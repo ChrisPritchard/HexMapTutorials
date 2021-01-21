@@ -7,6 +7,7 @@ namespace DarkDomains
     public class HexGrid : MonoBehaviour 
     {
         public int Width = 6, Height = 6;
+        public Color DefaultColour = Color.white, TouchedColour = Color.magenta;
 
         public HexCell CellPrefab;
         public Text CellLabelPrefab;
@@ -39,6 +40,7 @@ namespace DarkDomains
             cell.transform.SetParent(this.transform);
             cell.transform.localPosition = position;
             cell.Coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
+            cell.Colour = DefaultColour;
 
             var label = Instantiate<Text>(CellLabelPrefab);
             label.rectTransform.SetParent(canvas.transform, false);
@@ -69,7 +71,13 @@ namespace DarkDomains
         private void TouchCell(Vector3 position)
         {
             position = transform.InverseTransformPoint(position);
-            Debug.Log("touched at " + position + "\nhex: " + HexCoordinates.FromPosition(position));
+            var coords = HexCoordinates.FromPosition(position);
+
+            var index = coords.Z*Width+coords.X + coords.Z/2;
+            cells[index].Colour = TouchedColour;
+            hexMesh.Triangulate(cells);
+
+            Debug.Log("touched at " + position + "\nhex: " + coords);
         }
     }
 }

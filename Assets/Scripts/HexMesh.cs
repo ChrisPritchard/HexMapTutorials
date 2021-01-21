@@ -10,6 +10,7 @@ namespace DarkDomains
         Mesh hexMesh;
         List<Vector3> vertices;
         List<int> triangles;
+        List<Color> colours;
 
         private void Awake() 
         {
@@ -18,6 +19,7 @@ namespace DarkDomains
 
             vertices = new List<Vector3>();
             triangles = new List<int>();
+            colours = new List<Color>();
         }
 
         public void Triangulate(HexCell[] cells)
@@ -25,12 +27,15 @@ namespace DarkDomains
             hexMesh.Clear();
             vertices.Clear();
             triangles.Clear();
+            colours.Clear();
 
             foreach(var cell in cells)
                 Triangulate(cell);
 
             hexMesh.vertices = vertices.ToArray();
             hexMesh.triangles = triangles.ToArray();
+            hexMesh.colors = colours.ToArray();
+
             hexMesh.RecalculateNormals();
 
             GetComponent<MeshCollider>().sharedMesh = hexMesh;
@@ -40,7 +45,10 @@ namespace DarkDomains
         {
             var centre = cell.transform.localPosition;
             for (var i = 0; i < 6; i++)
+            {
                 AddTriangle(centre, centre + HexMetrics.Corners[i], centre + HexMetrics.Corners[(i+1)%6]);
+                AddTriangleColour(cell.Colour);
+            }
         }
 
         // adds a new triangle, both adding the vertices to the vertices list, and 
@@ -51,6 +59,12 @@ namespace DarkDomains
             var index = vertices.Count;
             vertices.AddRange(new[]{v1, v2, v3});
             triangles.AddRange(new[]{index,index+1,index+2});
+        }
+
+        // adds colours for each vertex
+        private void AddTriangleColour(Color colour)
+        {
+            colours.AddRange(new[]{colour, colour, colour});
         }
     }
 }
