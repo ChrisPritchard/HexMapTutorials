@@ -11,14 +11,17 @@ namespace DarkDomains
         public HexCell CellPrefab;
         public Text CellLabelPrefab;
 
-        HexCell[] cells;
         Canvas canvas;
+        HexMesh hexMesh;
+
+        HexCell[] cells;
 
         private void Awake() 
         {
-            cells = new HexCell[Width * Height];
             canvas = GetComponentInChildren<Canvas>();
+            hexMesh = GetComponentInChildren<HexMesh>();
 
+            cells = new HexCell[Width * Height];
             for(var x = 0; x < Width; x++)
                 for(var z = 0; z < Height; z++)
                     cells[z*Width+x] = CreateCell(x, z);
@@ -26,7 +29,9 @@ namespace DarkDomains
 
         private HexCell CreateCell(int x, int z)
         {
-            var position = new Vector3(x * HexMetrics.OuterRadius, 0f, z * HexMetrics.OuterRadius);
+            var px = x * (2 * HexMetrics.InnerRadius) + (z % 2) * HexMetrics.InnerRadius;
+            var pz = z * (1.5f * HexMetrics.OuterRadius);
+            var position = new Vector3(px, 0f, pz);
 
             var cell = Instantiate<HexCell>(CellPrefab);
             cell.transform.SetParent(this.transform);
@@ -38,6 +43,11 @@ namespace DarkDomains
             label.text = x + "\n" + z;
 
             return cell;
+        }
+
+        private void Start() 
+        {
+            hexMesh.Triangulate(cells);
         }
     }
 }
