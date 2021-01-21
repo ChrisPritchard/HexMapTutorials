@@ -5,6 +5,6 @@ namespace DarkDomains
 
     public class HexCell : MonoBehaviour
     {
-        
+        public HexCoordinates Coordinates;
     }
 }

@@ -29,18 +29,19 @@ namespace DarkDomains
 
         private HexCell CreateCell(int x, int z)
         {
-            var px = x * (2 * HexMetrics.InnerRadius) + (z % 2) * HexMetrics.InnerRadius;
+            var px = (x + z/2f - z/2) * (2 * HexMetrics.InnerRadius);
             var pz = z * (1.5f * HexMetrics.OuterRadius);
             var position = new Vector3(px, 0f, pz);
 
             var cell = Instantiate<HexCell>(CellPrefab);
             cell.transform.SetParent(this.transform);
             cell.transform.localPosition = position;
+            cell.Coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
 
             var label = Instantiate<Text>(CellLabelPrefab);
             label.rectTransform.SetParent(canvas.transform, false);
             label.rectTransform.anchoredPosition = new Vector2(position.x, position.z);
-            label.text = x + "\n" + z;
+            label.text = cell.Coordinates.ToString("\n");
 
             return cell;
         }
