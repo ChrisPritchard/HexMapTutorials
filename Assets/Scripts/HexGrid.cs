@@ -11,6 +11,7 @@ namespace DarkDomains
         public HexCell CellPrefab;
         public Text CellLabelPrefab;
 
+        new Camera camera;
         Canvas canvas;
         HexMesh hexMesh;
 
@@ -18,6 +19,7 @@ namespace DarkDomains
 
         private void Awake() 
         {
+            camera = Camera.main;
             canvas = GetComponentInChildren<Canvas>();
             hexMesh = GetComponentInChildren<HexMesh>();
 
@@ -49,6 +51,25 @@ namespace DarkDomains
         private void Start() 
         {
             hexMesh.Triangulate(cells);
+        }
+
+        private void Update() 
+        {
+            if(Input.GetMouseButtonUp(0))
+                HandleInput();
+        }
+
+        private void HandleInput()
+        {
+            var inputRay = camera.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(inputRay, out RaycastHit hit))
+                TouchCell(hit.point);
+        }
+
+        private void TouchCell(Vector3 position)
+        {
+            position = transform.InverseTransformPoint(position);
+            Debug.Log("touched at " + HexCoordinates.FromPosition(position));
         }
     }
 }

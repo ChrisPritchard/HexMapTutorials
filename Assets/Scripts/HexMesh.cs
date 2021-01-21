@@ -4,7 +4,7 @@ namespace DarkDomains
     using UnityEngine;
     using System.Collections.Generic;
     
-    [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
+    [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
     public class HexMesh : MonoBehaviour 
     {
         Mesh hexMesh;
@@ -32,6 +32,8 @@ namespace DarkDomains
             hexMesh.vertices = vertices.ToArray();
             hexMesh.triangles = triangles.ToArray();
             hexMesh.RecalculateNormals();
+
+            GetComponent<MeshCollider>().sharedMesh = hexMesh;
         }
 
         private void Triangulate(HexCell cell)
