@@ -1,4 +1,4 @@
-﻿Shader "Custom/VertexColours"
+﻿Shader "Custom/VertexColours" // default standard shader with two lines assigning the vertex colour to the albedo
 {
     Properties
     {
@@ -24,7 +24,7 @@
         struct Input
         {
             float2 uv_MainTex;
-            float4 colour : COLOR;
+            float4 colour : COLOR; // this gets populated automatically because of its type, with the assigned colour for the vertex in the mesh
         };
 
         half _Glossiness;
