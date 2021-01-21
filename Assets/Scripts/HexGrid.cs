@@ -69,7 +69,7 @@ namespace DarkDomains
         private void TouchCell(Vector3 position)
         {
             position = transform.InverseTransformPoint(position);
-            Debug.Log("touched at " + HexCoordinates.FromPosition(position));
+            Debug.Log("touched at " + position + "\nhex: " + HexCoordinates.FromPosition(position));
         }
     }
 }
