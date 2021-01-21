@@ -18,7 +18,7 @@ namespace DarkDomains
 
         public static HexCoordinates FromOffsetCoordinates(int x, int z) => new HexCoordinates(x-z/2, z);
 
-        public override string ToString() => ToString(", ");
+        public override string ToString() => "(" + ToString(", ") + ")";
 
         public string ToString(string sep) => X + sep + Y + sep + Z;
     }
