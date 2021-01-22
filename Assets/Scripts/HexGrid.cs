@@ -3,8 +3,8 @@ namespace DarkDomains
 {
     using UnityEngine;
     using UnityEngine.UI;
-    
-    public class HexGrid : MonoBehaviour 
+
+    public class HexGrid : MonoBehaviour
     {
         public int Width = 6, Height = 6;
         public Color DefaultColour = Color.white;
@@ -17,18 +17,18 @@ namespace DarkDomains
 
         HexCell[] cells;
 
-        private void Awake() 
+        private void Awake()
         {
             canvas = GetComponentInChildren<Canvas>();
             hexMesh = GetComponentInChildren<HexMesh>();
 
             cells = new HexCell[Width * Height];
-            for(var x = 0; x < Width; x++)
-                for(var z = 0; z < Height; z++)
-                    cells[z*Width+x] = CreateCell(x, z);
+            for(var z = 0; z < Height; z++)
+                for(var x = 0; x < Width; x++)
+                    CreateCell(x, z);
         }
 
-        private HexCell CreateCell(int x, int z)
+        private void CreateCell(int x, int z)
         {
             var px = (x + z/2f - z/2) * (2 * HexMetrics.InnerRadius);
             var pz = z * (1.5f * HexMetrics.OuterRadius);
@@ -45,10 +45,32 @@ namespace DarkDomains
             label.rectTransform.anchoredPosition = new Vector2(position.x, position.z);
             label.text = cell.Coordinates.ToString("\n");
 
-            return cell;
+            var index = z * Width + x;
+            cells[index] = cell;
+
+            // connect neighbours, working backwards. e.g. connect the prior, and the bottom two corners if available
+            // the setneighbour function does the reverse, so connecting back will conneck the prior cell to the current one too
+            // in this way, all cells are connected to their neighbours
+
+            if (x != 0)
+                cell.SetNeighbour(HexDirection.W, cells[index - 1]);
+            if (z == 0)
+                return;
+            
+            if (z % 2 == 0) // non 'shunted' row, so always has bottom right, but first doesnt have bottom left
+            {
+                cell.SetNeighbour(HexDirection.SE, cells[index - Width]);
+                if (x != 0)
+                    cell.SetNeighbour(HexDirection.SW, cells[index - Width - 1]);
+            } else  // 'shunted' row, always has bottom left, but last does not have bottom right
+            {
+                cell.SetNeighbour(HexDirection.SW, cells[index - Width]);
+                if (x != Width - 1)
+                    cell.SetNeighbour(HexDirection.SE, cells[index - Width + 1]);
+            }
         }
 
-        private void Start() 
+        private void Start()
         {
             hexMesh.Triangulate(cells);
         }
