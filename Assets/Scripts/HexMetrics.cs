@@ -5,7 +5,12 @@ namespace DarkDomains
     public static class HexMetrics
     {
         public const float OuterRadius = 10f; // distance from centre to any point. also distance between points
+
         public const float InnerRadius = OuterRadius * 0.866025404f; // distance from centre to any edge
+
+        public const float SolidFactor = 0.75f; // unblended core percent of a tile
+
+        public const float BlendFactor = 1f - SolidFactor; // blended with neighbours percent of a tile
 
         // hex points, pointy-top, with half above and half below 0 on the Z access
         // coords are in XYZ, but Z is as Y in this, with Y always 0, in order to align 
@@ -24,5 +29,9 @@ namespace DarkDomains
         public static Vector3 GetFirstCorner(HexDirection direction) => corners[(int)direction];
 
         public static Vector3 GetSecondCorner(HexDirection direction) => corners[(int)direction + 1];
+
+        public static Vector3 GetFirstSolidCorner(HexDirection direction) => corners[(int)direction] * SolidFactor;
+
+        public static Vector3 GetSecondSolidCorner(HexDirection direction) => corners[(int)direction + 1] * SolidFactor;
     }
 }
