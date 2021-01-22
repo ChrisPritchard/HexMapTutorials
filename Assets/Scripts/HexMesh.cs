@@ -67,10 +67,17 @@ namespace DarkDomains
             var neighbour = cell.GetNeighbour(direction) ?? cell;
             var nextNeighbour = cell.GetNeighbour(direction.Next()) ?? cell;
 
-            var blendColour1 = (cell.Colour + neighbour.Colour + prevNeighbour.Colour) / 3f;
-            var blendColour2 = (cell.Colour + neighbour.Colour + nextNeighbour.Colour) / 3f;
+            var prevBlendColour = (cell.Colour + prevNeighbour.Colour + neighbour.Colour) / 3f;
+            var bridgeColour = (cell.Colour + neighbour.Colour) * 0.5f;
+            var nextBlendColour = (cell.Colour + nextNeighbour.Colour + neighbour.Colour) / 3f;
 
-            AddQuadColour(cell.Colour, (cell.Colour + neighbour.Colour) * 0.5f);
+            AddQuadColour(cell.Colour, bridgeColour);
+
+            AddTriangle(v1, centre + HexMetrics.GetFirstCorner(direction), v3);
+            AddTriangleColour(cell.Colour, prevBlendColour, bridgeColour);
+
+            AddTriangle(v2, v4, centre + HexMetrics.GetSecondCorner(direction));
+            AddTriangleColour(cell.Colour, bridgeColour, nextBlendColour);
         }
 
         // adds a new triangle, both adding the vertices to the vertices list, and 
