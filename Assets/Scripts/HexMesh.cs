@@ -57,27 +57,34 @@ namespace DarkDomains
             AddTriangle(centre, v1, v2);
             AddTriangleColour(cell.Colour);
 
+            if(direction <= HexDirection.SE)
+                TriangulateConnection(direction, cell, v1, v2);
+        }
+
+        // adds bridges and corner triangles
+        private void TriangulateConnection(HexDirection direction, HexCell cell, Vector3 v1, Vector3 v2)
+        {
+            var neighbour = cell.GetNeighbour(direction);
+            if (neighbour == null)
+                return; // dont add for edge hexes
+
             var bridge = HexMetrics.GetBridge(direction);
             var v3 = v1 + bridge;
             var v4 = v2 + bridge;
 
             AddQuad(v1, v2, v3, v4);
+            AddQuadColour(cell.Colour, neighbour.Colour);
 
-            var prevNeighbour = cell.GetNeighbour(direction.Previous()) ?? cell;
-            var neighbour = cell.GetNeighbour(direction) ?? cell;
-            var nextNeighbour = cell.GetNeighbour(direction.Next()) ?? cell;
+            if(direction > HexDirection.E)
+                return;
 
-            var prevBlendColour = (cell.Colour + prevNeighbour.Colour + neighbour.Colour) / 3f;
-            var bridgeColour = (cell.Colour + neighbour.Colour) * 0.5f;
-            var nextBlendColour = (cell.Colour + nextNeighbour.Colour + neighbour.Colour) / 3f;
-
-            AddQuadColour(cell.Colour, bridgeColour);
-
-            AddTriangle(v1, centre + HexMetrics.GetFirstCorner(direction), v3);
-            AddTriangleColour(cell.Colour, prevBlendColour, bridgeColour);
-
-            AddTriangle(v2, v4, centre + HexMetrics.GetSecondCorner(direction));
-            AddTriangleColour(cell.Colour, bridgeColour, nextBlendColour);
+            var nextDirection = direction.Next();
+            var nextNeighbour = cell.GetNeighbour(nextDirection);
+            if (nextNeighbour == null)
+                return;
+            
+            AddTriangle(v2, v4, v2 + HexMetrics.GetBridge(nextDirection));
+            AddTriangleColour(cell.Colour, neighbour.Colour, nextNeighbour.Colour);
         }
 
         // adds a new triangle, both adding the vertices to the vertices list, and 
