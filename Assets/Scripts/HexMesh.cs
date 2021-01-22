@@ -92,11 +92,18 @@ namespace DarkDomains
             var v5 = v2 + HexMetrics.GetBridge(nextDirection);
             v5.y = nextNeighbour.Elevation * HexMetrics.ElevationStep;
             
-            AddTriangle(v2, v4, v5);
-            AddTriangleColour(cell.Colour, neighbour.Colour, nextNeighbour.Colour);
+            var minElevation = Mathf.Min(cell.Elevation, neighbour.Elevation, nextNeighbour.Elevation);
+            if (minElevation == cell.Elevation)
+                TriangulateCorner(v2, cell, v4, neighbour, v5, nextNeighbour);
+            else if (minElevation == neighbour.Elevation)
+                TriangulateCorner(v4, neighbour, v5, nextNeighbour, v2, cell);
+            else
+                TriangulateCorner(v5, nextNeighbour, v2, cell, v4, neighbour);
         }
 
-        private void TriangulateEdgeTerrace(Vector3 beginLeft, Vector3 beginRight, HexCell beginCell, Vector3 endLeft, Vector3 endRight, HexCell endCell)
+        private void TriangulateEdgeTerrace(
+            Vector3 beginLeft, Vector3 beginRight, HexCell beginCell, 
+            Vector3 endLeft, Vector3 endRight, HexCell endCell)
         {
             var v1 = beginLeft;
             var v2 = beginRight;
@@ -110,6 +117,15 @@ namespace DarkDomains
                 AddQuadColour(c1, c2);
                 v1 = v3; v2 = v4; c1 = c2;
             }
+        }
+
+        private void TriangulateCorner(
+            Vector3 bottom, HexCell bottomCell,
+            Vector3 left, HexCell leftCell,
+            Vector3 right, HexCell rightCell)
+        {
+            AddTriangle(bottom, left, right);
+            AddTriangleColour(bottomCell.Colour, leftCell.Colour, rightCell.Colour);
         }
 
         // adds a new triangle, both adding the vertices to the vertices list, and 
