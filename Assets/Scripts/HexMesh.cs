@@ -43,12 +43,20 @@ namespace DarkDomains
 
         private void Triangulate(HexCell cell)
         {
+            for (var d = HexDirection.NE; d <= HexDirection.NW; d++)
+                Triangulate(d, cell);
+        }
+
+        private void Triangulate(HexDirection direction, HexCell cell)
+        {
             var centre = cell.transform.localPosition;
-            for (var i = 0; i < 6; i++)
-            {
-                AddTriangle(centre, centre + HexMetrics.Corners[i], centre + HexMetrics.Corners[(i+1)%6]);
-                AddTriangleColour(cell.Colour);
-            }
+            AddTriangle(
+                centre, 
+                centre + HexMetrics.GetFirstCorner(direction), 
+                centre + HexMetrics.GetSecondCorner(direction));
+            var neighbour = cell.GetNeighbour(direction) ?? cell;
+            var blendColour = (cell.Colour + neighbour.Colour) / 2f;
+            AddTriangleColour(cell.Colour, blendColour, blendColour);
         }
 
         // adds a new triangle, both adding the vertices to the vertices list, and 
@@ -62,9 +70,6 @@ namespace DarkDomains
         }
 
         // adds colours for each vertex
-        private void AddTriangleColour(Color colour)
-        {
-            colours.AddRange(new[]{colour, colour, colour});
-        }
+        private void AddTriangleColour(Color c1, Color c2, Color c3) => colours.AddRange(new[]{c1, c2, c3});
     }
 }

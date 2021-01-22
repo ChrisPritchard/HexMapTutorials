@@ -3,13 +3,6 @@ namespace DarkDomains
 {
     using UnityEngine;
 
-    public enum HexDirection { NE, E, SE, SW, W, NW }
-
-    public static class HexDirectionExtensions
-    {
-        public static HexDirection Opposite(this HexDirection direction) => (HexDirection)(((int)direction + 3) % 6);
-    }
-
     public class HexCell : MonoBehaviour
     {
         public HexCoordinates Coordinates;
@@ -19,7 +12,7 @@ namespace DarkDomains
         [SerializeField]
         public HexCell[] Neighbours;
 
-        public HexCell GetNeighbour(HexDirection direction) => Neighbours[(int)direction] ?? this;
+        public HexCell GetNeighbour(HexDirection direction) => Neighbours[(int)direction];
 
         public void SetNeighbour(HexDirection direction, HexCell cell)
         {
