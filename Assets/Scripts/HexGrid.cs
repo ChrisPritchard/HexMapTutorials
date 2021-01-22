@@ -7,12 +7,11 @@ namespace DarkDomains
     public class HexGrid : MonoBehaviour 
     {
         public int Width = 6, Height = 6;
-        public Color DefaultColour = Color.white, TouchedColour = Color.magenta;
+        public Color DefaultColour = Color.white;
 
         public HexCell CellPrefab;
         public Text CellLabelPrefab;
 
-        new Camera camera;
         Canvas canvas;
         HexMesh hexMesh;
 
@@ -20,7 +19,6 @@ namespace DarkDomains
 
         private void Awake() 
         {
-            camera = Camera.main;
             canvas = GetComponentInChildren<Canvas>();
             hexMesh = GetComponentInChildren<HexMesh>();
 
@@ -55,26 +53,13 @@ namespace DarkDomains
             hexMesh.Triangulate(cells);
         }
 
-        private void Update() 
-        {
-            if(Input.GetMouseButtonUp(0))
-                HandleInput();
-        }
-
-        private void HandleInput()
-        {
-            var inputRay = camera.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(inputRay, out RaycastHit hit))
-                TouchCell(hit.point);
-        }
-
-        private void TouchCell(Vector3 position)
+        public void TouchCell(Vector3 position, Color colour)
         {
             position = transform.InverseTransformPoint(position);
             var coords = HexCoordinates.FromPosition(position);
 
             var index = coords.Z*Width+coords.X + coords.Z/2;
-            cells[index].Colour = TouchedColour;
+            cells[index].Colour = colour;
             hexMesh.Triangulate(cells);
 
             Debug.Log("touched at " + position + "\nhex: " + coords);
