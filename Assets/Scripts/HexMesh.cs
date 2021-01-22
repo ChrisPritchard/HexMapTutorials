@@ -55,10 +55,11 @@ namespace DarkDomains
             var v2 = centre + HexMetrics.GetSecondSolidCorner(direction);
 
             AddTriangle(centre, v1, v2);
-            AddTriangleColour(cell.Colour, cell.Colour, cell.Colour);
+            AddTriangleColour(cell.Colour);
 
-            var v3 = centre + HexMetrics.GetFirstCorner(direction);
-            var v4 = centre + HexMetrics.GetSecondCorner(direction);
+            var bridge = HexMetrics.GetBridge(direction);
+            var v3 = v1 + bridge;
+            var v4 = v2 + bridge;
 
             AddQuad(v1, v2, v3, v4);
 
@@ -69,7 +70,7 @@ namespace DarkDomains
             var blendColour1 = (cell.Colour + neighbour.Colour + prevNeighbour.Colour) / 3f;
             var blendColour2 = (cell.Colour + neighbour.Colour + nextNeighbour.Colour) / 3f;
 
-            AddQuadColour(cell.Colour, cell.Colour, blendColour1, blendColour2);
+            AddQuadColour(cell.Colour, (cell.Colour + neighbour.Colour) * 0.5f);
         }
 
         // adds a new triangle, both adding the vertices to the vertices list, and 
@@ -82,6 +83,9 @@ namespace DarkDomains
             triangles.AddRange(new[]{index,index+1,index+2});
         }
 
+        // one colour for triangle
+        private void AddTriangleColour(Color c1) => colours.AddRange(new[]{c1, c1, c1});
+
         // adds colours for each vertex
         private void AddTriangleColour(Color c1, Color c2, Color c3) => colours.AddRange(new[]{c1, c2, c3});
 
@@ -93,6 +97,10 @@ namespace DarkDomains
             triangles.AddRange(new[]{index+1, index+2, index+3});
         }
 
+        // for when each corner is a different colour
         private void AddQuadColour(Color c1, Color c2, Color c3, Color c4) => colours.AddRange(new[]{c1, c2, c3, c4});
+
+        // for when opposite sides of the quad are different colours
+        private void AddQuadColour(Color c1, Color c2) => colours.AddRange(new[]{c1, c1, c2, c2});
     }
 }
