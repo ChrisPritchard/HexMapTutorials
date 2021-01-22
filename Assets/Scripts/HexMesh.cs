@@ -71,6 +71,7 @@ namespace DarkDomains
             var bridge = HexMetrics.GetBridge(direction);
             var v3 = v1 + bridge;
             var v4 = v2 + bridge;
+            v3.y = v4.y = neighbour.Elevation * HexMetrics.ElevationStep;
 
             AddQuad(v1, v2, v3, v4);
             AddQuadColour(cell.Colour, neighbour.Colour);
@@ -82,8 +83,11 @@ namespace DarkDomains
             var nextNeighbour = cell.GetNeighbour(nextDirection);
             if (nextNeighbour == null)
                 return;
+
+            var v5 = v2 + HexMetrics.GetBridge(nextDirection);
+            v5.y = nextNeighbour.Elevation * HexMetrics.ElevationStep;
             
-            AddTriangle(v2, v4, v2 + HexMetrics.GetBridge(nextDirection));
+            AddTriangle(v2, v4, v5);
             AddTriangleColour(cell.Colour, neighbour.Colour, nextNeighbour.Colour);
         }
 
