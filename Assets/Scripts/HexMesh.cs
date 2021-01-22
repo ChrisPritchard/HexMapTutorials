@@ -124,8 +124,47 @@ namespace DarkDomains
             Vector3 left, HexCell leftCell,
             Vector3 right, HexCell rightCell)
         {
+            var leftEdge = bottomCell.GetEdgeType(leftCell);
+            var rightEdge = bottomCell.GetEdgeType(rightCell);
+
+            if (leftEdge == rightEdge && leftEdge == HexEdgeType.Slope)
+            {
+                TriangulateCornerTerraces(bottom, bottomCell, left, leftCell, right, rightCell);
+                return;
+            }
+
             AddTriangle(bottom, left, right);
             AddTriangleColour(bottomCell.Colour, leftCell.Colour, rightCell.Colour);
+        }
+
+        private void TriangulateCornerTerraces(
+            Vector3 bottom, HexCell bottomCell,
+            Vector3 left, HexCell leftCell,
+            Vector3 right, HexCell rightCell)
+        {
+            var v1 = bottom;
+            var v2 = v1;
+            var c1 = bottomCell.Colour;
+            var c2 = c1;
+
+            for(var step = 0; step <= HexMetrics.TerraceSteps; step++)
+            {
+                var v3 = HexMetrics.TerraceLerp(bottom, left, step);
+                var v4 = HexMetrics.TerraceLerp(bottom, right, step);
+                var c3 = HexMetrics.TerraceLerp(bottomCell.Colour, leftCell.Colour, step);
+                var c4 = HexMetrics.TerraceLerp(bottomCell.Colour, rightCell.Colour, step);
+
+                if(step == 0)
+                {
+                    AddTriangle(bottom, v3, v4);
+                    AddTriangleColour(bottomCell.Colour, c3, c4);
+                    continue;
+                }
+
+                AddQuad(v1, v2, v3, v4);
+                AddQuadColour(c1, c2, c3, c4);
+                v1 = v3; v2 = v4; c1 = c3; c2 = c4;
+            }
         }
 
         // adds a new triangle, both adding the vertices to the vertices list, and 

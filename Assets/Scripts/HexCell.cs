@@ -39,5 +39,7 @@ namespace DarkDomains
             Neighbours[(int)direction] = cell;
             cell.Neighbours[(int)direction.Opposite()] = this;
         }
+
+        public HexEdgeType GetEdgeType(HexCell other) => HexMetrics.GetEdgeType(elevation, other.elevation);
     }
 }
