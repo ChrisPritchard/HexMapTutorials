@@ -39,7 +39,7 @@ namespace DarkDomains
         private void EditCell(HexCell cell)
         {
             cell.Colour = activeColour;
-            cell.Elevation = activeElevation;
+            cell.Elevation = (int)activeElevation;
             HexGrid.Refresh();
         }
 

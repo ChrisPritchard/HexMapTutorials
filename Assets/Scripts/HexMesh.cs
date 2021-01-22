@@ -73,8 +73,13 @@ namespace DarkDomains
             var v4 = v2 + bridge;
             v3.y = v4.y = neighbour.Elevation * HexMetrics.ElevationStep;
 
-            AddQuad(v1, v2, v3, v4);
-            AddQuadColour(cell.Colour, neighbour.Colour);
+            if (HexMetrics.GetEdgeType(cell.Elevation, neighbour.Elevation) == HexEdgeType.Slope)
+                TriangulateEdgeTerrace(v1, v2, cell, v3, v4, neighbour);
+            else
+            {
+                AddQuad(v1, v2, v3, v4);
+                AddQuadColour(cell.Colour, neighbour.Colour);
+            }
 
             if(direction > HexDirection.E)
                 return;
@@ -89,6 +94,22 @@ namespace DarkDomains
             
             AddTriangle(v2, v4, v5);
             AddTriangleColour(cell.Colour, neighbour.Colour, nextNeighbour.Colour);
+        }
+
+        private void TriangulateEdgeTerrace(Vector3 beginLeft, Vector3 beginRight, HexCell beginCell, Vector3 endLeft, Vector3 endRight, HexCell endCell)
+        {
+            var v1 = beginLeft;
+            var v2 = beginRight;
+            var c1 = beginCell.Colour;
+            for(var step = 0; step <= HexMetrics.TerraceSteps; step++)
+            {
+                var v3 = HexMetrics.TerraceLerp(beginLeft, endLeft, step);
+                var v4 = HexMetrics.TerraceLerp(beginRight, endRight, step);
+                var c2 = HexMetrics.TerraceLerp(beginCell.Colour, endCell.Colour, step);
+                AddQuad(v1, v2, v3, v4);
+                AddQuadColour(c1, c2);
+                v1 = v3; v2 = v4; c1 = c2;
+            }
         }
 
         // adds a new triangle, both adding the vertices to the vertices list, and 

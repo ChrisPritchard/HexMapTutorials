@@ -11,8 +11,8 @@ namespace DarkDomains
 
         public RectTransform UIRect;
 
-        float elevation;
-        public float Elevation
+        int elevation;
+        public int Elevation
         {
             get => elevation;
             set
