@@ -11,6 +11,8 @@ namespace DarkDomains
 
         Color activeColour;
 
+        float activeElevation;
+
         new Camera camera;
         EventSystem eventSystem;
 
@@ -31,9 +33,18 @@ namespace DarkDomains
         {
             var inputRay = camera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(inputRay, out RaycastHit hit))
-                HexGrid.TouchCell(hit.point, activeColour);
+                EditCell(HexGrid.GetCell(hit.point));
+        }
+
+        private void EditCell(HexCell cell)
+        {
+            cell.Colour = activeColour;
+            cell.Elevation = activeElevation;
+            HexGrid.Refresh();
         }
 
         public void SelectColour(int index) => activeColour = Colours[index];
+
+        public void SelectElevation(float amount) => activeElevation = amount;
     }
 }

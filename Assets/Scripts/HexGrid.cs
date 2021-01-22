@@ -44,6 +44,7 @@ namespace DarkDomains
             label.rectTransform.SetParent(canvas.transform, false);
             label.rectTransform.anchoredPosition = new Vector2(position.x, position.z);
             label.text = cell.Coordinates.ToString("\n");
+            cell.UIRect = label.rectTransform;
 
             var index = z * Width + x;
             cells[index] = cell;
@@ -75,16 +76,17 @@ namespace DarkDomains
             hexMesh.Triangulate(cells);
         }
 
-        public void TouchCell(Vector3 position, Color colour)
+        public HexCell GetCell(Vector3 position)
         {
             position = transform.InverseTransformPoint(position);
             var coords = HexCoordinates.FromPosition(position);
-
             var index = coords.Z*Width+coords.X + coords.Z/2;
-            cells[index].Colour = colour;
-            hexMesh.Triangulate(cells);
+            return cells[index];
+        }
 
-            Debug.Log("touched at " + position + "\nhex: " + coords);
+        public void Refresh()
+        {
+            hexMesh.Triangulate(cells);
         }
     }
 }

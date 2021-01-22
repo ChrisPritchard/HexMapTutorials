@@ -12,6 +12,8 @@ namespace DarkDomains
 
         public const float BlendFactor = 1f - SolidFactor; // blended with neighbours percent of a tile
 
+        public const float ElevationStep = 5f; // how much the elevation value of a cell changes its height
+
         // hex points, pointy-top, with half above and half below 0 on the Z access
         // coords are in XYZ, but Z is as Y in this, with Y always 0, in order to align 
         // with the 3D plain in Unity. coords are clockwise from top.

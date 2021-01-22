@@ -9,6 +9,26 @@ namespace DarkDomains
 
         public Color Colour;
 
+        public RectTransform UIRect;
+
+        float elevation;
+        public float Elevation
+        {
+            get => elevation;
+            set
+            {
+                elevation = value;
+
+                var position = transform.localPosition;
+                position.y = elevation * HexMetrics.ElevationStep;
+                transform.localPosition = position;
+
+                position = UIRect.localPosition;
+                position.z = elevation * -HexMetrics.ElevationStep;
+                UIRect.localPosition = position;
+            }
+        }
+
         [SerializeField]
         public HexCell[] Neighbours;
 
