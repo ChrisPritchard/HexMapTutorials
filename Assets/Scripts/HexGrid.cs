@@ -52,8 +52,11 @@ namespace DarkDomains
             label.rectTransform.anchoredPosition = new Vector2(position.x, position.z);
             label.text = cell.Coordinates.ToString("\n");
             cell.UIRect = label.rectTransform;
-            
-            cell.Elevation = 0; // set to do an initial perturb of height
+
+            // defaults - will trigger an initial perturb of height          
+            cell.Elevation = 0;
+            cell.Colour = Color.white;
+
             var index = z * Width + x;
             cells[index] = cell;
 
