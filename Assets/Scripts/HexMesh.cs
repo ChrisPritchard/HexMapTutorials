@@ -198,14 +198,7 @@ namespace DarkDomains
             var boundaryColour = Color.Lerp(bottomCell.Colour, rightCell.Colour, b);
 
             TriangulteBoundaryTriangle(bottom, bottomCell, left, leftCell, boundary, boundaryColour);
-
-            if(leftCell.GetEdgeType(rightCell) == HexEdgeType.Slope)
-                TriangulteBoundaryTriangle(left, leftCell, right, rightCell, boundary, boundaryColour);
-            else
-            {
-                AddTriangle(left, right, boundary);
-                AddTriangleColour(leftCell.Colour, rightCell.Colour, boundaryColour);
-            }
+            TriangulateTop(left, leftCell, right, rightCell, boundary, boundaryColour);
         }
 
         private void TriangulateCornerCliffTerraces(
@@ -218,14 +211,22 @@ namespace DarkDomains
             var boundaryColour = Color.Lerp(bottomCell.Colour, leftCell.Colour, b);
 
             TriangulteBoundaryTriangle(right, rightCell, bottom, bottomCell, boundary, boundaryColour);
+            TriangulateTop(left, leftCell, right, rightCell, boundary, boundaryColour);
+        }
 
+        private void TriangulateTop(
+            Vector3 left, HexCell leftCell,
+            Vector3 right, HexCell rightCell,
+            Vector3 boundary, Color boundaryColour)
+        {
             if(rightCell.GetEdgeType(leftCell) == HexEdgeType.Slope)
-                TriangulteBoundaryTriangle(left, leftCell, right, rightCell, boundary, boundaryColour);
-            else
             {
-                AddTriangle(left, right, boundary);
-                AddTriangleColour(leftCell.Colour, rightCell.Colour, boundaryColour);
+                TriangulteBoundaryTriangle(left, leftCell, right, rightCell, boundary, boundaryColour);
+                return;
             }
+            
+            AddTriangle(left, right, boundary);
+            AddTriangleColour(leftCell.Colour, rightCell.Colour, boundaryColour);
         }
 
         private void TriangulteBoundaryTriangle(
