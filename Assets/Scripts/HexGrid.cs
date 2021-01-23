@@ -11,6 +11,7 @@ namespace DarkDomains
 
         public HexCell CellPrefab;
         public Text CellLabelPrefab;
+        public Texture2D NoiseSource;
 
         Canvas canvas;
         HexMesh hexMesh;
@@ -19,6 +20,8 @@ namespace DarkDomains
 
         private void Awake()
         {
+            HexMetrics.NoiseSource = NoiseSource;
+
             canvas = GetComponentInChildren<Canvas>();
             hexMesh = GetComponentInChildren<HexMesh>();
 
@@ -26,6 +29,11 @@ namespace DarkDomains
             for(var z = 0; z < Height; z++)
                 for(var x = 0; x < Width; x++)
                     CreateCell(x, z);
+        }
+
+        private void OnEnable() 
+        {
+            HexMetrics.NoiseSource = NoiseSource;    
         }
 
         private void CreateCell(int x, int z)
@@ -44,9 +52,10 @@ namespace DarkDomains
             label.rectTransform.anchoredPosition = new Vector2(position.x, position.z);
             label.text = cell.Coordinates.ToString("\n");
             cell.UIRect = label.rectTransform;
-
-            var index = z * Width + x;
             
+            cell.Elevation = 0; // set to do an initial perturb of height
+            var index = z * Width + x;
+                        
             // TODO - remove random setters. They're here just for ease of testing of new features for now
             cell.Colour = new[]{Color.green, Color.red, Color.blue, Color.yellow, Color.white}[Random.Range(0, 5)];
             cell.Elevation = Random.Range(0, 3);

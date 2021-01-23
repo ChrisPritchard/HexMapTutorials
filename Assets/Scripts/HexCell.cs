@@ -21,11 +21,12 @@ namespace DarkDomains
 
                 var position = transform.localPosition;
                 position.y = elevation * HexMetrics.ElevationStep;
+                position.y += (HexMetrics.SampleNoise(position).y * 2f - 1f) * HexMetrics.ElevationStep;
                 transform.localPosition = position;
 
-                position = UIRect.localPosition;
-                position.z = elevation * -HexMetrics.ElevationStep;
-                UIRect.localPosition = position;
+                var uiPosition = UIRect.localPosition;
+                uiPosition.z = -position.y;
+                UIRect.localPosition = uiPosition;
             }
         }
 

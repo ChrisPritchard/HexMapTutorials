@@ -57,6 +57,14 @@ namespace DarkDomains
 
         public static Vector3 GetBridge(HexDirection direction) => (GetFirstCorner(direction) + GetSecondCorner(direction)) * BlendFactor;
 
+        public static float CellPerturbStrength = 5f;
+
+        public static float ElevationPerturbStrength = 1.5f;
+
+        public static float NoiseScale = 0.003f;
+
+        public static Texture2D NoiseSource;
+
         // returns the point between a and b for the given terrace step
         // the lerp function is: for t = 0, a; for t = 1, b; for t between 0 and 1, a + (b - a) * t, so t times the distance between the two
         // here, horizontal is easy as each step, whether sloped or flat, is the same distance
@@ -83,5 +91,8 @@ namespace DarkDomains
             if (Mathf.Abs(elevation1 - elevation2) == 1) return HexEdgeType.Slope;
             return HexEdgeType.Cliff;
         }
+
+        public static Vector4 SampleNoise(Vector3 position) => 
+            NoiseSource.GetPixelBilinear(position.x * NoiseScale, position.z * NoiseScale);
     }
 }

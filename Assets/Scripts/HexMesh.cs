@@ -255,7 +255,7 @@ namespace DarkDomains
         private void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3)
         {
             var index = vertices.Count;
-            vertices.AddRange(new[]{v1, v2, v3});
+            vertices.AddRange(new[]{Perturb(v1), Perturb(v2), Perturb(v3)});
             triangles.AddRange(new[]{index,index+1,index+2});
         }
 
@@ -268,7 +268,7 @@ namespace DarkDomains
         private void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)
         {
             var index = vertices.Count;
-            vertices.AddRange(new[]{v1, v2, v3, v4});
+            vertices.AddRange(new[]{Perturb(v1), Perturb(v2), Perturb(v3), Perturb(v4)});
             triangles.AddRange(new[]{index, index+2, index+1});
             triangles.AddRange(new[]{index+1, index+2, index+3});
         }
@@ -278,5 +278,14 @@ namespace DarkDomains
 
         // for when opposite sides of the quad are different colours
         private void AddQuadColour(Color c1, Color c2) => colours.AddRange(new[]{c1, c1, c2, c2});
+
+        private Vector3 Perturb(Vector3 position)
+        {
+            var sample = HexMetrics.SampleNoise(position);
+            position.x += (sample.x * 2f - 1f) * HexMetrics.CellPerturbStrength;
+            //position.y += (sample.y * 2f - 1f) * HexMetrics.CellPerturbStrength;
+            position.z += (sample.z * 2f - 1f) * HexMetrics.CellPerturbStrength;
+            return position;
+        }
     }
 }
