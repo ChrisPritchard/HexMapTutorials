@@ -127,14 +127,17 @@ namespace DarkDomains
             var leftEdge = bottomCell.GetEdgeType(leftCell);
             var rightEdge = bottomCell.GetEdgeType(rightCell);
 
-            if (leftEdge == rightEdge && leftEdge == HexEdgeType.Slope)
-            {
+            if (leftEdge == HexEdgeType.Slope && rightEdge == HexEdgeType.Slope)
                 TriangulateCornerTerraces(bottom, bottomCell, left, leftCell, right, rightCell);
-                return;
+            else if (leftEdge == HexEdgeType.Slope && rightEdge == HexEdgeType.Flat)
+                TriangulateCornerTerraces(left, leftCell, right, rightCell, bottom, bottomCell);
+            else if (leftEdge == HexEdgeType.Flat && rightEdge == HexEdgeType.Slope)
+                TriangulateCornerTerraces(right, rightCell, bottom, bottomCell, left, leftCell);
+            else
+            {
+                AddTriangle(bottom, left, right);
+                AddTriangleColour(bottomCell.Colour, leftCell.Colour, rightCell.Colour);
             }
-
-            AddTriangle(bottom, left, right);
-            AddTriangleColour(bottomCell.Colour, leftCell.Colour, rightCell.Colour);
         }
 
         private void TriangulateCornerTerraces(
