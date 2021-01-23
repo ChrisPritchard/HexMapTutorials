@@ -13,11 +13,11 @@ namespace DarkDomains
 
         public const float InnerRadius = OuterRadius * 0.866025404f; // distance from centre to any edge
 
-        public const float SolidFactor = 0.75f; // unblended core percent of a tile
+        public const float SolidFactor = 0.8f; // unblended core percent of a tile
 
         public const float BlendFactor = 1f - SolidFactor; // blended with neighbours percent of a tile
 
-        public const float ElevationStep = 5f; // how much the elevation value of a cell changes its height
+        public const float ElevationStep = 3f; // how much the elevation value of a cell changes its height
 
         public const int TerracesPerSlope = 2;
 
@@ -57,7 +57,7 @@ namespace DarkDomains
 
         public static Vector3 GetBridge(HexDirection direction) => (GetFirstCorner(direction) + GetSecondCorner(direction)) * BlendFactor;
 
-        public static float CellPerturbStrength = 5f;
+        public static float CellPerturbStrength = 4f;
 
         public static float ElevationPerturbStrength = 1.5f;
 
