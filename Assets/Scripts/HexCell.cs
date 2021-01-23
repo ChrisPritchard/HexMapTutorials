@@ -30,6 +30,8 @@ namespace DarkDomains
             }
         }
 
+        public Vector3 Position => transform.localPosition;
+
         [SerializeField]
         public HexCell[] Neighbours;
 

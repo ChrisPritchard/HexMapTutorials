@@ -49,37 +49,36 @@ namespace DarkDomains
 
         private void Triangulate(HexDirection direction, HexCell cell)
         {
-            var centre = cell.transform.localPosition;
+            var e = new EdgeVertices(
+                cell.Position + HexMetrics.GetFirstSolidCorner(direction),
+                cell.Position + HexMetrics.GetSecondSolidCorner(direction)
+            );
 
-            var v1 = centre + HexMetrics.GetFirstSolidCorner(direction);
-            var v2 = centre + HexMetrics.GetSecondSolidCorner(direction);
-
-            AddTriangle(centre, v1, v2);
-            AddTriangleColour(cell.Colour);
+            TriangulateEdgeFan(cell.Position, e, cell.Colour);
 
             if(direction <= HexDirection.SE)
-                TriangulateConnection(direction, cell, v1, v2);
+                TriangulateConnection(direction, cell, e);
         }
 
         // adds bridges and corner triangles
-        private void TriangulateConnection(HexDirection direction, HexCell cell, Vector3 v1, Vector3 v2)
+        private void TriangulateConnection(
+            HexDirection direction, HexCell cell, EdgeVertices e1)
         {
             var neighbour = cell.GetNeighbour(direction);
             if (neighbour == null)
                 return; // dont add for edge hexes
 
             var bridge = HexMetrics.GetBridge(direction);
-            var v3 = v1 + bridge;
-            var v4 = v2 + bridge;
-            v3.y = v4.y = neighbour.Elevation * HexMetrics.ElevationStep;
+            bridge.y = neighbour.Position.y - cell.Position.y;
+            var e2 = new EdgeVertices(
+                e1.v1 + bridge,
+                e1.v4 + bridge
+            );
 
             if (HexMetrics.GetEdgeType(cell.Elevation, neighbour.Elevation) == HexEdgeType.Slope)
-                TriangulateEdgeTerrace(v1, v2, cell, v3, v4, neighbour);
+                TriangulateEdgeTerrace(e1, cell, e2, neighbour);
             else
-            {
-                AddQuad(v1, v2, v3, v4);
-                AddQuadColour(cell.Colour, neighbour.Colour);
-            }
+                TriangulateEdgeStrip(e1, cell.Colour, e2, neighbour.Colour);
 
             if(direction > HexDirection.E)
                 return;
@@ -89,34 +88,29 @@ namespace DarkDomains
             if (nextNeighbour == null)
                 return;
 
-            var v5 = v2 + HexMetrics.GetBridge(nextDirection);
-            v5.y = nextNeighbour.Elevation * HexMetrics.ElevationStep;
+            var v5 = e1.v4 + HexMetrics.GetBridge(nextDirection);
+            v5.y = nextNeighbour.Position.y;
             
             var minElevation = Mathf.Min(cell.Elevation, neighbour.Elevation, nextNeighbour.Elevation);
             if (minElevation == cell.Elevation)
-                TriangulateCorner(v2, cell, v4, neighbour, v5, nextNeighbour);
+                TriangulateCorner(e1.v4, cell, e2.v4, neighbour, v5, nextNeighbour);
             else if (minElevation == neighbour.Elevation)
-                TriangulateCorner(v4, neighbour, v5, nextNeighbour, v2, cell);
+                TriangulateCorner(e2.v4, neighbour, v5, nextNeighbour, e1.v4, cell);
             else
-                TriangulateCorner(v5, nextNeighbour, v2, cell, v4, neighbour);
+                TriangulateCorner(v5, nextNeighbour, e1.v4, cell, e2.v4, neighbour);
         }
 
-        private void TriangulateEdgeTerrace(
-            Vector3 beginLeft, Vector3 beginRight, HexCell beginCell, 
-            Vector3 endLeft, Vector3 endRight, HexCell endCell)
+        private void TriangulateEdgeTerrace(EdgeVertices begin, HexCell beginCell, EdgeVertices end, HexCell endCell)
         {
-            var v1 = beginLeft;
-            var v2 = beginRight;
+            var es = begin;
             var c1 = beginCell.Colour;
             
             for(var step = 0; step <= HexMetrics.TerraceSteps; step++)
             {
-                var v3 = HexMetrics.TerraceLerp(beginLeft, endLeft, step);
-                var v4 = HexMetrics.TerraceLerp(beginRight, endRight, step);
+                var ed = EdgeVertices.TerraceLerp(begin, end, step);
                 var c2 = HexMetrics.TerraceLerp(beginCell.Colour, endCell.Colour, step);
-                AddQuad(v1, v2, v3, v4);
-                AddQuadColour(c1, c2);
-                v1 = v3; v2 = v4; c1 = c2;
+                TriangulateEdgeStrip(es, c1, ed, c2);
+                es = ed; c1 = c2;
             }
         }
 
@@ -194,7 +188,7 @@ namespace DarkDomains
             Vector3 right, HexCell rightCell)
         {
             var b = Mathf.Abs(1f / (rightCell.Elevation - bottomCell.Elevation));
-            var boundary = Vector3.Lerp(bottom, right, b);
+            var boundary = Vector3.Lerp(Perturb(bottom), Perturb(right), b);
             var boundaryColour = Color.Lerp(bottomCell.Colour, rightCell.Colour, b);
 
             TriangulteBoundaryTriangle(bottom, bottomCell, left, leftCell, boundary, boundaryColour);
@@ -207,7 +201,7 @@ namespace DarkDomains
             Vector3 right, HexCell rightCell)
         {
             var b = Mathf.Abs(1f / (leftCell.Elevation - bottomCell.Elevation));
-            var boundary = Vector3.Lerp(bottom, left, b);
+            var boundary = Vector3.Lerp(Perturb(bottom), Perturb(left), b);
             var boundaryColour = Color.Lerp(bottomCell.Colour, leftCell.Colour, b);
 
             TriangulteBoundaryTriangle(right, rightCell, bottom, bottomCell, boundary, boundaryColour);
@@ -225,7 +219,7 @@ namespace DarkDomains
                 return;
             }
             
-            AddTriangle(left, right, boundary);
+            AddTriangleUnperturbed(Perturb(left), Perturb(right), boundary);
             AddTriangleColour(leftCell.Colour, rightCell.Colour, boundaryColour);
         }
 
@@ -234,30 +228,53 @@ namespace DarkDomains
             Vector3 terrace, HexCell terraceCell,
             Vector3 boundary, Color boundaryColour)
         {
-            var v1 = bottom;
+            var v1 = Perturb(bottom);
             var c1 = bottomCell.Colour;
 
             for(var step = 0; step <= HexMetrics.TerraceSteps; step++)
             {
-                var v2 = HexMetrics.TerraceLerp(bottom, terrace, step);
+                var v2 = Perturb(HexMetrics.TerraceLerp(bottom, terrace, step));
                 var c2 = HexMetrics.TerraceLerp(bottomCell.Colour, terraceCell.Colour, step);
 
-                AddTriangle(v1, v2, boundary);
+                AddTriangleUnperturbed(v1, v2, boundary);
                 AddTriangleColour(c1, c2, boundaryColour);
 
                 v1 = v2; c1 = c2;
             }
         }
 
+        private void TriangulateEdgeFan(Vector3 center, EdgeVertices edge, Color color)
+        {
+            AddTriangle(center, edge.v1, edge.v2);
+            AddTriangleColour(color);
+            AddTriangle(center, edge.v2, edge.v3);
+            AddTriangleColour(color);
+            AddTriangle(center, edge.v3, edge.v4);
+            AddTriangleColour(color);
+        }
+
+        private void TriangulateEdgeStrip(EdgeVertices e1, Color c1, EdgeVertices e2, Color c2)
+        {
+            AddQuad(e1.v1, e1.v2, e2.v1, e2.v2);
+            AddQuadColour(c1, c2);
+            AddQuad(e1.v2, e1.v3, e2.v2, e2.v3);
+            AddQuadColour(c1, c2);
+            AddQuad(e1.v3, e1.v4, e2.v3, e2.v4);
+            AddQuadColour(c1, c2);
+        }
+
         // adds a new triangle, both adding the vertices to the vertices list, and 
         // adding the three indices (offset by the current count, as this will be the index after the last set of vertices added)
         // to the triangles list
-        private void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3)
+        private void AddTriangleUnperturbed(Vector3 v1, Vector3 v2, Vector3 v3)
         {
             var index = vertices.Count;
-            vertices.AddRange(new[]{Perturb(v1), Perturb(v2), Perturb(v3)});
+            vertices.AddRange(new[]{v1, v2, v3});
             triangles.AddRange(new[]{index,index+1,index+2});
         }
+
+        private void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3) =>
+            AddTriangleUnperturbed(Perturb(v1), Perturb(v2), Perturb(v3));
 
         // one colour for triangle
         private void AddTriangleColour(Color c1) => colours.AddRange(new[]{c1, c1, c1});
@@ -279,6 +296,8 @@ namespace DarkDomains
         // for when opposite sides of the quad are different colours
         private void AddQuadColour(Color c1, Color c2) => colours.AddRange(new[]{c1, c1, c2, c2});
 
+        // a key insight with perturb is that the same position will always be perturbed the same amount, due to the fixed noise texture
+        // as a result, even though vertices for one triangle are isolated, other triangles will line up as their vertices have the same initial position
         private Vector3 Perturb(Vector3 position)
         {
             var sample = HexMetrics.SampleNoise(position);
