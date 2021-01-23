@@ -108,6 +108,7 @@ namespace DarkDomains
             var v1 = beginLeft;
             var v2 = beginRight;
             var c1 = beginCell.Colour;
+            
             for(var step = 0; step <= HexMetrics.TerraceSteps; step++)
             {
                 var v3 = HexMetrics.TerraceLerp(beginLeft, endLeft, step);
@@ -127,13 +128,23 @@ namespace DarkDomains
             var leftEdge = bottomCell.GetEdgeType(leftCell);
             var rightEdge = bottomCell.GetEdgeType(rightCell);
 
-            if (leftEdge == HexEdgeType.Slope && rightEdge == HexEdgeType.Slope)
-                TriangulateCornerTerraces(bottom, bottomCell, left, leftCell, right, rightCell);
-            else if (leftEdge == HexEdgeType.Slope && rightEdge == HexEdgeType.Flat)
-                TriangulateCornerTerraces(left, leftCell, right, rightCell, bottom, bottomCell);
-            else if (leftEdge == HexEdgeType.Flat && rightEdge == HexEdgeType.Slope)
-                TriangulateCornerTerraces(right, rightCell, bottom, bottomCell, left, leftCell);
-            else
+            if (leftEdge == HexEdgeType.Slope)
+            {
+                if (rightEdge == HexEdgeType.Slope) // SSF: slope-slope-flat
+                    TriangulateCornerTerraces(bottom, bottomCell, left, leftCell, right, rightCell);
+                else if (rightEdge == HexEdgeType.Flat) // SFS: slope-flat-slope
+                    TriangulateCornerTerraces(left, leftCell, right, rightCell, bottom, bottomCell);
+                else
+                    TriangulateCornerTerracesCliff(bottom, bottomCell, left, leftCell, right, rightCell);
+            } 
+            else if (rightEdge == HexEdgeType.Slope)
+            {
+                if (leftEdge == HexEdgeType.Flat) // FSS: flat-slope-slope
+                    TriangulateCornerTerraces(right, rightCell, bottom, bottomCell, left, leftCell);
+                else // must be a cliff, as left as slope has already been covered
+                    TriangulateCornerCliffTerraces(bottom, bottomCell, left, leftCell, right, rightCell);
+            }
+            else // both are cliffs or both are flat, so a simple triangle will do
             {
                 AddTriangle(bottom, left, right);
                 AddTriangleColour(bottomCell.Colour, leftCell.Colour, rightCell.Colour);
@@ -167,6 +178,66 @@ namespace DarkDomains
                 AddQuad(v1, v2, v3, v4);
                 AddQuadColour(c1, c2, c3, c4);
                 v1 = v3; v2 = v4; c1 = c3; c2 = c4;
+            }
+        }
+
+        private void TriangulateCornerTerracesCliff(
+            Vector3 bottom, HexCell bottomCell,
+            Vector3 left, HexCell leftCell,
+            Vector3 right, HexCell rightCell)
+        {
+            var b = 1f / (rightCell.Elevation - bottomCell.Elevation);
+            var boundary = Vector3.Lerp(bottom, right, b);
+            var boundaryColour = Color.Lerp(bottomCell.Colour, rightCell.Colour, b);
+
+            TriangulteBoundaryTriangle(bottom, bottomCell, left, leftCell, boundary, boundaryColour);
+
+            if(leftCell.GetEdgeType(rightCell) == HexEdgeType.Slope)
+                TriangulteBoundaryTriangle(left, leftCell, right, rightCell, boundary, boundaryColour);
+            else
+            {
+                AddTriangle(left, right, boundary);
+                AddTriangleColour(leftCell.Colour, rightCell.Colour, boundaryColour);
+            }
+        }
+
+        private void TriangulateCornerCliffTerraces(
+            Vector3 bottom, HexCell bottomCell,
+            Vector3 left, HexCell leftCell,
+            Vector3 right, HexCell rightCell)
+        {
+            var b = 1f / (leftCell.Elevation - bottomCell.Elevation);
+            var boundary = Vector3.Lerp(bottom, left, b);
+            var boundaryColour = Color.Lerp(bottomCell.Colour, leftCell.Colour, b);
+
+            TriangulteBoundaryTriangle(right, rightCell, bottom, bottomCell, boundary, boundaryColour);
+
+            if(rightCell.GetEdgeType(leftCell) == HexEdgeType.Slope)
+                TriangulteBoundaryTriangle(left, leftCell, right, rightCell, boundary, boundaryColour);
+            else
+            {
+                AddTriangle(left, right, boundary);
+                AddTriangleColour(leftCell.Colour, rightCell.Colour, boundaryColour);
+            }
+        }
+
+        private void TriangulteBoundaryTriangle(
+            Vector3 bottom, HexCell bottomCell, 
+            Vector3 terrace, HexCell terraceCell,
+            Vector3 boundary, Color boundaryColour)
+        {
+            var v1 = bottom;
+            var c1 = bottomCell.Colour;
+
+            for(var step = 0; step <= HexMetrics.TerraceSteps; step++)
+            {
+                var v2 = HexMetrics.TerraceLerp(bottom, terrace, step);
+                var c2 = HexMetrics.TerraceLerp(bottomCell.Colour, terraceCell.Colour, step);
+
+                AddTriangle(v1, v2, boundary);
+                AddTriangleColour(c1, c2, boundaryColour);
+
+                v1 = v2; c1 = c2;
             }
         }
 
