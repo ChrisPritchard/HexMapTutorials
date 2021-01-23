@@ -6,7 +6,11 @@ namespace DarkDomains
 
     public class HexGrid : MonoBehaviour
     {
-        public int Width = 6, Height = 6;
+        public int ChunkCountX = 4, ChunkCountZ = 3;
+
+        public int CellCountX => ChunkCountX * HexMetrics.ChunkSizeX;
+        public int CellCountZ => ChunkCountZ * HexMetrics.ChunkSizeZ;
+
         public Color DefaultColour = Color.white;
 
         public HexCell CellPrefab;
@@ -25,9 +29,9 @@ namespace DarkDomains
             canvas = GetComponentInChildren<Canvas>();
             hexMesh = GetComponentInChildren<HexMesh>();
 
-            cells = new HexCell[Width * Height];
-            for(var z = 0; z < Height; z++)
-                for(var x = 0; x < Width; x++)
+            cells = new HexCell[CellCountX * CellCountZ];
+            for(var z = 0; z < CellCountZ; z++)
+                for(var x = 0; x < CellCountX; x++)
                     CreateCell(x, z);
         }
 
@@ -57,7 +61,7 @@ namespace DarkDomains
             cell.Elevation = 0;
             cell.Colour = Color.white;
 
-            var index = z * Width + x;
+            var index = z * CellCountX + x;
             cells[index] = cell;
 
             // connect neighbours, working backwards. e.g. connect the prior, and the bottom two corners if available
@@ -71,14 +75,14 @@ namespace DarkDomains
             
             if (z % 2 == 0) // non 'shunted' row, so always has bottom right, but first doesnt have bottom left
             {
-                cell.SetNeighbour(HexDirection.SE, cells[index - Width]);
+                cell.SetNeighbour(HexDirection.SE, cells[index - CellCountX]);
                 if (x != 0)
-                    cell.SetNeighbour(HexDirection.SW, cells[index - Width - 1]);
+                    cell.SetNeighbour(HexDirection.SW, cells[index - CellCountX - 1]);
             } else  // 'shunted' row, always has bottom left, but last does not have bottom right
             {
-                cell.SetNeighbour(HexDirection.SW, cells[index - Width]);
-                if (x != Width - 1)
-                    cell.SetNeighbour(HexDirection.SE, cells[index - Width + 1]);
+                cell.SetNeighbour(HexDirection.SW, cells[index - CellCountX]);
+                if (x != CellCountX - 1)
+                    cell.SetNeighbour(HexDirection.SE, cells[index - CellCountX + 1]);
             }
         }
 
@@ -91,7 +95,7 @@ namespace DarkDomains
         {
             position = transform.InverseTransformPoint(position);
             var coords = HexCoordinates.FromPosition(position);
-            var index = coords.Z*Width+coords.X + coords.Z/2;
+            var index = coords.Z *CellCountX + coords.X + coords.Z/2;
             return cells[index];
         }
 

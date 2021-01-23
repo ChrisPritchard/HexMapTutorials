@@ -302,8 +302,8 @@ namespace DarkDomains
         {
             var sample = HexMetrics.SampleNoise(position);
             position.x += (sample.x * 2f - 1f) * HexMetrics.CellPerturbStrength;
-            //position.y += (sample.y * 2f - 1f) * HexMetrics.CellPerturbStrength;
             position.z += (sample.z * 2f - 1f) * HexMetrics.CellPerturbStrength;
+            // we dont perturb y so that surfaces (hex tops, terrace tops) are flat
             return position;
         }
     }

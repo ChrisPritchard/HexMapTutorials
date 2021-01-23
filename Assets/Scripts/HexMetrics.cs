@@ -27,6 +27,8 @@ namespace DarkDomains
 
         public const float VerticalTerraceStepSize = 1f / (TerracesPerSlope + 1);
 
+        public const int ChunkSizeX = 5, ChunkSizeZ = 5; // this can be tweaked, but note that the full map will always be a multiple of theses
+
         // hex points, pointy-top, with half above and half below 0 on the Z access
         // coords are in XYZ, but Z is as Y in this, with Y always 0, in order to align 
         // with the 3D plain in Unity. coords are clockwise from top.

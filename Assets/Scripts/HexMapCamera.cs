@@ -7,7 +7,7 @@ namespace DarkDomains
     {
         Transform swivel, stick;
 
-        float zoom = 1f;
+        float zoom;
         float rotationAngle;
 
         public HexGrid HexGrid;
@@ -20,6 +20,8 @@ namespace DarkDomains
         {
             swivel = transform.GetChild(0);
             stick = swivel.transform.GetChild(0);
+
+            AdjustZoom(0.8f);
         }
 
         private void Update() 
@@ -58,10 +60,10 @@ namespace DarkDomains
 
         private Vector3 ClampPosition(Vector3 position)
         {
-            var XMax = (HexGrid.Width - 0.5f) * 2f * HexMetrics.InnerRadius;
+            var XMax = (HexGrid.CellCountX - 0.5f) * 2f * HexMetrics.InnerRadius;
             position.x = Mathf.Clamp(position.x, 0f, XMax);
 
-            var ZMax = (HexGrid.Height - 1f) * 1.5f * HexMetrics.OuterRadius;
+            var ZMax = (HexGrid.CellCountZ - 1f) * 1.5f * HexMetrics.OuterRadius;
             position.z = Mathf.Clamp(position.z, 0f, ZMax);
 
             return position;
