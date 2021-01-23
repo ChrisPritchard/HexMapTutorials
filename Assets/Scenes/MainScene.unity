@@ -2811,8 +2811,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d75addb8fa9ebf40882d498f9bac628, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Width: 6
-  Height: 6
+  Width: 20
+  Height: 15
   DefaultColour: {r: 1, g: 1, b: 1, a: 1}
   CellPrefab: {fileID: 5625665019880338978, guid: 5559a6c2ddde799438539faf51166b9a,
     type: 3}
