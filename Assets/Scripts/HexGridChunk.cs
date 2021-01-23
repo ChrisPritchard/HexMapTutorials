@@ -17,16 +17,25 @@ namespace DarkDomains
             cells = new HexCell[HexMetrics.ChunkSizeX * HexMetrics.ChunkSizeZ];
         }
 
-        private void Start() 
-        {
-            hexMesh.Triangulate(cells);
-        }
-
         public void AddCell(int index, HexCell cell)
         {
             cells[index] = cell;
             cell.transform.SetParent(this.transform, false);
             cell.UIRect.SetParent(canvas.transform, false);
+            cell.Chunk = this;
+        }
+
+        // chunks are only enabled when they need to triangulate
+        public void Refresh()
+        {
+            enabled = true;
+        }
+
+        // this method will only be invoked if the chunk is enabled, and will then disable itself
+        private void LateUpdate() 
+        {
+            hexMesh.Triangulate(cells); 
+            enabled = false;
         }
     }
 }

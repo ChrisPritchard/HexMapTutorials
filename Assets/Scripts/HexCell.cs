@@ -5,6 +5,7 @@ namespace DarkDomains
 
     public class HexCell : MonoBehaviour
     {
+        public HexGridChunk Chunk;
         public HexCoordinates Coordinates;
         public RectTransform UIRect;
 
@@ -14,7 +15,11 @@ namespace DarkDomains
             get => colour;
             set
             {
+                if (colour == value)
+                    return;
+
                 colour = value;
+                Refresh();
             }
         }
 
@@ -24,6 +29,9 @@ namespace DarkDomains
             get => elevation;
             set
             {
+                if(value == elevation)
+                    return;
+
                 elevation = value;
 
                 var position = transform.localPosition;
@@ -34,6 +42,8 @@ namespace DarkDomains
                 var uiPosition = UIRect.localPosition;
                 uiPosition.z = -position.y;
                 UIRect.localPosition = uiPosition;
+
+                Refresh();
             }
         }
 
@@ -51,5 +61,16 @@ namespace DarkDomains
         }
 
         public HexEdgeType GetEdgeType(HexCell other) => HexMetrics.GetEdgeType(elevation, other.elevation);
+
+        public void Refresh()
+        {
+            if(!Chunk) 
+                return;
+
+            Chunk.Refresh();
+            foreach(var neighbour in Neighbours)
+                if(neighbour != null && neighbour.Chunk != Chunk)
+                    neighbour.Chunk.Refresh();
+        }
     }
 }

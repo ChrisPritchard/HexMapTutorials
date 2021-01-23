@@ -8,18 +8,16 @@ namespace DarkDomains
     public class HexMesh : MonoBehaviour 
     {
         Mesh hexMesh;
-        List<Vector3> vertices;
-        List<int> triangles;
-        List<Color> colours;
+
+        // these are static as they are temporary buffers, cleared then used for only a given triangulation
+        static List<Vector3> vertices = new List<Vector3>();
+        static List<int> triangles = new List<int>();
+        static List<Color> colours = new List<Color>();
 
         private void Awake() 
         {
             hexMesh = new Mesh { name = "Hex Mesh" };
             GetComponent<MeshFilter>().mesh = hexMesh;
-
-            vertices = new List<Vector3>();
-            triangles = new List<int>();
-            colours = new List<Color>();
         }
 
         public void Triangulate(HexCell[] cells)
