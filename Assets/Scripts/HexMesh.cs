@@ -144,7 +144,14 @@ namespace DarkDomains
                 else // must be a cliff, as left as slope has already been covered
                     TriangulateCornerCliffTerraces(bottom, bottomCell, left, leftCell, right, rightCell);
             }
-            else // both are cliffs or both are flat, so a simple triangle will do
+            else if (leftCell.GetEdgeType(rightCell) == HexEdgeType.Slope) // both sides are cliffs, top is slope
+            {
+                if (leftCell.Elevation < rightCell.Elevation)
+                    TriangulateCornerCliffTerraces(right, rightCell, bottom, bottomCell, left, leftCell); // CCSR: cliff, cliff, slope to right
+                else
+                    TriangulateCornerTerracesCliff(left, leftCell, right, rightCell, bottom, bottomCell); // CCSL: cliff, cliff, slope to left
+            }
+            else // no terraces anywhere, so a simple triangle will do
             {
                 AddTriangle(bottom, left, right);
                 AddTriangleColour(bottomCell.Colour, leftCell.Colour, rightCell.Colour);
@@ -186,7 +193,7 @@ namespace DarkDomains
             Vector3 left, HexCell leftCell,
             Vector3 right, HexCell rightCell)
         {
-            var b = 1f / (rightCell.Elevation - bottomCell.Elevation);
+            var b = Mathf.Abs(1f / (rightCell.Elevation - bottomCell.Elevation));
             var boundary = Vector3.Lerp(bottom, right, b);
             var boundaryColour = Color.Lerp(bottomCell.Colour, rightCell.Colour, b);
 
@@ -206,7 +213,7 @@ namespace DarkDomains
             Vector3 left, HexCell leftCell,
             Vector3 right, HexCell rightCell)
         {
-            var b = 1f / (leftCell.Elevation - bottomCell.Elevation);
+            var b = Mathf.Abs(1f / (leftCell.Elevation - bottomCell.Elevation));
             var boundary = Vector3.Lerp(bottom, left, b);
             var boundaryColour = Color.Lerp(bottomCell.Colour, leftCell.Colour, b);
 
