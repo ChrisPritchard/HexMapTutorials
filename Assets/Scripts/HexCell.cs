@@ -6,12 +6,19 @@ namespace DarkDomains
     public class HexCell : MonoBehaviour
     {
         public HexCoordinates Coordinates;
-
-        public Color Colour;
-
         public RectTransform UIRect;
 
-        int elevation;
+        Color colour; // defaults to transparent black (if a colour is transparent is it any real colour??)
+        public Color Colour 
+        {
+            get => colour;
+            set
+            {
+                colour = value;
+            }
+        }
+
+        int elevation = int.MinValue;
         public int Elevation
         {
             get => elevation;

@@ -55,10 +55,6 @@ namespace DarkDomains
             
             cell.Elevation = 0; // set to do an initial perturb of height
             var index = z * Width + x;
-                        
-            // TODO - remove random setters. They're here just for ease of testing of new features for now
-            cell.Colour = new[]{Color.green, Color.red, Color.blue, Color.yellow, Color.white}[Random.Range(0, 5)];
-            cell.Elevation = Random.Range(0, 3);
             cells[index] = cell;
 
             // connect neighbours, working backwards. e.g. connect the prior, and the bottom two corners if available
