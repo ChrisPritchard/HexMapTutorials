@@ -8,11 +8,13 @@ namespace DarkDomains
         Transform swivel, stick;
 
         float zoom = 1f;
+        float rotationAngle;
 
         public HexGrid HexGrid;
 
         public float StickMinZoom, StickMaxZoom;
         public float MoveSpeedMinZoom, MoveSpeedMaxZoom;
+        public float RotationSpeed;
 
         private void Awake() 
         {
@@ -30,6 +32,10 @@ namespace DarkDomains
             var zDelta = Input.GetAxis("Vertical");
             if (xDelta != 0f || zDelta != 0f)
                 AdjustPosition(xDelta, zDelta);
+
+            var rotationDelta = Input.GetAxis("Rotation");
+            if (rotationDelta != 0f)
+                AdjustRotation(rotationDelta);
         }
 
         private void AdjustZoom(float zoomDelta)
@@ -41,7 +47,7 @@ namespace DarkDomains
 
         private void AdjustPosition(float xDelta, float zDelta)
         {
-            var direction = new Vector3(xDelta, 0f, zDelta).normalized;
+            var direction = transform.localRotation * new Vector3(xDelta, 0f, zDelta).normalized;
             var damping = Mathf.Max(Mathf.Abs(xDelta), Mathf.Abs(zDelta));
             var distance = Mathf.Lerp(MoveSpeedMinZoom, MoveSpeedMaxZoom, zoom) * Time.deltaTime;
 
@@ -59,6 +65,16 @@ namespace DarkDomains
             position.z = Mathf.Clamp(position.z, 0f, ZMax);
 
             return position;
+        }
+
+        private void AdjustRotation(float delta)
+        {
+            rotationAngle += -delta * RotationSpeed * Time.deltaTime; // minus delta inverts movement - feels more natural to me
+            if (rotationAngle < 0f)
+                rotationAngle += 360f;
+            else if (rotationAngle >= 360f)
+                rotationAngle -= 360f;
+            transform.localRotation = Quaternion.Euler(0f, rotationAngle, 0f);
         }
     }
 }

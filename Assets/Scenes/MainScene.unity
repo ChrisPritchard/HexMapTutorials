@@ -2141,9 +2141,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HexGrid: {fileID: 1756129105}
   StickMinZoom: -250
-  StickMaxZoom: -45
+  StickMaxZoom: -15
   MoveSpeedMinZoom: 400
   MoveSpeedMaxZoom: 100
+  RotationSpeed: 180
 --- !u!4 &938200188
 Transform:
   m_ObjectHideFlags: 0
