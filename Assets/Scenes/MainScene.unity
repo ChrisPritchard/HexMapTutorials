@@ -2811,9 +2811,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d75addb8fa9ebf40882d498f9bac628, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Width: 20
-  Height: 15
+  ChunkCountX: 4
+  ChunkCountZ: 3
   DefaultColour: {r: 1, g: 1, b: 1, a: 1}
+  ChunkPrefab: {fileID: 2143859239721375533, guid: 3ef3e9916b1b6bc409c1b3ade8166688,
+    type: 3}
   CellPrefab: {fileID: 5625665019880338978, guid: 5559a6c2ddde799438539faf51166b9a,
     type: 3}
   CellLabelPrefab: {fileID: 5023515921265215618, guid: f2ac6604b49dc674882f141860f28fe7,

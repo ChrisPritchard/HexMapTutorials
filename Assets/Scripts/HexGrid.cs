@@ -13,31 +13,52 @@ namespace DarkDomains
 
         public Color DefaultColour = Color.white;
 
+        public HexGridChunk ChunkPrefab;
         public HexCell CellPrefab;
         public Text CellLabelPrefab;
         public Texture2D NoiseSource;
 
-        Canvas canvas;
-        HexMesh hexMesh;
-
+        HexGridChunk[] chunks;
         HexCell[] cells;
 
         private void Awake()
         {
             HexMetrics.NoiseSource = NoiseSource;
 
-            canvas = GetComponentInChildren<Canvas>();
-            hexMesh = GetComponentInChildren<HexMesh>();
-
-            cells = new HexCell[CellCountX * CellCountZ];
-            for(var z = 0; z < CellCountZ; z++)
-                for(var x = 0; x < CellCountX; x++)
-                    CreateCell(x, z);
+            CreateChunks();
+            CreateCells();
         }
 
         private void OnEnable() 
         {
             HexMetrics.NoiseSource = NoiseSource;    
+        }
+
+        private void CreateChunks()
+        {
+            chunks = new HexGridChunk[ChunkCountX * ChunkCountZ];
+
+            for(var z = 0; z < ChunkCountZ; z++)
+                for(var x = 0; x < ChunkCountX; x++)
+                    CreateChunk(x, z);
+        }
+
+        private void CreateChunk(int x, int z)
+        {
+            var chunk = Instantiate<HexGridChunk>(ChunkPrefab);
+            chunk.transform.SetParent(this.transform);
+
+            var index = z * ChunkCountX + x;
+            chunks[index] = chunk;
+        }
+
+        private void CreateCells()
+        {
+            cells = new HexCell[CellCountX * CellCountZ];
+
+            for(var z = 0; z < CellCountZ; z++)
+                for(var x = 0; x < CellCountX; x++)
+                    CreateCell(x, z);
         }
 
         private void CreateCell(int x, int z)
@@ -47,19 +68,8 @@ namespace DarkDomains
             var position = new Vector3(px, 0f, pz);
 
             var cell = Instantiate<HexCell>(CellPrefab);
-            cell.transform.SetParent(this.transform);
             cell.transform.localPosition = position;
             cell.Coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
-
-            var label = Instantiate<Text>(CellLabelPrefab);
-            label.rectTransform.SetParent(canvas.transform, false);
-            label.rectTransform.anchoredPosition = new Vector2(position.x, position.z);
-            label.text = cell.Coordinates.ToString("\n");
-            cell.UIRect = label.rectTransform;
-
-            // defaults - will trigger an initial perturb of height          
-            cell.Elevation = 0;
-            cell.Colour = Color.white;
 
             var index = z * CellCountX + x;
             cells[index] = cell;
@@ -70,25 +80,42 @@ namespace DarkDomains
 
             if (x != 0)
                 cell.SetNeighbour(HexDirection.W, cells[index - 1]);
-            if (z == 0)
-                return;
-            
-            if (z % 2 == 0) // non 'shunted' row, so always has bottom right, but first doesnt have bottom left
-            {
-                cell.SetNeighbour(HexDirection.SE, cells[index - CellCountX]);
-                if (x != 0)
-                    cell.SetNeighbour(HexDirection.SW, cells[index - CellCountX - 1]);
-            } else  // 'shunted' row, always has bottom left, but last does not have bottom right
-            {
-                cell.SetNeighbour(HexDirection.SW, cells[index - CellCountX]);
-                if (x != CellCountX - 1)
-                    cell.SetNeighbour(HexDirection.SE, cells[index - CellCountX + 1]);
+            if (z != 0)
+            {            
+                if (z % 2 == 0) // non 'shunted' row, so always has bottom right, but first doesnt have bottom left
+                {
+                    cell.SetNeighbour(HexDirection.SE, cells[index - CellCountX]);
+                    if (x != 0)
+                        cell.SetNeighbour(HexDirection.SW, cells[index - CellCountX - 1]);
+                } else  // 'shunted' row, always has bottom left, but last does not have bottom right
+                {
+                    cell.SetNeighbour(HexDirection.SW, cells[index - CellCountX]);
+                    if (x != CellCountX - 1)
+                        cell.SetNeighbour(HexDirection.SE, cells[index - CellCountX + 1]);
+                }
             }
+
+            var label = Instantiate<Text>(CellLabelPrefab);
+            label.rectTransform.anchoredPosition = new Vector2(position.x, position.z);
+            label.text = cell.Coordinates.ToString("\n");
+            cell.UIRect = label.rectTransform;
+
+            // defaults - will trigger an initial perturb of height          
+            cell.Elevation = 0;
+            cell.Colour = Color.white;
+
+            AddCellToChunk(x, z, cell);
         }
 
-        private void Start()
+        private void AddCellToChunk(int x, int z, HexCell cell)
         {
-            hexMesh.Triangulate(cells);
+            var chunkX = x / HexMetrics.ChunkSizeX;
+            var chunkZ = z / HexMetrics.ChunkSizeZ;
+            var chunk = chunks[chunkZ * ChunkCountX + chunkX];
+
+            var localX = x - chunkX * HexMetrics.ChunkSizeX; // index in chunk
+            var localZ = z - chunkZ * HexMetrics.ChunkSizeZ;
+            chunk.AddCell(localZ * HexMetrics.ChunkSizeX + localX, cell);
         }
 
         public HexCell GetCell(Vector3 position)
@@ -97,11 +124,6 @@ namespace DarkDomains
             var coords = HexCoordinates.FromPosition(position);
             var index = coords.Z *CellCountX + coords.X + coords.Z/2;
             return cells[index];
-        }
-
-        public void Refresh()
-        {
-            hexMesh.Triangulate(cells);
         }
     }
 }

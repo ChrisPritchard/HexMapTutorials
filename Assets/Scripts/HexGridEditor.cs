@@ -40,7 +40,6 @@ namespace DarkDomains
         {
             cell.Colour = activeColour;
             cell.Elevation = (int)activeElevation;
-            HexGrid.Refresh();
         }
 
         public void SelectColour(int index) => activeColour = Colours[index];
