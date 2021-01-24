@@ -30,6 +30,7 @@ namespace DarkDomains
         bool isDrag;
         HexDirection dragDirection;
         HexCell previousCell;
+        HexCell prevPreviousCell;
 
         private void Awake() 
         {
@@ -53,6 +54,7 @@ namespace DarkDomains
             {
                 var target = HexGrid.GetCell(hit.point);
                 EditCells(target);
+                prevPreviousCell = previousCell;
                 previousCell = target;
             }
             else
@@ -61,7 +63,8 @@ namespace DarkDomains
 
         private void EditCells(HexCell center)
         {
-            if(previousCell != null && previousCell != center)
+            // prevPrevious cell prevents quick double backs - i *think* this works
+            if(previousCell != null && previousCell != center && prevPreviousCell != null && prevPreviousCell != center)
                 isDrag = ValidateDrag(center);
             else
                 isDrag = false;
@@ -92,7 +95,6 @@ namespace DarkDomains
         }
 
         // test if cell is neighbour of previous cell
-        // TODO: remember last drag, so that tiles are not oscillated between (which ruins rivers)
         private bool ValidateDrag(HexCell newCell)
         {
             for(dragDirection = HexDirection.NE; dragDirection <= HexDirection.NW; dragDirection++)
