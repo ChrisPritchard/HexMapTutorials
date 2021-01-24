@@ -5,6 +5,8 @@ namespace DarkDomains
     using UnityEngine.UI;
     using UnityEngine.EventSystems;
     
+    public enum RiverMode { Off, Add, Remove }
+
     public class HexGridEditor : MonoBehaviour 
     {
         public Color[] Colours;
@@ -20,8 +22,14 @@ namespace DarkDomains
         int brushSize = 1;
         public Text BrushSizeText;
 
+        RiverMode riverMode;
+
         new Camera camera;
         EventSystem eventSystem;
+
+        bool isDrag;
+        HexDirection dragDirection;
+        HexCell previousCell;
 
         private void Awake() 
         {
@@ -32,22 +40,31 @@ namespace DarkDomains
 
         private void Update() 
         {
-            if(Input.GetMouseButtonUp(0) && !eventSystem.IsPointerOverGameObject())
+            if(Input.GetMouseButton(0) && !eventSystem.IsPointerOverGameObject())
                 HandleInput();
+            else
+                previousCell = null;
         }
 
         private void HandleInput()
         {
             var inputRay = camera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(inputRay, out RaycastHit hit))
-                EditCells(HexGrid.GetCell(hit.point));
+            {
+                var target = HexGrid.GetCell(hit.point);
+                EditCells(target);
+                previousCell = target;
+            }
+            else
+                previousCell = null;
         }
 
         private void EditCells(HexCell center)
         {
-            EditCell(center);
-            if(brushSize == 1)
-                return;
+            if(previousCell != null && previousCell != center)
+                isDrag = ValidateDrag(center);
+            else
+                isDrag = false;
 
             var c = center.Coordinates;
             var b = brushSize - 1; // when converted to radius, ignore centre
@@ -68,6 +85,19 @@ namespace DarkDomains
                 cell.Colour = activeColour;
             if(applyElevation)
                 cell.Elevation = (int)activeElevation;
+            if(riverMode == RiverMode.Remove)
+                cell.RemoveRiver();
+            if(isDrag && riverMode == RiverMode.Add)
+                previousCell.SetOutgoingRiver(dragDirection);            
+        }
+
+        // test if cell is neighbour of previous cell
+        private bool ValidateDrag(HexCell newCell)
+        {
+            for(dragDirection = HexDirection.NE; dragDirection <= HexDirection.NW; dragDirection++)
+                if(previousCell.GetNeighbour(dragDirection) == newCell)
+                    return true;
+            return false;
         }
 
         public void ApplyColour(bool disable) => applyColour = !disable;
@@ -87,6 +117,8 @@ namespace DarkDomains
             brushSize = (int)amount;
             BrushSizeText.text = brushSize.ToString();
         }
+
+        public void SelectRiverMode(int mode) => riverMode = (RiverMode)mode;
 
         public void ShowUI(bool visible) => HexGrid.ShowUI(visible);
     }
