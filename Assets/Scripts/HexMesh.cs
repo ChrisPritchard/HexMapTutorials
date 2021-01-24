@@ -17,9 +17,9 @@ namespace DarkDomains
 
         // these are static as they are temporary buffers, cleared then used for only a given triangulation
         [NonSerialized] List<Vector3> vertices;
-        [NonSerialized]static List<int> triangles;
-        [NonSerialized]static List<Color> colours;
-        [NonSerialized]static List<Vector2> uvs;
+        [NonSerialized] List<int> triangles;
+        [NonSerialized] List<Color> colours;
+        [NonSerialized] List<Vector2> uvs;
 
         private void Awake() 
         {
@@ -43,21 +43,21 @@ namespace DarkDomains
         public void Apply()
         {
             hexMesh.SetVertices(vertices);
-            ListPool<Vector3>.Put(vertices);
+            ListPool<Vector3>.Add(vertices);
 
             hexMesh.SetTriangles(triangles, 0);
-            ListPool<int>.Put(triangles);
+            ListPool<int>.Add(triangles);
 
             if(UseColours)
             {
                 hexMesh.SetColors(colours);
-                ListPool<Color>.Put(colours);
+                ListPool<Color>.Add(colours);
             }
 
             if(UseUV)
             {
                 hexMesh.SetUVs(0, uvs);
-                ListPool<Vector2>.Put(uvs);
+                ListPool<Vector2>.Add(uvs);
             }
 
             hexMesh.RecalculateNormals();

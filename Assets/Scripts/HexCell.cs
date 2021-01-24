@@ -59,7 +59,9 @@ namespace DarkDomains
 
         public float StreamBedY => (elevation + HexMetrics.StreamBedElevationOffset) * HexMetrics.ElevationStep;
 
-        public bool HashIncomingRiver => hasIncomingRiver;
+        public float RiverSurfaceY => (elevation + HexMetrics.RiverSurfaceElevationOffset) * HexMetrics.ElevationStep;
+
+        public bool HasIncomingRiver => hasIncomingRiver;
         public bool HasOutgoingRiver => hasOutgoingRiver;
         public HexDirection IncomingRiver => incomingRiver;
         public HexDirection OutgoingRiver => outgoingRiver;

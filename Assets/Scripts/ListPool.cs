@@ -12,7 +12,7 @@ namespace DarkDomains
 
         public static List<T> Get() => stack.Count > 0 ? stack.Pop() : new List<T>();
 
-        public static void Put(List<T> noLongerUsed) 
+        public static void Add(List<T> noLongerUsed) 
         {
             noLongerUsed.Clear();
             stack.Push(noLongerUsed);

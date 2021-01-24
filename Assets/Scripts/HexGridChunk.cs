@@ -93,6 +93,15 @@ namespace DarkDomains
 
             TriangulateEdgeStrip(m, cell.Colour, e, cell.Colour);
             TriangulateEdgeFan(centre, m, cell.Colour);
+
+            var reversed = cell.IncomingRiver == direction;
+            TriangulateRiverQuad(m.v2, m.v4, e.v2, e.v4, cell.RiverSurfaceY, cell.RiverSurfaceY, reversed);
+            centre.y = m.v2.y = m.v4.y = cell.RiverSurfaceY;
+            River.AddTriangle(centre, m.v2, m.v4);
+            if (reversed)
+                River.AddTriangleUV(new Vector2(0.5f, 1f), new Vector2(1f, 0f), new Vector2(0f, 0f));
+            else
+                River.AddTriangleUV(new Vector2(0.5f, 0f), new Vector2(0f, 1f), new Vector2(1f, 1f));
         }
 
         private void TriangulateWithRiver(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e)
@@ -145,6 +154,10 @@ namespace DarkDomains
 
             Terrain.AddTriangle(centreR, m.v4, m.v5);
             Terrain.AddTriangleColour(cell.Colour);
+
+            var reversed = cell.IncomingRiver == direction;
+            TriangulateRiverQuad(centreL, centreR, m.v2, m.v4, cell.RiverSurfaceY, cell.RiverSurfaceY, reversed);
+            TriangulateRiverQuad(m.v2, m.v4, e.v2, e.v4, cell.RiverSurfaceY, cell.RiverSurfaceY, reversed);
         }
 
         private void TriangulateAdjacentToRiver(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e)
@@ -182,7 +195,12 @@ namespace DarkDomains
             );
 
             if (cell.HasRiverThroughEdge(direction))
+            {
                 e2.v3.y = neighbour.StreamBedY;
+                TriangulateRiverQuad(
+                    e.v2, e.v4, e2.v2, e2.v4, cell.RiverSurfaceY, neighbour.RiverSurfaceY, 
+                    cell.HasIncomingRiver && cell.IncomingRiver == direction);
+            }
 
             if (HexMetrics.GetEdgeType(cell.Elevation, neighbour.Elevation) == HexEdgeType.Slope)
                 TriangulateEdgeTerrace(e, cell, e2, neighbour);
@@ -206,6 +224,16 @@ namespace DarkDomains
                 TriangulateCorner(e2.v5, neighbour, v5, nextNeighbour, e.v5, cell);
             else
                 TriangulateCorner(v5, nextNeighbour, e.v5, cell, e2.v5, neighbour);
+        }
+        private void TriangulateRiverQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, float y1, float y2, bool reversed)
+        {
+            v1.y = v2.y = y1;
+            v3.y = v4.y = y2;
+            River.AddQuad(v1, v2, v3, v4);
+            if (reversed)
+                River.AddQuadUV(1f, 0f, 1f, 0f);
+            else
+                River.AddQuadUV(0f, 1f, 0f, 1f); // left to right, bottom to top.
         }
 
         private void TriangulateEdgeTerrace(EdgeVertices begin, HexCell beginCell, EdgeVertices end, HexCell endCell)

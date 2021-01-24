@@ -42,6 +42,8 @@ namespace DarkDomains
 
         public const float StreamBedElevationOffset = -1f;
 
+        public const float RiverSurfaceElevationOffset = -0.5f;
+
         // hex points, pointy-top, with half above and half below 0 on the Z access
         // coords are in XYZ, but Z is as Y in this, with Y always 0, in order to align 
         // with the 3D plain in Unity. coords are clockwise from top.
