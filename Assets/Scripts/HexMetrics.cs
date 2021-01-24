@@ -107,5 +107,16 @@ namespace DarkDomains
 
         public static Vector4 SampleNoise(Vector3 position) => 
             NoiseSource.GetPixelBilinear(position.x * NoiseScale, position.z * NoiseScale);
+
+        // a key insight with perturb is that the same position will always be perturbed the same amount, due to the fixed noise texture
+        // as a result, even though vertices for one triangle are isolated, other triangles will line up as their vertices have the same initial position
+        public static Vector3 Perturb(Vector3 position)
+        {
+            var sample = SampleNoise(position);
+            position.x += (sample.x * 2f - 1f) * CellPerturbStrength;
+            position.z += (sample.z * 2f - 1f) * CellPerturbStrength;
+            // we dont perturb y so that surfaces (hex tops, terrace tops) are flat
+            return position;
+        }
     }
 }

@@ -232,3 +232,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a97429afc8b24e498a76f48a5311dc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Terrain: {fileID: 874666247751789318}
