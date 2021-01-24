@@ -70,7 +70,7 @@ namespace DarkDomains
             bridge.y = neighbour.Position.y - cell.Position.y;
             var e2 = new EdgeVertices(
                 e1.v1 + bridge,
-                e1.v4 + bridge
+                e1.v5 + bridge
             );
 
             if (HexMetrics.GetEdgeType(cell.Elevation, neighbour.Elevation) == HexEdgeType.Slope)
@@ -86,16 +86,16 @@ namespace DarkDomains
             if (nextNeighbour == null)
                 return;
 
-            var v5 = e1.v4 + HexMetrics.GetBridge(nextDirection);
+            var v5 = e1.v5 + HexMetrics.GetBridge(nextDirection);
             v5.y = nextNeighbour.Position.y;
             
             var minElevation = Mathf.Min(cell.Elevation, neighbour.Elevation, nextNeighbour.Elevation);
             if (minElevation == cell.Elevation)
-                TriangulateCorner(e1.v4, cell, e2.v4, neighbour, v5, nextNeighbour);
+                TriangulateCorner(e1.v5, cell, e2.v5, neighbour, v5, nextNeighbour);
             else if (minElevation == neighbour.Elevation)
-                TriangulateCorner(e2.v4, neighbour, v5, nextNeighbour, e1.v4, cell);
+                TriangulateCorner(e2.v5, neighbour, v5, nextNeighbour, e1.v5, cell);
             else
-                TriangulateCorner(v5, nextNeighbour, e1.v4, cell, e2.v4, neighbour);
+                TriangulateCorner(v5, nextNeighbour, e1.v5, cell, e2.v5, neighbour);
         }
 
         private void TriangulateEdgeTerrace(EdgeVertices begin, HexCell beginCell, EdgeVertices end, HexCell endCell)
@@ -249,6 +249,8 @@ namespace DarkDomains
             AddTriangleColour(color);
             AddTriangle(center, edge.v3, edge.v4);
             AddTriangleColour(color);
+            AddTriangle(center, edge.v4, edge.v5);
+            AddTriangleColour(color);
         }
 
         private void TriangulateEdgeStrip(EdgeVertices e1, Color c1, EdgeVertices e2, Color c2)
@@ -258,6 +260,8 @@ namespace DarkDomains
             AddQuad(e1.v2, e1.v3, e2.v2, e2.v3);
             AddQuadColour(c1, c2);
             AddQuad(e1.v3, e1.v4, e2.v3, e2.v4);
+            AddQuadColour(c1, c2);
+            AddQuad(e1.v4, e1.v5, e2.v4, e2.v5);
             AddQuadColour(c1, c2);
         }
 
