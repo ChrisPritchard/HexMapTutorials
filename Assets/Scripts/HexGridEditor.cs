@@ -92,6 +92,7 @@ namespace DarkDomains
         }
 
         // test if cell is neighbour of previous cell
+        // TODO: remember last drag, so that tiles are not oscillated between (which ruins rivers)
         private bool ValidateDrag(HexCell newCell)
         {
             for(dragDirection = HexDirection.NE; dragDirection <= HexDirection.NW; dragDirection++)
