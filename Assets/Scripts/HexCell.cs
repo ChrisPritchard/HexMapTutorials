@@ -9,6 +9,9 @@ namespace DarkDomains
         public HexCoordinates Coordinates;
         public RectTransform UIRect;
 
+        bool hasIncomingRiver, hasOutgoingRiver;
+        HexDirection incomingRiver, outgoingRiver;
+
         Color colour; // defaults to transparent black (if a colour is transparent is it any real colour??)
         public Color Colour 
         {
@@ -49,6 +52,12 @@ namespace DarkDomains
 
         public Vector3 Position => transform.localPosition;
 
+        public bool HashIncomingRiver => hasIncomingRiver;
+        public bool HasOutgoingRiver => hasOutgoingRiver;
+        public HexDirection IncomingRiver => incomingRiver;
+        public HexDirection OutgoingRiver => outgoingRiver;
+        public bool HasRiverBeginOrEnd => hasIncomingRiver || hasOutgoingRiver;
+
         [SerializeField]
         public HexCell[] Neighbours;
 
@@ -71,6 +80,41 @@ namespace DarkDomains
             foreach(var neighbour in Neighbours)
                 if(neighbour != null && neighbour.Chunk != Chunk)
                     neighbour.Chunk.Refresh();
+        }
+
+        public void RefreshSelfOnly() => Chunk?.Refresh();
+
+        public bool HasRiverThroughEdge(HexDirection direction) =>
+            (hasIncomingRiver && incomingRiver == direction) || (hasOutgoingRiver && outgoingRiver == direction);
+
+        public void RemoveOutgoingRiver()
+        {
+            if (!hasOutgoingRiver)
+                return;
+            hasOutgoingRiver = false;
+            RefreshSelfOnly();
+
+            var neighbour = GetNeighbour(outgoingRiver);
+            neighbour.hasIncomingRiver = false;
+            neighbour.RefreshSelfOnly();
+        }
+
+        public void RemoveIncomingRiver()
+        {
+            if (!hasIncomingRiver)
+                return;
+            hasIncomingRiver = false;
+            RefreshSelfOnly();
+
+            var neighbour = GetNeighbour(incomingRiver);
+            neighbour.hasOutgoingRiver = false;
+            neighbour.RefreshSelfOnly();
+        }
+
+        public void RemoveRiver()
+        {
+            RemoveOutgoingRiver();
+            RemoveIncomingRiver();
         }
     }
 }
