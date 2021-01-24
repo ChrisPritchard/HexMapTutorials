@@ -2,41 +2,68 @@
 namespace DarkDomains
 {
     using UnityEngine;
+    using System;
     using System.Collections.Generic;
     
-    [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
+    [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class HexMesh : MonoBehaviour 
     {
         Mesh hexMesh;
-        MeshCollider collider;
+        MeshCollider meshCollider;
+
+        public bool UseCollider;
+        public bool UseColours;
+        public bool UseUV;
 
         // these are static as they are temporary buffers, cleared then used for only a given triangulation
-        static List<Vector3> vertices = new List<Vector3>();
-        static List<int> triangles = new List<int>();
-        static List<Color> colours = new List<Color>();
+        [NonSerialized] List<Vector3> vertices;
+        [NonSerialized]static List<int> triangles;
+        [NonSerialized]static List<Color> colours;
+        [NonSerialized]static List<Vector2> uvs;
 
         private void Awake() 
         {
             hexMesh = new Mesh { name = "Hex Mesh" };
             GetComponent<MeshFilter>().mesh = hexMesh;
-            collider = GetComponent<MeshCollider>();
+            if(UseCollider)
+                meshCollider = gameObject.AddComponent<MeshCollider>();
         }
 
         public void Clear()
         {
             hexMesh.Clear();
-            vertices.Clear();
-            triangles.Clear();
-            colours.Clear();
+            vertices = ListPool<Vector3>.Get();
+            triangles = ListPool<int>.Get();
+            if(UseColours)
+                colours = ListPool<Color>.Get();
+            if(UseUV)
+                uvs = ListPool<Vector2>.Get();
         }
 
         public void Apply()
         {
             hexMesh.SetVertices(vertices);
+            ListPool<Vector3>.Put(vertices);
+
             hexMesh.SetTriangles(triangles, 0);
-            hexMesh.SetColors(colours);
+            ListPool<int>.Put(triangles);
+
+            if(UseColours)
+            {
+                hexMesh.SetColors(colours);
+                ListPool<Color>.Put(colours);
+            }
+
+            if(UseUV)
+            {
+                hexMesh.SetUVs(0, uvs);
+                ListPool<Vector2>.Put(uvs);
+            }
+
             hexMesh.RecalculateNormals();
-            collider.sharedMesh = hexMesh;
+
+            if(UseCollider)
+                meshCollider.sharedMesh = hexMesh;
         }
 
         // adds a new triangle, both adding the vertices to the vertices list, and 
@@ -58,6 +85,8 @@ namespace DarkDomains
         // adds colours for each vertex
         public void AddTriangleColour(Color c1, Color c2, Color c3) => colours.AddRange(new[]{c1, c2, c3});
 
+        public void AddTriangleUV(Vector2 uv1, Vector2 uv2, Vector2 uv3) => uvs.AddRange(new[] { uv1, uv2, uv3 });
+
         public void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)
         {
             var index = vertices.Count;
@@ -73,5 +102,10 @@ namespace DarkDomains
         public void AddQuadColour(Color c1, Color c2) => AddQuadColour(c1, c1, c2, c2);
 
         public void AddQuadColour(Color c1) => AddQuadColour(c1, c1);
+
+        public void AddQuadUV(Vector2 uv1, Vector2 uv2, Vector2 uv3, Vector2 uv4) => uvs.AddRange(new[] { uv1, uv2, uv3, uv4 });
+
+        public void AddQuadUV(float uMin, float uMax, float vMin, float vMax) =>
+            AddQuadUV(new Vector2(uMin, vMin), new Vector2(uMax, vMin), new Vector2(uMin, vMax), new Vector2(uMax, vMax));
     }
 }
