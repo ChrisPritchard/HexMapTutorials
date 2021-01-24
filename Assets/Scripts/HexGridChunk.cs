@@ -37,5 +37,7 @@ namespace DarkDomains
             hexMesh.Triangulate(cells); 
             enabled = false;
         }
+
+        public void ShowUI(bool visible) => canvas.gameObject.SetActive(visible);
     }
 }

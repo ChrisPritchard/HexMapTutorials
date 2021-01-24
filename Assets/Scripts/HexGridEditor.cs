@@ -87,5 +87,7 @@ namespace DarkDomains
             brushSize = (int)amount;
             BrushSizeText.text = brushSize.ToString();
         }
+
+        public void ShowUI(bool visible) => HexGrid.ShowUI(visible);
     }
 }
