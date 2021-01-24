@@ -57,11 +57,13 @@ namespace DarkDomains
 
         public Vector3 Position => transform.localPosition;
 
+        public float StreamBedY => (elevation + HexMetrics.StreamBedElevationOffset) * HexMetrics.ElevationStep;
+
         public bool HashIncomingRiver => hasIncomingRiver;
         public bool HasOutgoingRiver => hasOutgoingRiver;
         public HexDirection IncomingRiver => incomingRiver;
         public HexDirection OutgoingRiver => outgoingRiver;
-        public bool HasRiverBeginOrEnd => hasIncomingRiver || hasOutgoingRiver;
+        public bool HasRiver => hasIncomingRiver || hasOutgoingRiver;
 
         [SerializeField]
         public HexCell[] Neighbours;

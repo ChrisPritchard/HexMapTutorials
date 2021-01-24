@@ -27,7 +27,17 @@ namespace DarkDomains
 
         public const float VerticalTerraceStepSize = 1f / (TerracesPerSlope + 1);
 
+        public static float CellPerturbStrength = 0f;//4f;
+
+        public static float ElevationPerturbStrength = 1.5f;
+
+        public static float NoiseScale = 0.003f;
+
+        public static Texture2D NoiseSource;
+
         public const int ChunkSizeX = 5, ChunkSizeZ = 5; // this can be tweaked, but note that the full map will always be a multiple of theses
+
+        public const float StreamBedElevationOffset = -1f;
 
         // hex points, pointy-top, with half above and half below 0 on the Z access
         // coords are in XYZ, but Z is as Y in this, with Y always 0, in order to align 
@@ -58,14 +68,6 @@ namespace DarkDomains
         public static Vector3 GetSecondSolidCorner(HexDirection direction) => corners[(int)direction + 1] * SolidFactor;
 
         public static Vector3 GetBridge(HexDirection direction) => (GetFirstCorner(direction) + GetSecondCorner(direction)) * BlendFactor;
-
-        public static float CellPerturbStrength = 4f;
-
-        public static float ElevationPerturbStrength = 1.5f;
-
-        public static float NoiseScale = 0.003f;
-
-        public static Texture2D NoiseSource;
 
         // returns the point between a and b for the given terrace step
         // the lerp function is: for t = 0, a; for t = 1, b; for t between 0 and 1, a + (b - a) * t, so t times the distance between the two

@@ -45,6 +45,8 @@ namespace DarkDomains
                 Triangulate(d, cell);
         }
 
+        // triangulates one of the six cores of a hex cell
+        // and, if the conditions are met, the bridge and corner on that side
         private void Triangulate(HexDirection direction, HexCell cell)
         {
             var e = new EdgeVertices(
@@ -52,15 +54,25 @@ namespace DarkDomains
                 cell.Position + HexMetrics.GetSecondSolidCorner(direction)
             );
 
-            TriangulateEdgeFan(cell.Position, e, cell.Colour);
+            if (cell.HasRiverThroughEdge(direction))
+                e.v3.y = cell.StreamBedY;
+                
+            if (cell.HasRiver)
+                TriangulateWithRiver(direction, cell, e);
+            else
+                TriangulateEdgeFan(cell.Position, e, cell.Colour);
 
             if(direction <= HexDirection.SE)
                 TriangulateConnection(direction, cell, e);
         }
 
+        private void TriangulateWithRiver(HexDirection direction, HexCell cell, EdgeVertices e1)
+        {
+
+        }
+
         // adds bridges and corner triangles
-        private void TriangulateConnection(
-            HexDirection direction, HexCell cell, EdgeVertices e1)
+        private void TriangulateConnection(HexDirection direction, HexCell cell, EdgeVertices e1)
         {
             var neighbour = cell.GetNeighbour(direction);
             if (neighbour == null)
@@ -73,6 +85,9 @@ namespace DarkDomains
                 e1.v5 + bridge
             );
 
+            if (cell.HasRiverThroughEdge(direction))
+                e2.v3.y = neighbour.StreamBedY;
+
             if (HexMetrics.GetEdgeType(cell.Elevation, neighbour.Elevation) == HexEdgeType.Slope)
                 TriangulateEdgeTerrace(e1, cell, e2, neighbour);
             else
@@ -80,7 +95,6 @@ namespace DarkDomains
 
             if(direction > HexDirection.E)
                 return;
-
             var nextDirection = direction.Next();
             var nextNeighbour = cell.GetNeighbour(nextDirection);
             if (nextNeighbour == null)
