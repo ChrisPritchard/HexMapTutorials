@@ -85,8 +85,27 @@ namespace DarkDomains
 
         private void TriangulateWithRiver(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e1)
         {
-            var centreL = centre + HexMetrics.GetFirstSolidCorner(direction.Previous()) * 0.25f;
-            var centreR = centre + HexMetrics.GetSecondSolidCorner(direction.Next()) * 0.25f;
+            Vector3 centreL, centreR;
+            if (cell.HasRiverThroughEdge(direction.Opposite()))
+            {
+                centreL = centre + HexMetrics.GetFirstSolidCorner(direction.Previous()) * 0.25f;
+                centreR = centre + HexMetrics.GetSecondSolidCorner(direction.Next()) * 0.25f;
+            }
+            else if (cell.HasRiverThroughEdge(direction.Next()))
+            {
+                centreL = centre;
+                centreR = Vector3.Lerp(centre, e1.v5, 2f/3);
+            }
+            else if (cell.HasRiverThroughEdge(direction.Previous()))
+            {
+                centreL = Vector3.Lerp(centre, e1.v1, 2f/3);
+                centreR = centre;
+            }
+            else
+                centreL = centreR = centre;
+
+            centre = Vector3.Lerp(centreL, centreR, 0.5f); // aligns edges
+
             var m = new EdgeVertices(
                 Vector3.Lerp(centreL, e1.v1, 0.5f),
                 Vector3.Lerp(centreR, e1.v5, 0.5f),
@@ -97,10 +116,13 @@ namespace DarkDomains
 
             AddTriangle(centreL, m.v1, m.v2);
             AddTriangleColour(cell.Colour);
+
             AddQuad(centreL, centre, m.v2, m.v3);
             AddQuadColour(cell.Colour);
+
             AddQuad(centre, centreR, m.v3, m.v4);
             AddQuadColour(cell.Colour);
+
             AddTriangle(centreR, m.v4, m.v5);
             AddTriangleColour(cell.Colour);
         }
