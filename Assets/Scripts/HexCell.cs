@@ -46,6 +46,11 @@ namespace DarkDomains
                 uiPosition.z = -position.y;
                 UIRect.localPosition = uiPosition;
 
+                if (hasOutgoingRiver && elevation < GetNeighbour(outgoingRiver).elevation)
+                    RemoveOutgoingRiver();
+                if (hasIncomingRiver && elevation > GetNeighbour(incomingRiver).elevation)
+                    RemoveIncomingRiver();
+
                 Refresh();
             }
         }
@@ -115,6 +120,29 @@ namespace DarkDomains
         {
             RemoveOutgoingRiver();
             RemoveIncomingRiver();
+        }
+
+        public void SetOutgoingRiver(HexDirection direction)
+        {
+            if (hasOutgoingRiver && outgoingRiver == direction)
+                return;
+
+            var neighbour = GetNeighbour(direction);
+            if(!neighbour || neighbour.elevation > elevation)
+                return;
+
+            RemoveOutgoingRiver(); // clear existing, if it exists
+            if (hasIncomingRiver && incomingRiver == direction)
+                RemoveIncomingRiver();
+            
+            outgoingRiver = direction;
+            hasOutgoingRiver = true;
+            RefreshSelfOnly();
+
+            neighbour.RemoveIncomingRiver();
+            neighbour.hasIncomingRiver = true;
+            neighbour.incomingRiver = direction.Opposite();
+            neighbour.RefreshSelfOnly();
         }
     }
 }
