@@ -8,7 +8,7 @@ namespace DarkDomains
         HexCell[] cells;
         Canvas canvas;
         
-        public HexMesh Terrain;
+        public HexMesh Terrain, River;
 
         private void Awake() 
         {
@@ -26,10 +26,7 @@ namespace DarkDomains
         }
 
         // chunks are only enabled when they need to triangulate
-        public void Refresh()
-        {
-            enabled = true;
-        }
+        public void Refresh() => enabled = true;
 
         // this method will only be invoked if the chunk is enabled, and will then disable itself
         private void LateUpdate() 
@@ -43,11 +40,13 @@ namespace DarkDomains
         public void Triangulate(HexCell[] cells)
         {
             Terrain.Clear();
+            River.Clear();
 
             foreach(var cell in cells)
                 Triangulate(cell);
 
             Terrain.Apply();
+            River.Apply();
         }
 
         private void Triangulate(HexCell cell)
