@@ -64,6 +64,8 @@ namespace DarkDomains
                     else
                         TriangulateWithRiver(direction, cell, cell.Position, e);
                 }
+                else
+                    TriangulateAdjacentToRiver(direction, cell, cell.Position, e);
             }
             else
                 TriangulateEdgeFan(cell.Position, e, cell.Colour);
@@ -72,18 +74,18 @@ namespace DarkDomains
                 TriangulateConnection(direction, cell, e);
         }
 
-        private void TriangulateWithRiverBeginOrEnd(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e1)
+        private void TriangulateWithRiverBeginOrEnd(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e)
         {
             var m = new EdgeVertices(
-                Vector3.Lerp(centre, e1.v1, 0.5f),
-                Vector3.Lerp(centre, e1.v5, 0.5f));
-            m.v3.y = e1.v3.y;
+                Vector3.Lerp(centre, e.v1, 0.5f),
+                Vector3.Lerp(centre, e.v5, 0.5f));
+            m.v3.y = e.v3.y;
 
-            TriangulateEdgeStrip(m, cell.Colour, e1, cell.Colour);
+            TriangulateEdgeStrip(m, cell.Colour, e, cell.Colour);
             TriangulateEdgeFan(centre, m, cell.Colour);
         }
 
-        private void TriangulateWithRiver(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e1)
+        private void TriangulateWithRiver(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e)
         {
             Vector3 centreL, centreR;
             if (cell.HasRiverThroughEdge(direction.Opposite()))
@@ -94,25 +96,33 @@ namespace DarkDomains
             else if (cell.HasRiverThroughEdge(direction.Next()))
             {
                 centreL = centre;
-                centreR = Vector3.Lerp(centre, e1.v5, 2f/3);
+                centreR = Vector3.Lerp(centre, e.v5, 2f/3);
             }
             else if (cell.HasRiverThroughEdge(direction.Previous()))
             {
-                centreL = Vector3.Lerp(centre, e1.v1, 2f/3);
+                centreL = Vector3.Lerp(centre, e.v1, 2f/3);
                 centreR = centre;
             }
+            else if (cell.HasRiverThroughEdge(direction.Next2()))
+            {
+                centreL = centre;
+                centreR = centre + HexMetrics.GetSolidEdgeMiddle(direction.Next()) * 0.5f * HexMetrics.InnerToOuter;
+            }
             else
-                centreL = centreR = centre;
+            {
+                centreL = centre + HexMetrics.GetSolidEdgeMiddle(direction.Previous()) * 0.5f * HexMetrics.InnerToOuter;
+                centreR = centre;
+            }
 
             centre = Vector3.Lerp(centreL, centreR, 0.5f); // aligns edges
 
             var m = new EdgeVertices(
-                Vector3.Lerp(centreL, e1.v1, 0.5f),
-                Vector3.Lerp(centreR, e1.v5, 0.5f),
+                Vector3.Lerp(centreL, e.v1, 0.5f),
+                Vector3.Lerp(centreR, e.v5, 0.5f),
                 1f/6);
-            m.v3.y = centre.y = e1.v3.y;
+            m.v3.y = centre.y = e.v3.y;
 
-            TriangulateEdgeStrip(m, cell.Colour, e1, cell.Colour);
+            TriangulateEdgeStrip(m, cell.Colour, e, cell.Colour);
 
             AddTriangle(centreL, m.v1, m.v2);
             AddTriangleColour(cell.Colour);
@@ -127,8 +137,28 @@ namespace DarkDomains
             AddTriangleColour(cell.Colour);
         }
 
+        private void TriangulateAdjacentToRiver(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e)
+        {
+            if (cell.HasRiverThroughEdge(direction.Next()))
+            {
+                if(cell.HasRiverThroughEdge(direction.Previous())) // on a curve, so pull back the centre point
+                    centre += HexMetrics.GetSolidEdgeMiddle(direction) * HexMetrics.InnerToOuter * 0.5f;
+                else if (cell.HasRiverThroughEdge(direction.Previous2())) // straight connection - pull to one side
+                    centre += HexMetrics.GetFirstSolidCorner(direction) * 0.25f;
+            }
+            else if (cell.HasRiverThroughEdge(direction.Previous()) && cell.HasRiverThroughEdge(direction.Next2()))
+                centre += HexMetrics.GetSecondSolidCorner(direction) * 0.25f; // other type of straight connection
+
+            var m = new EdgeVertices(
+                Vector3.Lerp(centre, e.v1, 0.5f),
+                Vector3.Lerp(centre, e.v5, 0.5f));
+
+            TriangulateEdgeStrip(m, cell.Colour, e, cell.Colour);
+            TriangulateEdgeFan(centre, m, cell.Colour);
+        }
+
         // adds bridges and corner triangles
-        private void TriangulateConnection(HexDirection direction, HexCell cell, EdgeVertices e1)
+        private void TriangulateConnection(HexDirection direction, HexCell cell, EdgeVertices e)
         {
             var neighbour = cell.GetNeighbour(direction);
             if (neighbour == null)
@@ -137,17 +167,17 @@ namespace DarkDomains
             var bridge = HexMetrics.GetBridge(direction);
             bridge.y = neighbour.Position.y - cell.Position.y;
             var e2 = new EdgeVertices(
-                e1.v1 + bridge,
-                e1.v5 + bridge
+                e.v1 + bridge,
+                e.v5 + bridge
             );
 
             if (cell.HasRiverThroughEdge(direction))
                 e2.v3.y = neighbour.StreamBedY;
 
             if (HexMetrics.GetEdgeType(cell.Elevation, neighbour.Elevation) == HexEdgeType.Slope)
-                TriangulateEdgeTerrace(e1, cell, e2, neighbour);
+                TriangulateEdgeTerrace(e, cell, e2, neighbour);
             else
-                TriangulateEdgeStrip(e1, cell.Colour, e2, neighbour.Colour);
+                TriangulateEdgeStrip(e, cell.Colour, e2, neighbour.Colour);
 
             if(direction > HexDirection.E)
                 return;
@@ -156,16 +186,16 @@ namespace DarkDomains
             if (nextNeighbour == null)
                 return;
 
-            var v5 = e1.v5 + HexMetrics.GetBridge(nextDirection);
+            var v5 = e.v5 + HexMetrics.GetBridge(nextDirection);
             v5.y = nextNeighbour.Position.y;
             
             var minElevation = Mathf.Min(cell.Elevation, neighbour.Elevation, nextNeighbour.Elevation);
             if (minElevation == cell.Elevation)
-                TriangulateCorner(e1.v5, cell, e2.v5, neighbour, v5, nextNeighbour);
+                TriangulateCorner(e.v5, cell, e2.v5, neighbour, v5, nextNeighbour);
             else if (minElevation == neighbour.Elevation)
-                TriangulateCorner(e2.v5, neighbour, v5, nextNeighbour, e1.v5, cell);
+                TriangulateCorner(e2.v5, neighbour, v5, nextNeighbour, e.v5, cell);
             else
-                TriangulateCorner(v5, nextNeighbour, e1.v5, cell, e2.v5, neighbour);
+                TriangulateCorner(v5, nextNeighbour, e.v5, cell, e2.v5, neighbour);
         }
 
         private void TriangulateEdgeTerrace(EdgeVertices begin, HexCell beginCell, EdgeVertices end, HexCell endCell)

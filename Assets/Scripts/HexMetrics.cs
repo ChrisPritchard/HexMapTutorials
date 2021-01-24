@@ -9,9 +9,12 @@ namespace DarkDomains
 
     public static class HexMetrics
     {
+        public const float OuterToInner = 0.866025404f;
+        public const float InnerToOuter = 1f / OuterToInner;
+
         public const float OuterRadius = 10f; // distance from centre to any point. also distance between points
 
-        public const float InnerRadius = OuterRadius * 0.866025404f; // distance from centre to any edge
+        public const float InnerRadius = OuterRadius * OuterToInner; // distance from centre to any edge
 
         public const float SolidFactor = 0.8f; // unblended core percent of a tile
 
@@ -57,7 +60,11 @@ namespace DarkDomains
 
         public static HexDirection Previous(this HexDirection direction) => direction == HexDirection.NE ? HexDirection.NW : direction - 1;
 
+        public static HexDirection Previous2(this HexDirection direction) => direction.Previous().Previous();
+
         public static HexDirection Next(this HexDirection direction) => direction == HexDirection.NW ? HexDirection.NE : direction + 1;
+
+        public static HexDirection Next2(this HexDirection direction) => direction.Next().Next();
 
         public static Vector3 GetFirstCorner(HexDirection direction) => corners[(int)direction];
 
@@ -66,6 +73,8 @@ namespace DarkDomains
         public static Vector3 GetFirstSolidCorner(HexDirection direction) => corners[(int)direction] * SolidFactor;
 
         public static Vector3 GetSecondSolidCorner(HexDirection direction) => corners[(int)direction + 1] * SolidFactor;
+
+        public static Vector3 GetSolidEdgeMiddle(HexDirection direction) => (GetFirstCorner(direction) + GetSecondCorner(direction)) * 0.5f * SolidFactor;
 
         public static Vector3 GetBridge(HexDirection direction) => (GetFirstCorner(direction) + GetSecondCorner(direction)) * BlendFactor;
 
