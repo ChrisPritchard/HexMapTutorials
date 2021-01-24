@@ -29,7 +29,7 @@ namespace DarkDomains
 
         public static float CellPerturbStrength = 0f;//4f;
 
-        public static float ElevationPerturbStrength = 1.5f;
+        public static float ElevationPerturbStrength = 0f;//1.5f;
 
         public static float NoiseScale = 0.003f;
 

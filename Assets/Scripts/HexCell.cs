@@ -39,7 +39,7 @@ namespace DarkDomains
 
                 var position = transform.localPosition;
                 position.y = elevation * HexMetrics.ElevationStep;
-                position.y += (HexMetrics.SampleNoise(position).y * 2f - 1f) * HexMetrics.ElevationStep;
+                position.y += (HexMetrics.SampleNoise(position).y * 2f - 1f) * HexMetrics.ElevationPerturbStrength;
                 transform.localPosition = position;
 
                 var uiPosition = UIRect.localPosition;
@@ -64,6 +64,7 @@ namespace DarkDomains
         public HexDirection IncomingRiver => incomingRiver;
         public HexDirection OutgoingRiver => outgoingRiver;
         public bool HasRiver => hasIncomingRiver || hasOutgoingRiver;
+        public bool HasRiverBeginOrEnd => hasIncomingRiver != hasOutgoingRiver;
 
         [SerializeField]
         public HexCell[] Neighbours;

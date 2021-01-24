@@ -53,12 +53,18 @@ namespace DarkDomains
                 cell.Position + HexMetrics.GetFirstSolidCorner(direction),
                 cell.Position + HexMetrics.GetSecondSolidCorner(direction)
             );
-
-            if (cell.HasRiverThroughEdge(direction))
-                e.v3.y = cell.StreamBedY;
                 
             if (cell.HasRiver)
-                TriangulateWithRiver(direction, cell, e);
+            {
+                if (cell.HasRiverThroughEdge(direction))
+                {
+                    e.v3.y = cell.StreamBedY;
+                    if(cell.HasRiverBeginOrEnd)
+                        TriangulateWithRiverBeginOrEnd(direction, cell, cell.Position, e);
+                    else
+                        TriangulateWithRiver(direction, cell, cell.Position, e);
+                }
+            }
             else
                 TriangulateEdgeFan(cell.Position, e, cell.Colour);
 
@@ -66,9 +72,37 @@ namespace DarkDomains
                 TriangulateConnection(direction, cell, e);
         }
 
-        private void TriangulateWithRiver(HexDirection direction, HexCell cell, EdgeVertices e1)
+        private void TriangulateWithRiverBeginOrEnd(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e1)
         {
+            var m = new EdgeVertices(
+                Vector3.Lerp(centre, e1.v1, 0.5f),
+                Vector3.Lerp(centre, e1.v5, 0.5f));
+            m.v3.y = e1.v3.y;
 
+            TriangulateEdgeStrip(m, cell.Colour, e1, cell.Colour);
+            TriangulateEdgeFan(centre, m, cell.Colour);
+        }
+
+        private void TriangulateWithRiver(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e1)
+        {
+            var centreL = centre + HexMetrics.GetFirstSolidCorner(direction.Previous()) * 0.25f;
+            var centreR = centre + HexMetrics.GetSecondSolidCorner(direction.Next()) * 0.25f;
+            var m = new EdgeVertices(
+                Vector3.Lerp(centreL, e1.v1, 0.5f),
+                Vector3.Lerp(centreR, e1.v5, 0.5f),
+                1f/6);
+            m.v3.y = centre.y = e1.v3.y;
+
+            TriangulateEdgeStrip(m, cell.Colour, e1, cell.Colour);
+
+            AddTriangle(centreL, m.v1, m.v2);
+            AddTriangleColour(cell.Colour);
+            AddQuad(centreL, centre, m.v2, m.v3);
+            AddQuadColour(cell.Colour);
+            AddQuad(centre, centreR, m.v3, m.v4);
+            AddQuadColour(cell.Colour);
+            AddTriangle(centreR, m.v4, m.v5);
+            AddTriangleColour(cell.Colour);
         }
 
         // adds bridges and corner triangles
@@ -310,7 +344,9 @@ namespace DarkDomains
         private void AddQuadColour(Color c1, Color c2, Color c3, Color c4) => colours.AddRange(new[]{c1, c2, c3, c4});
 
         // for when opposite sides of the quad are different colours
-        private void AddQuadColour(Color c1, Color c2) => colours.AddRange(new[]{c1, c1, c2, c2});
+        private void AddQuadColour(Color c1, Color c2) => AddQuadColour(c1, c1, c2, c2);
+
+        private void AddQuadColour(Color c1) => AddQuadColour(c1, c1);
 
         // a key insight with perturb is that the same position will always be perturbed the same amount, due to the fixed noise texture
         // as a result, even though vertices for one triangle are isolated, other triangles will line up as their vertices have the same initial position
