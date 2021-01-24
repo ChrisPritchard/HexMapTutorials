@@ -48,5 +48,7 @@ namespace DarkDomains
 
             return new HexCoordinates(iX, iZ);
         }
+
+        public bool IsTheSameAs(HexCoordinates other) => other.X == X && other.Y == Y && other.Z == Z;
     }
 }

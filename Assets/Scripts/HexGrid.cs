@@ -122,7 +122,14 @@ namespace DarkDomains
         {
             position = transform.InverseTransformPoint(position);
             var coords = HexCoordinates.FromPosition(position);
+            return GetCell(coords);
+        }
+
+        public HexCell GetCell(HexCoordinates coords)
+        {
             var index = coords.Z *CellCountX + coords.X + coords.Z/2;
+            if (index < 0 || index >= cells.Length)
+                return null;
             return cells[index];
         }
     }

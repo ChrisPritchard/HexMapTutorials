@@ -2,6 +2,7 @@
 namespace DarkDomains
 {
     using UnityEngine;
+    using UnityEngine.UI;
     using UnityEngine.EventSystems;
     
     public class HexGridEditor : MonoBehaviour 
@@ -10,8 +11,14 @@ namespace DarkDomains
         public HexGrid HexGrid;
 
         Color activeColour;
+        bool applyColour = true;
 
-        float activeElevation;
+        float activeElevation = 0f;
+        bool applyElevation = true;
+        public Text ElevationText;
+
+        int brushSize = 1;
+        public Text BrushSizeText;
 
         new Camera camera;
         EventSystem eventSystem;
@@ -33,17 +40,52 @@ namespace DarkDomains
         {
             var inputRay = camera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(inputRay, out RaycastHit hit))
-                EditCell(HexGrid.GetCell(hit.point));
+                EditCells(HexGrid.GetCell(hit.point));
+        }
+
+        private void EditCells(HexCell center)
+        {
+            EditCell(center);
+            if(brushSize == 1)
+                return;
+
+            var c = center.Coordinates;
+            var b = brushSize - 1; // when converted to radius, ignore centre
+
+            for (int r = 0, z = c.Z - b; z <= c.Z; z++, r++)
+                for (var x = c.X - r; x <= c.X + b; x++)
+                    EditCell(HexGrid.GetCell(new HexCoordinates(x, z)));
+            for (int r = 0, z = c.Z + b; z > c.Z; z--, r++)
+                for (var x = c.X - b; x <= c.X + r; x++)
+                    EditCell(HexGrid.GetCell(new HexCoordinates(x, z)));
         }
 
         private void EditCell(HexCell cell)
         {
-            cell.Colour = activeColour;
-            cell.Elevation = (int)activeElevation;
+            if(!cell)
+                return;
+            if(applyColour)
+                cell.Colour = activeColour;
+            if(applyElevation)
+                cell.Elevation = (int)activeElevation;
         }
+
+        public void ApplyColour(bool disable) => applyColour = !disable;
 
         public void SelectColour(int index) => activeColour = Colours[index];
 
-        public void SelectElevation(float amount) => activeElevation = amount;
+        public void ApplyElevation(bool disable) => applyElevation = !disable;
+
+        public void SelectElevation(float amount)
+        {
+            activeElevation = amount;
+            ElevationText.text = amount.ToString();
+        }
+
+        public void SelectBrushSize(float amount)
+        {
+            brushSize = (int)amount;
+            BrushSizeText.text = brushSize.ToString();
+        }
     }
 }
