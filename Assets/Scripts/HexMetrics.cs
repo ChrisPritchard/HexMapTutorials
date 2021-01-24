@@ -40,9 +40,9 @@ namespace DarkDomains
 
         public const int ChunkSizeX = 5, ChunkSizeZ = 5; // this can be tweaked, but note that the full map will always be a multiple of theses
 
-        public const float StreamBedElevationOffset = -1f;
+        public const float StreamBedElevationOffset = -1.75f;
 
-        public const float RiverSurfaceElevationOffset = -0.5f;
+        public const float RiverSurfaceElevationOffset = -0.25f;
 
         // hex points, pointy-top, with half above and half below 0 on the Z access
         // coords are in XYZ, but Z is as Y in this, with Y always 0, in order to align 
