@@ -8,7 +8,7 @@ namespace DarkDomains
         HexCell[] cells;
         Canvas canvas;
         
-        public HexMesh Terrain, River;
+        public HexMesh Terrain, River, Road;
 
         private void Awake() 
         {
@@ -41,12 +41,14 @@ namespace DarkDomains
         {
             Terrain.Clear();
             River.Clear();
+            Road.Clear();
 
             foreach(var cell in cells)
                 Triangulate(cell);
 
             Terrain.Apply();
             River.Apply();
+            Road.Apply();
         }
 
         private void Triangulate(HexCell cell)
@@ -203,9 +205,9 @@ namespace DarkDomains
             }
 
             if (HexMetrics.GetEdgeType(cell.Elevation, neighbour.Elevation) == HexEdgeType.Slope)
-                TriangulateEdgeTerrace(e, cell, e2, neighbour);
+                TriangulateEdgeTerrace(e, cell, e2, neighbour, cell.HasRoadThroughEdge(direction));
             else
-                TriangulateEdgeStrip(e, cell.Colour, e2, neighbour.Colour);
+                TriangulateEdgeStrip(e, cell.Colour, e2, neighbour.Colour, cell.HasRoadThroughEdge(direction));
 
             if(direction > HexDirection.E)
                 return;
@@ -245,7 +247,7 @@ namespace DarkDomains
                 River.AddQuadUV(0f, 1f, v, v + 0.2f); // left to right, bottom to top.
         }
 
-        private void TriangulateEdgeTerrace(EdgeVertices begin, HexCell beginCell, EdgeVertices end, HexCell endCell)
+        private void TriangulateEdgeTerrace(EdgeVertices begin, HexCell beginCell, EdgeVertices end, HexCell endCell, bool hasRoad)
         {
             var es = begin;
             var c1 = beginCell.Colour;
@@ -254,7 +256,7 @@ namespace DarkDomains
             {
                 var ed = EdgeVertices.TerraceLerp(begin, end, step);
                 var c2 = HexMetrics.TerraceLerp(beginCell.Colour, endCell.Colour, step);
-                TriangulateEdgeStrip(es, c1, ed, c2);
+                TriangulateEdgeStrip(es, c1, ed, c2, hasRoad);
                 es = ed; c1 = c2;
             }
         }
@@ -400,7 +402,7 @@ namespace DarkDomains
             Terrain.AddTriangleColour(color);
         }
 
-        private void TriangulateEdgeStrip(EdgeVertices e1, Color c1, EdgeVertices e2, Color c2)
+        private void TriangulateEdgeStrip(EdgeVertices e1, Color c1, EdgeVertices e2, Color c2, bool hasRoad = false)
         {
             Terrain.AddQuad(e1.v1, e1.v2, e2.v1, e2.v2);
             Terrain.AddQuadColour(c1, c2);
@@ -410,6 +412,19 @@ namespace DarkDomains
             Terrain.AddQuadColour(c1, c2);
             Terrain.AddQuad(e1.v4, e1.v5, e2.v4, e2.v5);
             Terrain.AddQuadColour(c1, c2);
+
+            if(hasRoad)
+                TriangulateRoadSegment(e1.v2, e1.v3, e1.v4, e2.v2, e2.v3, e2.v4);
+        }
+
+        private void TriangulateRoadSegment(
+            Vector3 v1, Vector3 v2, Vector3 v3, 
+            Vector3 v4, Vector3 v5, Vector3 v6)
+        {
+            Road.AddQuad(v1, v2, v4, v5);
+            Road.AddQuad(v2, v3, v5, v6);
+            Road.AddQuadUV(0f, 1f, 0f, 0f);
+            Road.AddQuadUV(1f, 0f, 0f, 0f);
         }
     }
 }
