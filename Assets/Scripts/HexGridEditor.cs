@@ -6,6 +6,7 @@ namespace DarkDomains
     using UnityEngine.EventSystems;
     
     public enum RiverMode { Off, Add, Remove }
+    public enum RoadMode { Off, Add, Remove }
 
     public class HexGridEditor : MonoBehaviour 
     {
@@ -23,6 +24,8 @@ namespace DarkDomains
         public Text BrushSizeText;
 
         RiverMode riverMode;
+
+        RoadMode roadMode;
 
         new Camera camera;
         EventSystem eventSystem;
@@ -91,7 +94,11 @@ namespace DarkDomains
             if(riverMode == RiverMode.Remove)
                 cell.RemoveRiver();
             if(isDrag && riverMode == RiverMode.Add)
-                previousCell.SetOutgoingRiver(dragDirection);            
+                previousCell.SetOutgoingRiver(dragDirection);
+            if(roadMode == RoadMode.Remove)
+                cell.RemoveRiver();
+            if(isDrag && roadMode == RoadMode.Add)
+                previousCell.AddRoad(dragDirection);       
         }
 
         // test if cell is neighbour of previous cell
@@ -122,6 +129,8 @@ namespace DarkDomains
         }
 
         public void SelectRiverMode(int mode) => riverMode = (RiverMode)mode;
+
+        public void SelectRoadMode(int mode) => roadMode = (RoadMode)mode;
 
         public void ShowUI(bool visible) => HexGrid.ShowUI(visible);
     }

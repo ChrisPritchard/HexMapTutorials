@@ -106,9 +106,12 @@ namespace DarkDomains
 
         private void SetRoad(int index, bool state)
         {
+            var neighbour = Neighbours[index];
+            if(!neighbour) 
+                return;
             roads[index] = state;
-            Neighbours[index].roads[(int)((HexDirection)index).Opposite()] = state;
-            Neighbours[index].RefreshSelfOnly();
+            neighbour.roads[(int)((HexDirection)index).Opposite()] = state;
+            neighbour.RefreshSelfOnly();
             RefreshSelfOnly();
         }
 
