@@ -12,6 +12,9 @@ namespace DarkDomains
         bool hasIncomingRiver, hasOutgoingRiver;
         HexDirection incomingRiver, outgoingRiver;
 
+        [SerializeField]
+        bool[] roads;
+
         Color colour; // defaults to transparent black (if a colour is transparent is it any real colour??)
         public Color Colour 
         {
@@ -51,6 +54,10 @@ namespace DarkDomains
                 if (hasIncomingRiver && elevation > GetNeighbour(incomingRiver).elevation)
                     RemoveIncomingRiver();
 
+                for(var direction = HexDirection.NE; direction <= HexDirection.NW; direction++)
+                    if(HasRoadThroughEdge(direction) && GetElevationDifference(direction) > HexMetrics.MaxRoadSlope)
+                        SetRoad((int)direction, false);
+
                 Refresh();
             }
         }
@@ -67,6 +74,45 @@ namespace DarkDomains
         public HexDirection OutgoingRiver => outgoingRiver;
         public bool HasRiver => hasIncomingRiver || hasOutgoingRiver;
         public bool HasRiverBeginOrEnd => hasIncomingRiver != hasOutgoingRiver;
+
+        public bool HasRoads
+        {
+            get
+            {
+                foreach(var road in roads)
+                    if (road) return true;
+                return false;
+            }
+        }
+
+        public bool HasRoadThroughEdge(HexDirection direction) => roads[(int)direction];
+
+        public void RemoveRoads()
+        {
+            for(var i = 0; i < Neighbours.Length; i++) 
+            {
+                if(!roads[i])
+                    continue;
+                SetRoad(i, false);
+            }
+        }
+
+        public void AddRoad(HexDirection direction)
+        {
+            if(!roads[(int)direction] && !HasRiverThroughEdge(direction) 
+                && GetElevationDifference(direction) <= HexMetrics.MaxRoadSlope)
+                SetRoad((int)direction, true);
+        }
+
+        private void SetRoad(int index, bool state)
+        {
+            roads[index] = state;
+            Neighbours[index].roads[(int)((HexDirection)index).Opposite()] = state;
+            Neighbours[index].RefreshSelfOnly();
+            RefreshSelfOnly();
+        }
+
+        public int GetElevationDifference(HexDirection direction) => Mathf.Abs(elevation - GetNeighbour(direction).elevation);
 
         [SerializeField]
         public HexCell[] Neighbours;
@@ -142,12 +188,12 @@ namespace DarkDomains
             
             outgoingRiver = direction;
             hasOutgoingRiver = true;
-            RefreshSelfOnly();
 
             neighbour.RemoveIncomingRiver();
             neighbour.hasIncomingRiver = true;
             neighbour.incomingRiver = direction.Opposite();
-            neighbour.RefreshSelfOnly();
+
+            SetRoad((int)direction, false); // this will also refresh this cell
         }
     }
 }
