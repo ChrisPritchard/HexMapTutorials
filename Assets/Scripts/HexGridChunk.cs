@@ -80,10 +80,23 @@ namespace DarkDomains
                     TriangulateAdjacentToRiver(direction, cell, cell.Position, e);
             }
             else
-                TriangulateEdgeFan(cell.Position, e, cell.Colour);
+                TriangulateWithoutRiver(direction, cell, cell.Position, e);
 
             if(direction <= HexDirection.SE)
                 TriangulateConnection(direction, cell, e);
+        }
+
+        private void TriangulateWithoutRiver(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e)
+        {
+            TriangulateEdgeFan(cell.Position, e, cell.Colour);
+
+            if(cell.HasRoads)
+            {
+                var interpolators = GetRoadInterpolators(direction, cell);
+                TriangulateRoad(centre, 
+                    Vector3.Lerp(centre, e.v1, interpolators.x), Vector3.Lerp(centre, e.v5, interpolators.y), 
+                    e, cell.HasRoadThroughEdge(direction));
+            }
         }
 
         private void TriangulateWithRiverBeginOrEnd(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e)
@@ -425,6 +438,40 @@ namespace DarkDomains
             Road.AddQuad(v2, v3, v5, v6);
             Road.AddQuadUV(0f, 1f, 0f, 0f);
             Road.AddQuadUV(1f, 0f, 0f, 0f);
+        }
+
+        private void TriangulateRoad(Vector3 centre, Vector3 ml, Vector3 mr, EdgeVertices e, bool hasRoadThroughEdge)
+        {
+            if(hasRoadThroughEdge)
+            {
+                var mc = Vector3.Lerp(ml, mr, 0.5f);
+                TriangulateRoadSegment(ml, mc, mr, e.v2, e.v3, e.v4);
+                Road.AddTriangle(centre, ml, mc);
+                Road.AddTriangle(centre, mc, mr);
+                Road.AddTriangleUV(new Vector3(1f, 0f), new Vector3(0f, 0f), new Vector3(1f, 0f));
+                Road.AddTriangleUV(new Vector3(1f, 0f), new Vector3(1f, 0f), new Vector3(0f, 0f));
+            }
+            else
+                TriangulateRoadEdge(centre, ml, mr);
+        }
+
+        private void TriangulateRoadEdge(Vector3 centre, Vector3 ml, Vector3 mr)
+        {
+            Road.AddTriangle(centre, ml, mr);
+            Road.AddTriangleUV(new Vector3(1f, 0f), new Vector3(0f, 0f), new Vector3(0f, 0f));
+        }
+
+        private Vector2 GetRoadInterpolators(HexDirection direction, HexCell cell)
+        {
+            Vector2 interpolators;
+            if(cell.HasRoadThroughEdge(direction))
+                interpolators.x = interpolators.y = 0.5f;
+            else
+            {
+                interpolators.x = cell.HasRoadThroughEdge(direction.Previous()) ? 0.5f : 0.25f;
+                interpolators.y = cell.HasRoadThroughEdge(direction.Next()) ? 0.5f : 0.25f;
+            }
+            return interpolators;
         }
     }
 }
