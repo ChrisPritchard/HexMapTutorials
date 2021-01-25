@@ -96,7 +96,7 @@ namespace DarkDomains
             if(isDrag && riverMode == RiverMode.Add)
                 previousCell.SetOutgoingRiver(dragDirection);
             if(roadMode == RoadMode.Remove)
-                cell.RemoveRiver();
+                cell.RemoveRoad();
             if(isDrag && roadMode == RoadMode.Add)
                 previousCell.AddRoad(dragDirection);       
         }

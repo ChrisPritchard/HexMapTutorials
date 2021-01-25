@@ -74,6 +74,7 @@ namespace DarkDomains
         public HexDirection OutgoingRiver => outgoingRiver;
         public bool HasRiver => hasIncomingRiver || hasOutgoingRiver;
         public bool HasRiverBeginOrEnd => hasIncomingRiver != hasOutgoingRiver;
+        public HexDirection RiverBeginOrEndDirection => hasIncomingRiver ? incomingRiver : outgoingRiver;
 
         public bool HasRoads
         {
@@ -87,7 +88,7 @@ namespace DarkDomains
 
         public bool HasRoadThroughEdge(HexDirection direction) => roads[(int)direction];
 
-        public void RemoveRoads()
+        public void RemoveRoad()
         {
             for(var i = 0; i < Neighbours.Length; i++) 
             {

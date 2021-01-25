@@ -237,6 +237,8 @@ MonoBehaviour:
   HexGrid: {fileID: 1756129105}
   ElevationText: {fileID: 1757329288}
   BrushSizeText: {fileID: 1946345215}
+  riversOffToggle: {fileID: 458262171}
+  roadsOffToggle: {fileID: 1226794169}
 --- !u!114 &24471983
 MonoBehaviour:
   m_ObjectHideFlags: 0

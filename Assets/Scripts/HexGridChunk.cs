@@ -177,6 +177,11 @@ namespace DarkDomains
 
         private void TriangulateAdjacentToRiver(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e)
         {
+            if(cell.HasRoads)
+            {
+                TriangulateRoadAdjacentToRiver(direction, cell, centre, e);
+            }
+
             if (cell.HasRiverThroughEdge(direction.Next()))
             {
                 if(cell.HasRiverThroughEdge(direction.Previous())) // on a curve, so pull back the centre point
@@ -461,6 +466,74 @@ namespace DarkDomains
             Road.AddTriangleUV(new Vector3(1f, 0f), new Vector3(0f, 0f), new Vector3(0f, 0f));
         }
 
+        private void TriangulateRoadAdjacentToRiver(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e)
+        {
+            var edgeRoad = cell.HasRoadThroughEdge(direction);
+            var previousRiver = cell.HasRiverThroughEdge(direction.Previous());
+            var nextRiver = cell.HasRiverThroughEdge(direction.Next());
+
+            var interpolators = GetRoadInterpolators(direction, cell);
+            var roadCentre = centre;
+
+            if(cell.HasRiverBeginOrEnd) // pointy end of rivers
+                roadCentre += HexMetrics.GetSolidEdgeMiddle(cell.RiverBeginOrEndDirection.Opposite()) * 1f/3;
+            else if(cell.IncomingRiver == cell.OutgoingRiver.Opposite()) // straight rivers
+            {
+                Vector3 corner;
+                if(previousRiver)
+                {
+                    if(!edgeRoad && !cell.HasRoadThroughEdge(direction.Next()))
+                        return; // isolated on one side of the river
+                    corner = HexMetrics.GetSecondSolidCorner(direction);
+                }
+                else
+                {
+                    if(!edgeRoad && !cell.HasRoadThroughEdge(direction.Previous()))
+                        return; // isolated on one side of the river
+                    corner = HexMetrics.GetFirstSolidCorner(direction);
+                }
+                roadCentre += corner * 0.5f;
+                centre += corner * 0.25f;
+            }
+            else if(cell.IncomingRiver == cell.OutgoingRiver.Previous()) // zigzag river orientation 1
+                roadCentre -= HexMetrics.GetSecondSolidCorner(cell.IncomingRiver) * 0.2f;
+            else if(cell.IncomingRiver == cell.OutgoingRiver.Next()) // zigzag river orientation 2
+                roadCentre -= HexMetrics.GetFirstSolidCorner(cell.IncomingRiver) * 0.2f;
+            else if (previousRiver && nextRiver) // inside of curved river
+            {
+                if(!edgeRoad)
+                    return; // isolated road - i.e road didn't come from this edge, and doesn't connect out either.
+                var offset = HexMetrics.GetSolidEdgeMiddle(direction) * HexMetrics.InnerToOuter;
+                roadCentre += offset * 0.7f;
+                centre += offset * 0.5f;
+            }
+            else // outside of curved river
+            {
+                HexDirection middle;
+                if(previousRiver) 
+                    middle = direction.Next();
+                else if(nextRiver) 
+                    middle = direction.Previous();
+                else 
+                    middle = direction;
+                if (!cell.HasRoadThroughEdge(middle) && !cell.HasRoadThroughEdge(middle.Previous()) && !cell.HasRoadThroughEdge(middle.Next()))
+                    return; // prune orphaned rivers on the inside of a curve
+                roadCentre += HexMetrics.GetSolidEdgeMiddle(middle) * 0.25f;
+            }
+
+            var ml = Vector3.Lerp(roadCentre, e.v1, interpolators.x);
+            var mr = Vector3.Lerp(roadCentre, e.v5, interpolators.y);
+
+            TriangulateRoad(roadCentre, ml, mr, e, edgeRoad);
+
+            if(previousRiver)
+                TriangulateRoadEdge(roadCentre, centre, ml);
+            if(nextRiver)
+                TriangulateRoadEdge(roadCentre, mr, centre);
+        }
+
+        // the center of a hex is filled by the road when a road passes through this edge, or when there is a road on each side (so inner turn)
+        // for other sides (road on only one side, or no roads on either side and this edge, the center is filled half as much, which lines up with the roads' straight bits)
         private Vector2 GetRoadInterpolators(HexDirection direction, HexCell cell)
         {
             Vector2 interpolators;

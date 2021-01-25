@@ -5,6 +5,7 @@ namespace DarkDomains
 
     public struct EdgeVertices
     {
+        // typically v2, v4 are the edges of a road/river, with v3 being the river bed/middle of the road
         public Vector3 v1, v2, v3, v4, v5;
 
         public EdgeVertices(Vector3 corner1, Vector3 corner2)
