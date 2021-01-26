@@ -611,18 +611,27 @@ namespace DarkDomains
             var c2 = centre + HexMetrics.GetSecondSolidCorner(direction);
             Water.AddTriangle(centre, c1, c2);
 
-            if(direction < HexDirection.SE)
+            if(direction <= HexDirection.SE)
             {
                 var neighbour = cell.GetNeighbour(direction);
                 if (neighbour == null || !neighbour.IsUnderwater)
                     return;
+
+                var bridge = HexMetrics.GetBridge(direction);
+                var e1 = c1 + bridge;
+                var e2 = c2 + bridge;
+
+                Water.AddQuad(c1, c2, e1, e2);
+
+                if(direction <= HexDirection.E)
+                {
+                    var nextNeighbour = cell.GetNeighbour(direction.Next());
+                    if(nextNeighbour == null || !nextNeighbour.IsUnderwater)
+                        return;
+
+                    Water.AddTriangle(c2, e2, c2 + HexMetrics.GetBridge(direction.Next()));
+                }
             }
-
-            var bridge = HexMetrics.GetBridge(direction);
-            var e1 = c1 + bridge;
-            var e2 = c2 + bridge;
-
-            Water.AddQuad(c1, c2, e1, e2);
         }
     }
 }
