@@ -42,7 +42,7 @@ namespace DarkDomains
 
         public const float StreamBedElevationOffset = -1.75f;
 
-        public const float RiverSurfaceElevationOffset = -0.25f;
+        public const float WaterElevationOffset = -0.3f;
 
         public const int MaxRoadSlope = 1;
 

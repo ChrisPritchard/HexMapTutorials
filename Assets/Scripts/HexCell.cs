@@ -15,6 +15,8 @@ namespace DarkDomains
         [SerializeField]
         bool[] roads;
 
+        public Vector3 Position => transform.localPosition;
+
         float terrainTypeIndex;
         public float TerrainTypeIndex
         {
@@ -62,11 +64,26 @@ namespace DarkDomains
             }
         }
 
-        public Vector3 Position => transform.localPosition;
+        private int waterLevel;
+        public int WaterLevel
+        {
+            get => waterLevel;
+            set
+            {
+                if (waterLevel == value)
+                    return;
+                waterLevel = value;
+                Refresh();
+            }
+        }
+
+        public bool IsUnderwater => waterLevel > elevation;
 
         public float StreamBedY => (elevation + HexMetrics.StreamBedElevationOffset) * HexMetrics.ElevationStep;
 
-        public float RiverSurfaceY => (elevation + HexMetrics.RiverSurfaceElevationOffset) * HexMetrics.ElevationStep;
+        public float RiverSurfaceY => (elevation + HexMetrics.WaterElevationOffset) * HexMetrics.ElevationStep;
+
+        public float WaterSurfaceY => (waterLevel + HexMetrics.WaterElevationOffset) * HexMetrics.ElevationStep;
 
         public bool HasIncomingRiver => hasIncomingRiver;
         public bool HasOutgoingRiver => hasOutgoingRiver;
