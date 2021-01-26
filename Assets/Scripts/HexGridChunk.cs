@@ -92,7 +92,7 @@ namespace DarkDomains
 
         private void TriangulateWithoutRiver(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e)
         {
-            TriangulateEdgeFan(cell.Position, e, colour1);
+            TriangulateEdgeFan(cell.Position, e, cell.TerrainTypeIndex);
 
             if(cell.HasRoads)
             {
@@ -124,8 +124,8 @@ namespace DarkDomains
                 Vector3.Lerp(centre, e.v1, 0.5f),
                 Vector3.Lerp(centre, e.v5, 0.5f));
 
-            TriangulateEdgeStrip(m, colour1, e, colour1);
-            TriangulateEdgeFan(centre, m, colour1);
+            TriangulateEdgeStrip(m, colour1, cell.TerrainTypeIndex, e, colour1, cell.TerrainTypeIndex);
+            TriangulateEdgeFan(centre, m, cell.TerrainTypeIndex);
         }
 
         private void TriangulateWithRiverBeginOrEnd(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e)
@@ -135,8 +135,8 @@ namespace DarkDomains
                 Vector3.Lerp(centre, e.v5, 0.5f));
             m.v3.y = e.v3.y;
 
-            TriangulateEdgeStrip(m, colour1, e, colour1);
-            TriangulateEdgeFan(centre, m, colour1);
+            TriangulateEdgeStrip(m, colour1, cell.TerrainTypeIndex, e, colour1, cell.TerrainTypeIndex);
+            TriangulateEdgeFan(centre, m, cell.TerrainTypeIndex);
 
             var reversed = cell.IncomingRiver == direction;
             TriangulateRiverQuad(m.v2, m.v4, e.v2, e.v4, cell.RiverSurfaceY, 0.6f, reversed);
@@ -185,7 +185,7 @@ namespace DarkDomains
                 1f/6);
             m.v3.y = centre.y = e.v3.y;
 
-            TriangulateEdgeStrip(m, colour1, e, colour1);
+            TriangulateEdgeStrip(m, colour1, cell.TerrainTypeIndex, e, colour1, cell.TerrainTypeIndex);
 
             Terrain.AddTriangle(centreL, m.v1, m.v2);
             Terrain.AddQuad(centreL, centre, m.v2, m.v3);
@@ -196,6 +196,12 @@ namespace DarkDomains
             Terrain.AddQuadColour(colour1);
             Terrain.AddQuadColour(colour1);
             Terrain.AddTriangleColour(colour1);
+
+            var types = new Vector3(cell.TerrainTypeIndex, cell.TerrainTypeIndex, cell.TerrainTypeIndex);
+            Terrain.AddTriangleTerrainTypes(types);
+            Terrain.AddQuadTerrainTypes(types);
+            Terrain.AddQuadTerrainTypes(types);
+            Terrain.AddTriangleTerrainTypes(types);
 
             var reversed = cell.IncomingRiver == direction;
             TriangulateRiverQuad(centreL, centreR, m.v2, m.v4, cell.RiverSurfaceY, 0.4f, reversed);
@@ -227,7 +233,10 @@ namespace DarkDomains
             if (HexMetrics.GetEdgeType(cell.Elevation, neighbour.Elevation) == HexEdgeType.Slope)
                 TriangulateEdgeTerrace(e, cell, e2, neighbour, cell.HasRoadThroughEdge(direction));
             else
-                TriangulateEdgeStrip(e, colour1, e2, colour2, cell.HasRoadThroughEdge(direction));
+                TriangulateEdgeStrip(
+                    e, colour1, cell.TerrainTypeIndex, 
+                    e2, colour2, neighbour.TerrainTypeIndex, 
+                    cell.HasRoadThroughEdge(direction));
 
             if(direction > HexDirection.E)
                 return;
@@ -257,7 +266,10 @@ namespace DarkDomains
             {
                 var ed = EdgeVertices.TerraceLerp(begin, end, step);
                 var c2 = HexMetrics.TerraceLerp(colour1, colour2, step);
-                TriangulateEdgeStrip(es, c1, ed, c2, hasRoad);
+                TriangulateEdgeStrip(
+                    es, c1, beginCell.TerrainTypeIndex, 
+                    ed, c2, endCell.TerrainTypeIndex,
+                    hasRoad);
                 es = ed; c1 = c2;
             }
         }
@@ -297,6 +309,11 @@ namespace DarkDomains
             {
                 Terrain.AddTriangle(bottom, left, right);
                 Terrain.AddTriangleColour(colour1, colour2, colour3);
+                var types = new Vector3(
+                    bottomCell.TerrainTypeIndex, 
+                    leftCell.TerrainTypeIndex, 
+                    rightCell.TerrainTypeIndex);
+                Terrain.AddTriangleTerrainTypes(types);
             }
         }
 
@@ -309,6 +326,10 @@ namespace DarkDomains
             var v2 = v1;
             var c1 = bottomCell.Colour;
             var c2 = c1;
+            var types = new Vector3(
+                bottomCell.TerrainTypeIndex, 
+                leftCell.TerrainTypeIndex, 
+                rightCell.TerrainTypeIndex);
 
             for(var step = 0; step <= HexMetrics.TerraceSteps; step++)
             {
@@ -321,11 +342,13 @@ namespace DarkDomains
                 {
                     Terrain.AddTriangle(bottom, v3, v4);
                     Terrain.AddTriangleColour(bottomCell.Colour, c3, c4);
+                    Terrain.AddTriangleTerrainTypes(types);
                     continue;
                 }
 
                 Terrain.AddQuad(v1, v2, v3, v4);
                 Terrain.AddQuadColour(c1, c2, c3, c4);
+                Terrain.AddQuadTerrainTypes(types);
                 v1 = v3; v2 = v4; c1 = c3; c2 = c4;
             }
         }
@@ -338,17 +361,22 @@ namespace DarkDomains
             var b = Mathf.Abs(1f / (rightCell.Elevation - bottomCell.Elevation));
             var boundary = Vector3.Lerp(HexMetrics.Perturb(bottom), HexMetrics.Perturb(right), b);
             var boundaryColour = Color.Lerp(colour1, colour3, b);
+            var types = new Vector3(
+                bottomCell.TerrainTypeIndex, 
+                leftCell.TerrainTypeIndex, 
+                rightCell.TerrainTypeIndex);
 
-            TriangulteBoundaryTriangle(bottom, colour1, left, colour2, boundary, boundaryColour);
+            TriangulateBoundaryTriangle(bottom, colour1, left, colour2, boundary, boundaryColour, types);
             
             if(rightCell.GetEdgeType(leftCell) == HexEdgeType.Slope)
             {
-                TriangulteBoundaryTriangle(left, colour2, right, colour3, boundary, boundaryColour);
+                TriangulateBoundaryTriangle(left, colour2, right, colour3, boundary, boundaryColour, types);
                 return;
             }
             
             Terrain.AddTriangleUnperturbed(HexMetrics.Perturb(left), HexMetrics.Perturb(right), boundary);
             Terrain.AddTriangleColour(colour2, colour3, boundaryColour);
+            Terrain.AddTriangleTerrainTypes(types);
         }
 
         private void TriangulateCornerCliffTerraces(
@@ -359,23 +387,29 @@ namespace DarkDomains
             var b = Mathf.Abs(1f / (leftCell.Elevation - bottomCell.Elevation));
             var boundary = Vector3.Lerp(HexMetrics.Perturb(bottom), HexMetrics.Perturb(left), b);
             var boundaryColour = Color.Lerp(bottomCell.Colour, leftCell.Colour, b);
+            var types = new Vector3(
+                bottomCell.TerrainTypeIndex, 
+                leftCell.TerrainTypeIndex, 
+                rightCell.TerrainTypeIndex);
 
-            TriangulteBoundaryTriangle(right, colour1, bottom, colour2, boundary, boundaryColour);
+            TriangulateBoundaryTriangle(right, colour1, bottom, colour2, boundary, boundaryColour, types);
             
             if(rightCell.GetEdgeType(leftCell) == HexEdgeType.Slope)
             {
-                TriangulteBoundaryTriangle(left, colour2, right, colour3, boundary, boundaryColour);
+                TriangulateBoundaryTriangle(left, colour2, right, colour3, boundary, boundaryColour, types);
                 return;
             }
             
             Terrain.AddTriangleUnperturbed(HexMetrics.Perturb(left), HexMetrics.Perturb(right), boundary);
             Terrain.AddTriangleColour(colour2, colour3, boundaryColour);
+            Terrain.AddTriangleTerrainTypes(types);
         }
 
-        private void TriangulteBoundaryTriangle(
+        private void TriangulateBoundaryTriangle(
             Vector3 begin, Color beginColour, 
             Vector3 terrace, Color terraceColour,
-            Vector3 boundary, Color boundaryColour)
+            Vector3 boundary, Color boundaryColour,
+            Vector3 types)
         {
             var v1 = HexMetrics.Perturb(begin);
             var c1 = beginColour;
@@ -387,33 +421,48 @@ namespace DarkDomains
 
                 Terrain.AddTriangleUnperturbed(v1, v2, boundary);
                 Terrain.AddTriangleColour(c1, c2, boundaryColour);
+                Terrain.AddTriangleTerrainTypes(types);
 
                 v1 = v2; c1 = c2;
             }
         }
 
-        private void TriangulateEdgeFan(Vector3 center, EdgeVertices edge, Color color)
+        private void TriangulateEdgeFan(Vector3 center, EdgeVertices edge, float type)
         {
             Terrain.AddTriangle(center, edge.v1, edge.v2);
-            Terrain.AddTriangleColour(color);
             Terrain.AddTriangle(center, edge.v2, edge.v3);
-            Terrain.AddTriangleColour(color);
             Terrain.AddTriangle(center, edge.v3, edge.v4);
-            Terrain.AddTriangleColour(color);
             Terrain.AddTriangle(center, edge.v4, edge.v5);
-            Terrain.AddTriangleColour(color);
+
+            Terrain.AddTriangleColour(colour1);
+            Terrain.AddTriangleColour(colour1);
+            Terrain.AddTriangleColour(colour1);
+            Terrain.AddTriangleColour(colour1);
+
+            var types = new Vector3(type, type, type);
+            Terrain.AddTriangleTerrainTypes(types);
+            Terrain.AddTriangleTerrainTypes(types);
+            Terrain.AddTriangleTerrainTypes(types);
+            Terrain.AddTriangleTerrainTypes(types);
         }
 
-        private void TriangulateEdgeStrip(EdgeVertices e1, Color c1, EdgeVertices e2, Color c2, bool hasRoad = false)
+        private void TriangulateEdgeStrip(EdgeVertices e1, Color c1, float type1, EdgeVertices e2, Color c2, float type2, bool hasRoad = false)
         {
             Terrain.AddQuad(e1.v1, e1.v2, e2.v1, e2.v2);
-            Terrain.AddQuadColour(c1, c2);
             Terrain.AddQuad(e1.v2, e1.v3, e2.v2, e2.v3);
-            Terrain.AddQuadColour(c1, c2);
             Terrain.AddQuad(e1.v3, e1.v4, e2.v3, e2.v4);
-            Terrain.AddQuadColour(c1, c2);
             Terrain.AddQuad(e1.v4, e1.v5, e2.v4, e2.v5);
+
             Terrain.AddQuadColour(c1, c2);
+            Terrain.AddQuadColour(c1, c2);
+            Terrain.AddQuadColour(c1, c2);
+            Terrain.AddQuadColour(c1, c2);
+
+            var types = new Vector3(type1, type2, type1);
+            Terrain.AddQuadTerrainTypes(types);
+            Terrain.AddQuadTerrainTypes(types);
+            Terrain.AddQuadTerrainTypes(types);
+            Terrain.AddQuadTerrainTypes(types);
 
             if(hasRoad)
                 TriangulateRoadSegment(e1.v2, e1.v3, e1.v4, e2.v2, e2.v3, e2.v4);

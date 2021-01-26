@@ -14,9 +14,10 @@ namespace DarkDomains
         public bool UseCollider;
         public bool UseColours;
         public bool UseUV;
+        public bool UseTerrainTypes;
 
         // these are static as they are temporary buffers, cleared then used for only a given triangulation
-        [NonSerialized] List<Vector3> vertices;
+        [NonSerialized] List<Vector3> vertices, terrainTypes;
         [NonSerialized] List<int> triangles;
         [NonSerialized] List<Color> colours;
         [NonSerialized] List<Vector2> uvs;
@@ -33,6 +34,8 @@ namespace DarkDomains
         {
             hexMesh.Clear();
             vertices = ListPool<Vector3>.Get();
+            if (UseTerrainTypes)
+                terrainTypes = ListPool<Vector3>.Get();
             triangles = ListPool<int>.Get();
             if(UseColours)
                 colours = ListPool<Color>.Get();
@@ -44,6 +47,12 @@ namespace DarkDomains
         {
             hexMesh.SetVertices(vertices);
             ListPool<Vector3>.Add(vertices);
+
+            if(UseTerrainTypes)
+            {
+                hexMesh.SetUVs(2, terrainTypes);
+                ListPool<Vector3>.Add(terrainTypes);
+            }
 
             hexMesh.SetTriangles(triangles, 0);
             ListPool<int>.Add(triangles);
@@ -87,6 +96,8 @@ namespace DarkDomains
 
         public void AddTriangleUV(Vector2 uv1, Vector2 uv2, Vector2 uv3) => uvs.AddRange(new[] { uv1, uv2, uv3 });
 
+        public void AddTriangleTerrainTypes(Vector3 types) => terrainTypes.AddRange(new[] { types, types, types });
+
         public void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)
         {
             var index = vertices.Count;
@@ -107,5 +118,7 @@ namespace DarkDomains
 
         public void AddQuadUV(float uMin, float uMax, float vMin, float vMax) =>
             AddQuadUV(new Vector2(uMin, vMin), new Vector2(uMax, vMin), new Vector2(uMin, vMax), new Vector2(uMax, vMax));
+
+        public void AddQuadTerrainTypes(Vector3 types) => terrainTypes.AddRange(new[] { types, types, types, types });
     }
 }

@@ -29,6 +29,20 @@ namespace DarkDomains
             }
         }
 
+        float terrainTypeIndex;
+        public float TerrainTypeIndex
+        {
+            get => terrainTypeIndex;
+            set
+            {
+                if (terrainTypeIndex == value)
+                    return;
+
+                terrainTypeIndex = value;
+                Refresh();
+            }
+        }
+
         int elevation = int.MinValue;
         public int Elevation
         {
