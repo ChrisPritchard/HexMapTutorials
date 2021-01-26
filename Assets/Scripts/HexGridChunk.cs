@@ -260,7 +260,7 @@ namespace DarkDomains
         private void TriangulateEdgeTerrace(EdgeVertices begin, HexCell beginCell, EdgeVertices end, HexCell endCell, bool hasRoad)
         {
             var es = begin;
-            var c1 = beginCell.Colour;
+            var c1 = colour1;
             
             for(var step = 0; step <= HexMetrics.TerraceSteps; step++)
             {
@@ -324,7 +324,7 @@ namespace DarkDomains
         {
             var v1 = bottom;
             var v2 = v1;
-            var c1 = bottomCell.Colour;
+            var c1 = colour1;
             var c2 = c1;
             var types = new Vector3(
                 bottomCell.TerrainTypeIndex, 
@@ -341,7 +341,7 @@ namespace DarkDomains
                 if(step == 0)
                 {
                     Terrain.AddTriangle(bottom, v3, v4);
-                    Terrain.AddTriangleColour(bottomCell.Colour, c3, c4);
+                    Terrain.AddTriangleColour(colour1, c3, c4);
                     Terrain.AddTriangleTerrainTypes(types);
                     continue;
                 }
@@ -386,7 +386,7 @@ namespace DarkDomains
         {
             var b = Mathf.Abs(1f / (leftCell.Elevation - bottomCell.Elevation));
             var boundary = Vector3.Lerp(HexMetrics.Perturb(bottom), HexMetrics.Perturb(left), b);
-            var boundaryColour = Color.Lerp(bottomCell.Colour, leftCell.Colour, b);
+            var boundaryColour = Color.Lerp(colour1, colour2, b);
             var types = new Vector3(
                 bottomCell.TerrainTypeIndex, 
                 leftCell.TerrainTypeIndex, 

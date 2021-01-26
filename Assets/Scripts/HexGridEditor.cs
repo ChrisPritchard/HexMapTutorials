@@ -87,8 +87,8 @@ namespace DarkDomains
         {
             if(!cell)
                 return;
-            if(applyColour)
-                cell.Colour = activeColour;
+            // if(applyColour)
+            //     cell.Colour = activeColour;
             if(applyElevation)
                 cell.Elevation = (int)activeElevation;
             if(riverMode == RiverMode.Remove)

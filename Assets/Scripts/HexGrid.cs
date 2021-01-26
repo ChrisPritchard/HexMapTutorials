@@ -103,7 +103,6 @@ namespace DarkDomains
 
             // defaults - will trigger an initial perturb of height          
             cell.Elevation = 0;
-            cell.Colour = Color.white;
 
             AddCellToChunk(x, z, cell);
         }

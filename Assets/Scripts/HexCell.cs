@@ -15,20 +15,6 @@ namespace DarkDomains
         [SerializeField]
         bool[] roads;
 
-        Color colour; // defaults to transparent black (if a colour is transparent is it any real colour??)
-        public Color Colour 
-        {
-            get => colour;
-            set
-            {
-                if (colour == value)
-                    return;
-
-                colour = value;
-                Refresh();
-            }
-        }
-
         float terrainTypeIndex;
         public float TerrainTypeIndex
         {
