@@ -19,6 +19,10 @@ namespace DarkDomains
         bool applyElevation = true;
         public Text ElevationText;
 
+        float activeWaterLevel = 0f;
+        bool applyWaterLevel = false;
+        public Text WaterLevelText;
+
         int brushSize = 1;
         public Text BrushSizeText;
 
@@ -90,6 +94,8 @@ namespace DarkDomains
                 cell.TerrainTypeIndex = activeTerrain;
             if(applyElevation)
                 cell.Elevation = (int)activeElevation;
+            if(applyWaterLevel)
+                cell.WaterLevel = (int)activeWaterLevel;
             if(riverMode == RiverMode.Remove)
                 cell.RemoveRiver();
             if(isDrag && riverMode == RiverMode.Add)
@@ -119,6 +125,14 @@ namespace DarkDomains
         {
             activeElevation = amount;
             ElevationText.text = amount.ToString();
+        }
+
+        public void ApplyWaterLevel(bool disable) => applyWaterLevel = !disable;
+
+        public void SelectWaterLevel(float amount)
+        {
+            activeWaterLevel = amount;
+            WaterLevelText.text = amount.ToString();
         }
 
         public void SelectBrushSize(float amount)
