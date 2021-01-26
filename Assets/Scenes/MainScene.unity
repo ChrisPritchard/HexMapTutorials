@@ -228,17 +228,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0c0fc61a7cb83244b5fba320b0cc67c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Colours:
-  - {r: 1, g: 1, b: 1, a: 0}
-  - {r: 1, g: 0, b: 0, a: 0}
-  - {r: 0, g: 0.14503145, b: 1, a: 0}
-  - {r: 0, g: 1, b: 0.26026773, a: 0}
-  - {r: 1, g: 0.93442965, b: 0, a: 0}
   HexGrid: {fileID: 1756129105}
   ElevationText: {fileID: 1757329288}
   BrushSizeText: {fileID: 1946345215}
-  riversOffToggle: {fileID: 458262171}
-  roadsOffToggle: {fileID: 1226794169}
 --- !u!114 &24471983
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -478,7 +470,7 @@ GameObject:
   - component: {fileID: 66383902}
   - component: {fileID: 66383903}
   m_Layer: 5
-  m_Name: Toggle Blue
+  m_Name: Toggle Mud
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -552,7 +544,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 24471982}
-        m_MethodName: SelectColour
+        m_MethodName: SelectTerrain
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -886,7 +878,7 @@ GameObject:
   - component: {fileID: 218939412}
   - component: {fileID: 218939413}
   m_Layer: 5
-  m_Name: Colour Panel
+  m_Name: Terrain Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2188,7 +2180,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: White
+  m_Text: 'Sand
+
+'
 --- !u!222 &449477100
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2362,7 +2356,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Blue
+  m_Text: Mud
 --- !u!222 &476453139
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2662,7 +2656,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Yellow
+  m_Text: Snow
 --- !u!222 &585651063
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2836,7 +2830,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Green
+  m_Text: 'Stone
+
+'
 --- !u!222 &625064469
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2956,7 +2952,7 @@ GameObject:
   - component: {fileID: 632522053}
   - component: {fileID: 632522054}
   m_Layer: 5
-  m_Name: Toggle White
+  m_Name: Toggle Sand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3030,7 +3026,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 24471982}
-        m_MethodName: SelectColour
+        m_MethodName: SelectTerrain
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3573,7 +3569,7 @@ GameObject:
   - component: {fileID: 745796233}
   - component: {fileID: 745796234}
   m_Layer: 5
-  m_Name: Toggle Red
+  m_Name: Toggle Grass
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3647,7 +3643,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 24471982}
-        m_MethodName: SelectColour
+        m_MethodName: SelectTerrain
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4093,7 +4089,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Colours
+  m_Text: 'Terrain
+
+'
 --- !u!222 &869919497
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4699,7 +4697,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Red
+  m_Text: Grass
 --- !u!222 &1055064322
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -6062,7 +6060,7 @@ GameObject:
   - component: {fileID: 1504245118}
   - component: {fileID: 1504245119}
   m_Layer: 5
-  m_Name: Toggle Yellow
+  m_Name: Toggle Snow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6136,7 +6134,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 24471982}
-        m_MethodName: SelectColour
+        m_MethodName: SelectTerrain
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6232,7 +6230,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 24471982}
-        m_MethodName: ApplyColour
+        m_MethodName: ApplyTerrain
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -7299,7 +7297,7 @@ GameObject:
   - component: {fileID: 2042913877}
   - component: {fileID: 2042913878}
   m_Layer: 5
-  m_Name: Toggle Green
+  m_Name: Toggle Stone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7373,7 +7371,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 24471982}
-        m_MethodName: SelectColour
+        m_MethodName: SelectTerrain
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

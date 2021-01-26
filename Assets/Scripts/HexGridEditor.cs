@@ -10,11 +10,10 @@ namespace DarkDomains
 
     public class HexGridEditor : MonoBehaviour 
     {
-        public Color[] Colours;
         public HexGrid HexGrid;
 
-        Color activeColour;
-        bool applyColour = true;
+        int activeTerrain;
+        bool applyTerrain = true;
 
         float activeElevation = 0f;
         bool applyElevation = true;
@@ -39,7 +38,7 @@ namespace DarkDomains
         {
             camera = Camera.main;
             eventSystem = EventSystem.current;
-            activeColour = Colours[0];
+            activeTerrain = 0;
         }
 
         private void Update() 
@@ -87,8 +86,8 @@ namespace DarkDomains
         {
             if(!cell)
                 return;
-            // if(applyColour)
-            //     cell.Colour = activeColour;
+            if(applyTerrain)
+                cell.TerrainTypeIndex = activeTerrain;
             if(applyElevation)
                 cell.Elevation = (int)activeElevation;
             if(riverMode == RiverMode.Remove)
@@ -110,9 +109,9 @@ namespace DarkDomains
             return false;
         }
 
-        public void ApplyColour(bool disable) => applyColour = !disable;
+        public void ApplyTerrain(bool disable) => applyTerrain = !disable;
 
-        public void SelectColour(int index) => activeColour = Colours[index];
+        public void SelectTerrain(int index) => activeTerrain = index;
 
         public void ApplyElevation(bool disable) => applyElevation = !disable;
 
