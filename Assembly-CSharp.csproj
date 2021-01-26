@@ -46,6 +46,7 @@
      <Compile Include="Assets\Scripts\HexMesh.cs" />
      <Compile Include="Assets\Scripts\HexMetrics.cs" />
      <Compile Include="Assets\Scripts\ListPool.cs" />
+     <None Include="Assets\Shaders\Water.shader" />
      <None Include="Assets\Shaders\Roads.shader" />
      <None Include="Assets\Shaders\Rivers.shader" />
      <None Include="Assets\Shaders\Terrain.shader" />

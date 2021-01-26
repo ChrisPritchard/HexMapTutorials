@@ -1226,7 +1226,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 24471982}
-        m_MethodName: ApplyElevation
+        m_MethodName: ApplyWaterLevel
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1236,7 +1236,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  m_IsOn: 0
+  m_IsOn: 1
 --- !u!1 &237710522
 GameObject:
   m_ObjectHideFlags: 0

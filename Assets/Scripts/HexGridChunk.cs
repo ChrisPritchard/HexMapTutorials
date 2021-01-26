@@ -8,7 +8,7 @@ namespace DarkDomains
         HexCell[] cells;
         Canvas canvas;
         
-        public HexMesh Terrain, River, Road;
+        public HexMesh Terrain, Rivers, Roads, Water;
 
         static Color colour1 = new Color(1f, 0f, 0f);
         static Color colour2 = new Color(0f, 1f, 0f);
@@ -44,15 +44,17 @@ namespace DarkDomains
         public void Triangulate(HexCell[] cells)
         {
             Terrain.Clear();
-            River.Clear();
-            Road.Clear();
+            Rivers.Clear();
+            Roads.Clear();
+            Water.Clear();
 
             foreach(var cell in cells)
                 Triangulate(cell);
 
             Terrain.Apply();
-            River.Apply();
-            Road.Apply();
+            Rivers.Apply();
+            Roads.Apply();
+            Water.Apply();
         }
 
         private void Triangulate(HexCell cell)
@@ -88,6 +90,9 @@ namespace DarkDomains
 
             if(direction <= HexDirection.SE)
                 TriangulateConnection(direction, cell, e);
+            
+            if(cell.IsUnderwater)
+                TriangulateWater(direction, cell, cell.Position);
         }
 
         private void TriangulateWithoutRiver(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e)
@@ -141,11 +146,11 @@ namespace DarkDomains
             var reversed = cell.IncomingRiver == direction;
             TriangulateRiverQuad(m.v2, m.v4, e.v2, e.v4, cell.RiverSurfaceY, 0.6f, reversed);
             centre.y = m.v2.y = m.v4.y = cell.RiverSurfaceY;
-            River.AddTriangle(centre, m.v2, m.v4);
+            Rivers.AddTriangle(centre, m.v2, m.v4);
             if (reversed)
-                River.AddTriangleUV(new Vector2(0.5f, 0.4f), new Vector2(1f, 0.2f), new Vector2(0f, 0.2f));
+                Rivers.AddTriangleUV(new Vector2(0.5f, 0.4f), new Vector2(1f, 0.2f), new Vector2(0f, 0.2f));
             else
-                River.AddTriangleUV(new Vector2(0.5f, 0.4f), new Vector2(0f, 0.6f), new Vector2(1f, 0.6f));
+                Rivers.AddTriangleUV(new Vector2(0.5f, 0.4f), new Vector2(0f, 0.6f), new Vector2(1f, 0.6f));
         }
 
         private void TriangulateWithRiver(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e)
@@ -480,21 +485,21 @@ namespace DarkDomains
         {
             v1.y = v2.y = y1;
             v3.y = v4.y = y2;
-            River.AddQuad(v1, v2, v3, v4);
+            Rivers.AddQuad(v1, v2, v3, v4);
             if (reversed)
-                River.AddQuadUV(1f, 0f, 0.8f - v, 0.6f - v);
+                Rivers.AddQuadUV(1f, 0f, 0.8f - v, 0.6f - v);
             else
-                River.AddQuadUV(0f, 1f, v, v + 0.2f); // left to right, bottom to top.
+                Rivers.AddQuadUV(0f, 1f, v, v + 0.2f); // left to right, bottom to top.
         }
 
         private void TriangulateRoadSegment(
             Vector3 v1, Vector3 v2, Vector3 v3, 
             Vector3 v4, Vector3 v5, Vector3 v6)
         {
-            Road.AddQuad(v1, v2, v4, v5);
-            Road.AddQuad(v2, v3, v5, v6);
-            Road.AddQuadUV(0f, 1f, 0f, 0f);
-            Road.AddQuadUV(1f, 0f, 0f, 0f);
+            Roads.AddQuad(v1, v2, v4, v5);
+            Roads.AddQuad(v2, v3, v5, v6);
+            Roads.AddQuadUV(0f, 1f, 0f, 0f);
+            Roads.AddQuadUV(1f, 0f, 0f, 0f);
         }
 
         private void TriangulateRoad(Vector3 centre, Vector3 ml, Vector3 mr, EdgeVertices e, bool hasRoadThroughEdge)
@@ -503,10 +508,10 @@ namespace DarkDomains
             {
                 var mc = Vector3.Lerp(ml, mr, 0.5f);
                 TriangulateRoadSegment(ml, mc, mr, e.v2, e.v3, e.v4);
-                Road.AddTriangle(centre, ml, mc);
-                Road.AddTriangle(centre, mc, mr);
-                Road.AddTriangleUV(new Vector3(1f, 0f), new Vector3(0f, 0f), new Vector3(1f, 0f));
-                Road.AddTriangleUV(new Vector3(1f, 0f), new Vector3(1f, 0f), new Vector3(0f, 0f));
+                Roads.AddTriangle(centre, ml, mc);
+                Roads.AddTriangle(centre, mc, mr);
+                Roads.AddTriangleUV(new Vector3(1f, 0f), new Vector3(0f, 0f), new Vector3(1f, 0f));
+                Roads.AddTriangleUV(new Vector3(1f, 0f), new Vector3(1f, 0f), new Vector3(0f, 0f));
             }
             else
                 TriangulateRoadEdge(centre, ml, mr);
@@ -514,8 +519,8 @@ namespace DarkDomains
 
         private void TriangulateRoadEdge(Vector3 centre, Vector3 ml, Vector3 mr)
         {
-            Road.AddTriangle(centre, ml, mr);
-            Road.AddTriangleUV(new Vector3(1f, 0f), new Vector3(0f, 0f), new Vector3(0f, 0f));
+            Roads.AddTriangle(centre, ml, mr);
+            Roads.AddTriangleUV(new Vector3(1f, 0f), new Vector3(0f, 0f), new Vector3(0f, 0f));
         }
 
         private void TriangulateRoadAdjacentToRiver(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e)
@@ -597,6 +602,27 @@ namespace DarkDomains
                 interpolators.y = cell.HasRoadThroughEdge(direction.Next()) ? 0.5f : 0.25f;
             }
             return interpolators;
+        }
+
+        private void TriangulateWater(HexDirection direction, HexCell cell, Vector3 centre)
+        {
+            centre.y = cell.WaterSurfaceY;
+            var c1 = centre + HexMetrics.GetFirstSolidCorner(direction);
+            var c2 = centre + HexMetrics.GetSecondSolidCorner(direction);
+            Water.AddTriangle(centre, c1, c2);
+
+            if(direction < HexDirection.SE)
+            {
+                var neighbour = cell.GetNeighbour(direction);
+                if (neighbour == null || !neighbour.IsUnderwater)
+                    return;
+            }
+
+            var bridge = HexMetrics.GetBridge(direction);
+            var e1 = c1 + bridge;
+            var e2 = c2 + bridge;
+
+            Water.AddQuad(c1, c2, e1, e2);
         }
     }
 }
