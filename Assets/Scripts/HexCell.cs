@@ -51,10 +51,7 @@ namespace DarkDomains
                 uiPosition.z = -position.y;
                 UIRect.localPosition = uiPosition;
 
-                if (hasOutgoingRiver && elevation < GetNeighbour(outgoingRiver).elevation)
-                    RemoveOutgoingRiver();
-                if (hasIncomingRiver && elevation > GetNeighbour(incomingRiver).elevation)
-                    RemoveIncomingRiver();
+                ValidateRivers();
 
                 for(var direction = HexDirection.NE; direction <= HexDirection.NW; direction++)
                     if(HasRoadThroughEdge(direction) && GetElevationDifference(direction) > HexMetrics.MaxRoadSlope)
@@ -73,6 +70,7 @@ namespace DarkDomains
                 if (waterLevel == value)
                     return;
                 waterLevel = value;
+                ValidateRivers();
                 Refresh();
             }
         }
@@ -200,7 +198,7 @@ namespace DarkDomains
                 return;
 
             var neighbour = GetNeighbour(direction);
-            if(!neighbour || neighbour.elevation > elevation)
+            if(!IsValidRiverDestination(neighbour))
                 return;
 
             RemoveOutgoingRiver(); // clear existing, if it exists
@@ -215,6 +213,17 @@ namespace DarkDomains
             neighbour.incomingRiver = direction.Opposite();
 
             SetRoad((int)direction, false); // this will also refresh this cell
+        }
+
+        private bool IsValidRiverDestination(HexCell neighbour) =>
+            neighbour && (elevation >= neighbour.elevation || waterLevel == neighbour.elevation);
+
+        private void ValidateRivers()
+        {
+            if (hasOutgoingRiver && !IsValidRiverDestination(GetNeighbour(outgoingRiver)))
+                RemoveOutgoingRiver();
+            if (hasIncomingRiver && !GetNeighbour(incomingRiver).IsValidRiverDestination(this))
+                RemoveIncomingRiver();
         }
     }
 }
