@@ -144,6 +144,9 @@ namespace DarkDomains
             TriangulateEdgeStrip(m, colour1, cell.TerrainTypeIndex, e, colour1, cell.TerrainTypeIndex);
             TriangulateEdgeFan(centre, m, cell.TerrainTypeIndex);
 
+            if(cell.IsUnderwater)
+                return;
+
             var reversed = cell.IncomingRiver == direction;
             TriangulateRiverQuad(m.v2, m.v4, e.v2, e.v4, cell.RiverSurfaceY, 0.6f, reversed);
             centre.y = m.v2.y = m.v4.y = cell.RiverSurfaceY;
@@ -209,6 +212,9 @@ namespace DarkDomains
             Terrain.AddQuadTerrainTypes(types);
             Terrain.AddTriangleTerrainTypes(types);
 
+            if(cell.IsUnderwater)
+                return;
+
             var reversed = cell.IncomingRiver == direction;
             TriangulateRiverQuad(centreL, centreR, m.v2, m.v4, cell.RiverSurfaceY, 0.4f, reversed);
             TriangulateRiverQuad(m.v2, m.v4, e.v2, e.v4, cell.RiverSurfaceY, 0.6f, reversed);
@@ -231,9 +237,11 @@ namespace DarkDomains
             if (cell.HasRiverThroughEdge(direction))
             {
                 e2.v3.y = neighbour.StreamBedY;
-                TriangulateRiverQuad(
-                    e.v2, e.v4, e2.v2, e2.v4, cell.RiverSurfaceY, neighbour.RiverSurfaceY, 0.8f,
-                    cell.HasIncomingRiver && cell.IncomingRiver == direction);
+
+                if(!cell.IsUnderwater && !neighbour.IsUnderwater)
+                    TriangulateRiverQuad(
+                        e.v2, e.v4, e2.v2, e2.v4, cell.RiverSurfaceY, neighbour.RiverSurfaceY, 0.8f,
+                        cell.HasIncomingRiver && cell.IncomingRiver == direction);
             }
 
             if (HexMetrics.GetEdgeType(cell.Elevation, neighbour.Elevation) == HexEdgeType.Slope)
