@@ -220,8 +220,25 @@ namespace DarkDomains
             TriangulateRiverQuad(m.v2, m.v4, e.v2, e.v4, cell.RiverSurfaceY, 0.6f, reversed);
         }
 
+        private void TriangulateWaterfallInWater(
+            Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4,
+            float y1, float y2, float waterY)
+        {
+            v1.y = v2.y = y1;
+            v3.y = v4.y = y2;
+            v1 = HexMetrics.Perturb(v1);
+            v2 = HexMetrics.Perturb(v2);
+            v3 = HexMetrics.Perturb(v3);
+            v4 = HexMetrics.Perturb(v4);
+            var t = (waterY - y2) / (y1 - y2);
+            v3 = Vector3.Lerp(v3, v1, t);
+            v4 = Vector3.Lerp(v4, v2, t);
+            Rivers.AddQuadUnperterbed(v1, v2, v3, v4);
+            Rivers.AddQuadUV(0f, 1f, 0.8f, 1f);
+        }
+
         // adds bridges and corner triangles
-        private void TriangulateConnection(HexDirection direction, HexCell cell, EdgeVertices e)
+        private void TriangulateConnection(HexDirection direction, HexCell cell, EdgeVertices e1)
         {
             var neighbour = cell.GetNeighbour(direction);
             if (neighbour == null)
@@ -230,25 +247,36 @@ namespace DarkDomains
             var bridge = HexMetrics.GetBridge(direction);
             bridge.y = neighbour.Position.y - cell.Position.y;
             var e2 = new EdgeVertices(
-                e.v1 + bridge,
-                e.v5 + bridge
+                e1.v1 + bridge,
+                e1.v5 + bridge
             );
 
             if (cell.HasRiverThroughEdge(direction))
             {
                 e2.v3.y = neighbour.StreamBedY;
 
-                if(!cell.IsUnderwater && !neighbour.IsUnderwater)
-                    TriangulateRiverQuad(
-                        e.v2, e.v4, e2.v2, e2.v4, cell.RiverSurfaceY, neighbour.RiverSurfaceY, 0.8f,
-                        cell.HasIncomingRiver && cell.IncomingRiver == direction);
+                if(!cell.IsUnderwater)
+                    if(!neighbour.IsUnderwater)
+                        TriangulateRiverQuad(
+                            e1.v2, e1.v4, e2.v2, e2.v4, cell.RiverSurfaceY, neighbour.RiverSurfaceY, 0.8f,
+                            cell.HasIncomingRiver && cell.IncomingRiver == direction);
+                    else if(cell.Elevation > neighbour.WaterLevel)
+                        TriangulateWaterfallInWater(
+                            e1.v2, e1.v4, e2.v2, e2.v4, 
+                            cell.RiverSurfaceY, neighbour.RiverSurfaceY,
+                            neighbour.WaterLevel);
+                else if (!neighbour.IsUnderwater && neighbour.Elevation > cell.WaterLevel)
+                    TriangulateWaterfallInWater(
+                            e2.v2, e2.v4, e1.v2, e1.v4, 
+                            neighbour.RiverSurfaceY, cell.RiverSurfaceY,
+                            cell.WaterLevel);
             }
 
             if (HexMetrics.GetEdgeType(cell.Elevation, neighbour.Elevation) == HexEdgeType.Slope)
-                TriangulateEdgeTerrace(e, cell, e2, neighbour, cell.HasRoadThroughEdge(direction));
+                TriangulateEdgeTerrace(e1, cell, e2, neighbour, cell.HasRoadThroughEdge(direction));
             else
                 TriangulateEdgeStrip(
-                    e, colour1, cell.TerrainTypeIndex, 
+                    e1, colour1, cell.TerrainTypeIndex, 
                     e2, colour2, neighbour.TerrainTypeIndex, 
                     cell.HasRoadThroughEdge(direction));
 
@@ -259,16 +287,16 @@ namespace DarkDomains
             if (nextNeighbour == null)
                 return;
 
-            var v5 = e.v5 + HexMetrics.GetBridge(nextDirection);
+            var v5 = e1.v5 + HexMetrics.GetBridge(nextDirection);
             v5.y = nextNeighbour.Position.y;
             
             var minElevation = Mathf.Min(cell.Elevation, neighbour.Elevation, nextNeighbour.Elevation);
             if (minElevation == cell.Elevation)
-                TriangulateCorner(e.v5, cell, e2.v5, neighbour, v5, nextNeighbour);
+                TriangulateCorner(e1.v5, cell, e2.v5, neighbour, v5, nextNeighbour);
             else if (minElevation == neighbour.Elevation)
-                TriangulateCorner(e2.v5, neighbour, v5, nextNeighbour, e.v5, cell);
+                TriangulateCorner(e2.v5, neighbour, v5, nextNeighbour, e1.v5, cell);
             else
-                TriangulateCorner(v5, nextNeighbour, e.v5, cell, e2.v5, neighbour);
+                TriangulateCorner(v5, nextNeighbour, e1.v5, cell, e2.v5, neighbour);
         }
 
         private void TriangulateEdgeTerrace(EdgeVertices begin, HexCell beginCell, EdgeVertices end, HexCell endCell, bool hasRoad)

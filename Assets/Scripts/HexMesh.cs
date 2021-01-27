@@ -106,6 +106,14 @@ namespace DarkDomains
             triangles.AddRange(new[]{index+1, index+2, index+3});
         }
 
+        public void AddQuadUnperterbed(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)
+        {
+            var index = vertices.Count;
+            vertices.AddRange(new[]{v1, v2, v3, v4});
+            triangles.AddRange(new[]{index, index+2, index+1});
+            triangles.AddRange(new[]{index+1, index+2, index+3});
+        }
+
         // for when each corner is a different colour
         public void AddQuadColour(Color c1, Color c2, Color c3, Color c4) => colours.AddRange(new[]{c1, c2, c3, c4});
 
