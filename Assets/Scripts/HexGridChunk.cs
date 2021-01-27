@@ -8,7 +8,7 @@ namespace DarkDomains
         HexCell[] cells;
         Canvas canvas;
         
-        public HexMesh Terrain, Rivers, Roads, Water;
+        public HexMesh Terrain, Rivers, Roads, Water, WaterShore;
 
         static Color colour1 = new Color(1f, 0f, 0f);
         static Color colour2 = new Color(0f, 1f, 0f);
@@ -17,7 +17,6 @@ namespace DarkDomains
         private void Awake() 
         {
             canvas = GetComponentInChildren<Canvas>();
-
             cells = new HexCell[HexMetrics.ChunkSizeX * HexMetrics.ChunkSizeZ];
         }
 
@@ -47,6 +46,7 @@ namespace DarkDomains
             Rivers.Clear();
             Roads.Clear();
             Water.Clear();
+            WaterShore.Clear();
 
             foreach(var cell in cells)
                 Triangulate(cell);
@@ -55,6 +55,7 @@ namespace DarkDomains
             Rivers.Apply();
             Roads.Apply();
             Water.Apply();
+            WaterShore.Apply();
         }
 
         private void Triangulate(HexCell cell)
@@ -628,14 +629,24 @@ namespace DarkDomains
 
             var bridge = HexMetrics.GetBridge(direction);
             var e2 = new EdgeVertices(e1.v1 + bridge, e1.v5 + bridge);
-            Water.AddQuad(e1.v1, e1.v2, e2.v1, e2.v2);
-            Water.AddQuad(e1.v2, e1.v3, e2.v2, e2.v3);
-            Water.AddQuad(e1.v3, e1.v4, e2.v3, e2.v4);
-            Water.AddQuad(e1.v4, e1.v5, e2.v4, e2.v5);
+            WaterShore.AddQuad(e1.v1, e1.v2, e2.v1, e2.v2);
+            WaterShore.AddQuad(e1.v2, e1.v3, e2.v2, e2.v3);
+            WaterShore.AddQuad(e1.v3, e1.v4, e2.v3, e2.v4);
+            WaterShore.AddQuad(e1.v4, e1.v5, e2.v4, e2.v5);
+            WaterShore.AddQuadUV(0f, 0f, 0f, 1f);
+            WaterShore.AddQuadUV(0f, 0f, 0f, 1f);
+            WaterShore.AddQuadUV(0f, 0f, 0f, 1f);
+            WaterShore.AddQuadUV(0f, 0f, 0f, 1f);
 
             var nextNeighbour = cell.GetNeighbour(direction.Next());
             if (nextNeighbour != null)
-                Water.AddTriangle(e1.v5, e2.v5, e1.v5 + HexMetrics.GetBridge(direction.Next()));
+            {
+                WaterShore.AddTriangle(e1.v5, e2.v5, e1.v5 + HexMetrics.GetBridge(direction.Next()));
+                WaterShore.AddTriangleUV(
+                    new Vector2(0f, 0f), 
+                    new Vector2(0f, 1f), 
+                    new Vector2(0f, nextNeighbour.IsUnderwater ? 0f : 1f));
+            }
         }
 
         private void TriangulateOpenWater(HexDirection direction, HexCell cell, HexCell neighbour, Vector3 centre)
