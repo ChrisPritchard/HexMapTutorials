@@ -1,4 +1,18 @@
 
+float River(float2 riverUV, sampler2D noiseText) {
+    float2 uv = riverUV;
+    uv.x = uv.x * 0.0625 + _Time.y * 0.005;
+    uv.y -= _Time.y * 0.25;
+    float4 noise = tex2D(noiseText, uv);
+
+    float2 uv2 = riverUV;
+    uv2.x = uv2.x * 0.0625 - _Time.y * 0.0052;
+    uv2.y -= _Time.y * 0.23;
+    float4 noise2 = tex2D(noiseText, uv2);
+
+    return noise.x * noise2.w;
+}
+
 float Foam(float shore, float2 worldXZ, sampler2D noiseTex) {
     shore = sqrt(shore) * 0.9;
 

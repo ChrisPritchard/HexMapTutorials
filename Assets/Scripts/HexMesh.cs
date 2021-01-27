@@ -14,13 +14,14 @@ namespace DarkDomains
         public bool UseCollider;
         public bool UseColours;
         public bool UseUV;
+        public bool UseUV2;
         public bool UseTerrainTypes;
 
         // these are static as they are temporary buffers, cleared then used for only a given triangulation
         [NonSerialized] List<Vector3> vertices, terrainTypes;
         [NonSerialized] List<int> triangles;
         [NonSerialized] List<Color> colours;
-        [NonSerialized] List<Vector2> uvs;
+        [NonSerialized] List<Vector2> uvs, uv2s;
 
         private void Awake() 
         {
@@ -41,6 +42,8 @@ namespace DarkDomains
                 colours = ListPool<Color>.Get();
             if(UseUV)
                 uvs = ListPool<Vector2>.Get();
+            if(UseUV2)
+                uv2s = ListPool<Vector2>.Get();
         }
 
         public void Apply()
@@ -67,6 +70,12 @@ namespace DarkDomains
             {
                 hexMesh.SetUVs(0, uvs);
                 ListPool<Vector2>.Add(uvs);
+            }
+
+            if(UseUV2)
+            {
+                hexMesh.SetUVs(1, uv2s);
+                ListPool<Vector2>.Add(uv2s);
             }
 
             hexMesh.RecalculateNormals();
@@ -96,6 +105,8 @@ namespace DarkDomains
 
         public void AddTriangleUV(Vector2 uv1, Vector2 uv2, Vector2 uv3) => uvs.AddRange(new[] { uv1, uv2, uv3 });
 
+        public void AddTriangleUV2(Vector2 uv1, Vector2 uv2, Vector2 uv3) => uv2s.AddRange(new[] { uv1, uv2, uv3 });
+
         public void AddTriangleTerrainTypes(Vector3 types) => terrainTypes.AddRange(new[] { types, types, types });
 
         public void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)
@@ -124,8 +135,13 @@ namespace DarkDomains
 
         public void AddQuadUV(Vector2 uv1, Vector2 uv2, Vector2 uv3, Vector2 uv4) => uvs.AddRange(new[] { uv1, uv2, uv3, uv4 });
 
+        public void AddQuadUV2(Vector2 uv1, Vector2 uv2, Vector2 uv3, Vector2 uv4) => uv2s.AddRange(new[] { uv1, uv2, uv3, uv4 });
+
         public void AddQuadUV(float uMin, float uMax, float vMin, float vMax) =>
             AddQuadUV(new Vector2(uMin, vMin), new Vector2(uMax, vMin), new Vector2(uMin, vMax), new Vector2(uMax, vMax));
+
+        public void AddQuadUV2(float uMin, float uMax, float vMin, float vMax) =>
+            AddQuadUV2(new Vector2(uMin, vMin), new Vector2(uMax, vMin), new Vector2(uMin, vMax), new Vector2(uMax, vMax));
 
         public void AddQuadTerrainTypes(Vector3 types) => terrainTypes.AddRange(new[] { types, types, types, types });
     }
