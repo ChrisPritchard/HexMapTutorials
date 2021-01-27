@@ -712,6 +712,28 @@ namespace DarkDomains
             WaterShore.AddTriangleUV(
                 new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(0f, 0f)
             );
+
+            Estuaries.AddQuad(e2.v1, e1.v2, e2.v2, e1.v3);
+            Estuaries.AddTriangle(e1.v3, e2.v2, e2.v4);
+            Estuaries.AddQuad(e1.v3, e1.v4, e2.v4, e2.v5);
+
+            Estuaries.AddQuadUV(
+                new Vector2(0f, 1f), new Vector2(0f, 0f), 
+                new Vector2(1f, 1f), new Vector2(0f, 0f));
+            Estuaries.AddTriangleUV(
+                new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(1f, 1f));
+            Estuaries.AddQuadUV(
+                new Vector2(0f, 0f), new Vector2(0f, 0f), 
+                new Vector2(1f, 1f), new Vector2(0f, 1f));
+
+            Estuaries.AddQuadUV2(
+                new Vector2(1.5f, 1f), new Vector2(0.7f, 1.15f), 
+                new Vector2(1f, 0.8f), new Vector2(0.5f, 1.1f));
+            Estuaries.AddTriangleUV2(
+                new Vector2(0.5f, 1.1f), new Vector2(1f, 0.8f), new Vector2(0f, 0.8f));
+            Estuaries.AddQuadUV2(
+                new Vector2(0.5f, 1.1f), new Vector2(0.3f, 1.15f), 
+                new Vector2(0f, 0.8f), new Vector2(-0.5f, 1f));
         }
 
         private void TriangulateOpenWater(HexDirection direction, HexCell cell, HexCell neighbour, Vector3 centre)
