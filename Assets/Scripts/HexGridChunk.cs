@@ -607,30 +607,59 @@ namespace DarkDomains
         private void TriangulateWater(HexDirection direction, HexCell cell, Vector3 centre)
         {
             centre.y = cell.WaterSurfaceY;
+            var neighbour = cell.GetNeighbour(direction);
+
+            if(neighbour != null && !neighbour.IsUnderwater)
+                TriangulateWaterShore(direction, cell, neighbour, centre);
+            else
+                TriangulateOpenWater(direction, cell, neighbour, centre);
+        }
+
+        private void TriangulateWaterShore(HexDirection direction, HexCell cell, HexCell neighbour, Vector3 centre)
+        {
+            var e1 = new EdgeVertices(
+                centre + HexMetrics.GetFirstSolidCorner(direction),
+                centre + HexMetrics.GetSecondSolidCorner(direction)
+            );
+            Water.AddTriangle(centre, e1.v1, e1.v2);
+            Water.AddTriangle(centre, e1.v2, e1.v3);
+            Water.AddTriangle(centre, e1.v3, e1.v4);
+            Water.AddTriangle(centre, e1.v4, e1.v5);
+
+            var bridge = HexMetrics.GetBridge(direction);
+            var e2 = new EdgeVertices(e1.v1 + bridge, e1.v5 + bridge);
+            Water.AddQuad(e1.v1, e1.v2, e2.v1, e2.v2);
+            Water.AddQuad(e1.v2, e1.v3, e2.v2, e2.v3);
+            Water.AddQuad(e1.v3, e1.v4, e2.v3, e2.v4);
+            Water.AddQuad(e1.v4, e1.v5, e2.v4, e2.v5);
+
+            var nextNeighbour = cell.GetNeighbour(direction.Next());
+            if (nextNeighbour != null)
+                Water.AddTriangle(e1.v5, e2.v5, e1.v5 + HexMetrics.GetBridge(direction.Next()));
+        }
+
+        private void TriangulateOpenWater(HexDirection direction, HexCell cell, HexCell neighbour, Vector3 centre)
+        {
             var c1 = centre + HexMetrics.GetFirstSolidCorner(direction);
             var c2 = centre + HexMetrics.GetSecondSolidCorner(direction);
             Water.AddTriangle(centre, c1, c2);
 
-            if(direction <= HexDirection.SE)
+            if(direction > HexDirection.SE)
+                return;
+                
+            var bridge = HexMetrics.GetBridge(direction);
+            var e1 = c1 + bridge;
+            var e2 = c2 + bridge;
+
+            Water.AddQuad(c1, c2, e1, e2);
+
+            if(direction <= HexDirection.E)
             {
-                var neighbour = cell.GetNeighbour(direction);
-                if (neighbour == null || !neighbour.IsUnderwater)
+                var nextNeighbour = cell.GetNeighbour(direction.Next());
+                if(nextNeighbour == null || !nextNeighbour.IsUnderwater)
                     return;
 
-                var bridge = HexMetrics.GetBridge(direction);
-                var e1 = c1 + bridge;
-                var e2 = c2 + bridge;
-
-                Water.AddQuad(c1, c2, e1, e2);
-
-                if(direction <= HexDirection.E)
-                {
-                    var nextNeighbour = cell.GetNeighbour(direction.Next());
-                    if(nextNeighbour == null || !nextNeighbour.IsUnderwater)
-                        return;
-
-                    Water.AddTriangle(c2, e2, c2 + HexMetrics.GetBridge(direction.Next()));
-                }
+                Water.AddTriangle(c2, e2, c2 + HexMetrics.GetBridge(direction.Next()));
             }
         }
     }
