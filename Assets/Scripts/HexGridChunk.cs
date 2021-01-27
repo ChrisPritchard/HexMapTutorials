@@ -619,16 +619,21 @@ namespace DarkDomains
         private void TriangulateWaterShore(HexDirection direction, HexCell cell, HexCell neighbour, Vector3 centre)
         {
             var e1 = new EdgeVertices(
-                centre + HexMetrics.GetFirstSolidCorner(direction),
-                centre + HexMetrics.GetSecondSolidCorner(direction)
+                centre + HexMetrics.GetFirstWaterCorner(direction),
+                centre + HexMetrics.GetSecondWaterCorner(direction)
             );
             Water.AddTriangle(centre, e1.v1, e1.v2);
             Water.AddTriangle(centre, e1.v2, e1.v3);
             Water.AddTriangle(centre, e1.v3, e1.v4);
             Water.AddTriangle(centre, e1.v4, e1.v5);
 
-            var bridge = HexMetrics.GetBridge(direction);
-            var e2 = new EdgeVertices(e1.v1 + bridge, e1.v5 + bridge);
+            var centre2 = neighbour.Position;
+            centre2.y = centre.y;
+            var e2 = new EdgeVertices(
+                centre2 + HexMetrics.GetSecondSolidCorner(direction.Opposite()),
+                centre2 + HexMetrics.GetFirstSolidCorner(direction.Opposite())
+            ); // rather than calculating from current centre, work backwards from neighbour centre to find edge
+
             WaterShore.AddQuad(e1.v1, e1.v2, e2.v1, e2.v2);
             WaterShore.AddQuad(e1.v2, e1.v3, e2.v2, e2.v3);
             WaterShore.AddQuad(e1.v3, e1.v4, e2.v3, e2.v4);
@@ -639,39 +644,44 @@ namespace DarkDomains
             WaterShore.AddQuadUV(0f, 0f, 0f, 1f);
 
             var nextNeighbour = cell.GetNeighbour(direction.Next());
-            if (nextNeighbour != null)
-            {
-                WaterShore.AddTriangle(e1.v5, e2.v5, e1.v5 + HexMetrics.GetBridge(direction.Next()));
-                WaterShore.AddTriangleUV(
-                    new Vector2(0f, 0f), 
-                    new Vector2(0f, 1f), 
-                    new Vector2(0f, nextNeighbour.IsUnderwater ? 0f : 1f));
-            }
+            if (nextNeighbour == null)
+                return;
+
+            var v3 = nextNeighbour.Position + 
+                (nextNeighbour.IsUnderwater ? 
+                    HexMetrics.GetFirstWaterCorner(direction.Previous()) :
+                    HexMetrics.GetFirstSolidCorner(direction.Previous()));
+            v3.y = centre.y;
+            WaterShore.AddTriangle(e1.v5, e2.v5, v3);
+            WaterShore.AddTriangleUV(
+                new Vector2(0f, 0f), 
+                new Vector2(0f, 1f), 
+                new Vector2(0f, nextNeighbour.IsUnderwater ? 0f : 1f));
         }
 
         private void TriangulateOpenWater(HexDirection direction, HexCell cell, HexCell neighbour, Vector3 centre)
         {
-            var c1 = centre + HexMetrics.GetFirstSolidCorner(direction);
-            var c2 = centre + HexMetrics.GetSecondSolidCorner(direction);
+            var c1 = centre + HexMetrics.GetFirstWaterCorner(direction);
+            var c2 = centre + HexMetrics.GetSecondWaterCorner(direction);
             Water.AddTriangle(centre, c1, c2);
 
             if(direction > HexDirection.SE)
                 return;
                 
-            var bridge = HexMetrics.GetBridge(direction);
+            var bridge = HexMetrics.GetWaterBridge(direction);
             var e1 = c1 + bridge;
             var e2 = c2 + bridge;
 
             Water.AddQuad(c1, c2, e1, e2);
 
-            if(direction <= HexDirection.E)
-            {
-                var nextNeighbour = cell.GetNeighbour(direction.Next());
-                if(nextNeighbour == null || !nextNeighbour.IsUnderwater)
-                    return;
+            if(direction > HexDirection.E)
+                return;
 
-                Water.AddTriangle(c2, e2, c2 + HexMetrics.GetBridge(direction.Next()));
-            }
+            var nextNeighbour = cell.GetNeighbour(direction.Next());
+            if(nextNeighbour == null || !nextNeighbour.IsUnderwater)
+                return;
+
+            Water.AddTriangle(c2, e2, c2 + HexMetrics.GetWaterBridge(direction.Next()));
         }
     }
 }

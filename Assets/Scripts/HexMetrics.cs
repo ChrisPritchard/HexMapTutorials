@@ -42,7 +42,11 @@ namespace DarkDomains
 
         public const float StreamBedElevationOffset = -1.75f;
 
-        public const float WaterElevationOffset = -0.3f;
+        public const float WaterElevationOffset = -0.5f;
+
+        public const float WaterFactor = 0.6f;
+
+        public const float WaterBlendFactor = 1f - WaterFactor;
 
         public const int MaxRoadSlope = 1;
 
@@ -81,6 +85,12 @@ namespace DarkDomains
         public static Vector3 GetSolidEdgeMiddle(HexDirection direction) => (GetFirstCorner(direction) + GetSecondCorner(direction)) * 0.5f * SolidFactor;
 
         public static Vector3 GetBridge(HexDirection direction) => (GetFirstCorner(direction) + GetSecondCorner(direction)) * BlendFactor;
+
+        public static Vector3 GetFirstWaterCorner(HexDirection direction) => corners[(int)direction] * WaterFactor;
+
+        public static Vector3 GetSecondWaterCorner(HexDirection direction) => corners[(int)direction + 1] * WaterFactor;
+
+        public static Vector3 GetWaterBridge(HexDirection direction) => (GetFirstCorner(direction) + GetSecondCorner(direction)) * WaterBlendFactor;
 
         // returns the point between a and b for the given terrace step
         // the lerp function is: for t = 0, a; for t = 1, b; for t between 0 and 1, a + (b - a) * t, so t times the distance between the two
