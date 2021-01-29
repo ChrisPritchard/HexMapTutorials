@@ -146,7 +146,7 @@ namespace DarkDomains
             TriangulateEdgeStrip(m, colour1, cell.TerrainTypeIndex, e, colour1, cell.TerrainTypeIndex);
             TriangulateEdgeFan(centre, m, cell.TerrainTypeIndex);
 
-            var reversed = cell.IncomingRiver == direction;
+            var reversed = cell.HasIncomingRiver;
             TriangulateRiverQuad(m.v2, m.v4, e.v2, e.v4, cell.RiverSurfaceY, 0.6f, reversed);
             centre.y = m.v2.y = m.v4.y = cell.RiverSurfaceY;
             Rivers.AddTriangle(centre, m.v2, m.v4);
