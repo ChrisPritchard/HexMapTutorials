@@ -234,6 +234,11 @@ namespace DarkDomains
                 var startV3 = e2.v3.y;
                 e2.v3.y = neighbour.StreamBedY;
 
+                // by definition, both cells have rivers through them
+                // however, if both are underwater, then we want (i want) no river bed
+                // if only one is, the river should merge with the stream
+                // EXCEPT if there is an elevation difference, in which case we need the stream bed to make a waterfall
+
                 // if im a river and the neighbour is a river
                 if(!cell.IsUnderwater && !neighbour.IsUnderwater)
                     TriangulateRiverQuad(
@@ -251,8 +256,10 @@ namespace DarkDomains
                             e2.v2, e2.v4, e1.v2, e1.v4, 
                             neighbour.RiverSurfaceY, cell.RiverSurfaceY,
                             cell.WaterLevel);
-                else if (cell.IsUnderwater == neighbour.IsUnderwater == true)
-                    e2.v3.y = startV3; // merge river bed with water bed (cell normal surface, as water is above)
+                else if ((cell.IsUnderwater == neighbour.IsUnderwater == true) // both underwater
+                || !cell.IsUnderwater && neighbour.IsUnderwater) // river into water on same level
+                    e2.v3.y = startV3; // if a river, this will smooth e1 (river side) into e2 (lake/sea bed, which is normal surface)
+                    // if not a river, then e1 is already sea/lake bed, so e2 will now be approximate same level
             }
 
             if (HexMetrics.GetEdgeType(cell.Elevation, neighbour.Elevation) == HexEdgeType.Slope)
