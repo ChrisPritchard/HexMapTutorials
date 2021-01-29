@@ -75,7 +75,7 @@ namespace DarkDomains
                 cell.Position + HexMetrics.GetSecondSolidCorner(direction)
             );
                 
-            if (cell.HasRiver)
+            if (!cell.IsUnderwater && cell.HasRiver)
             {
                 if (cell.HasRiverThroughEdge(direction))
                 {
@@ -146,9 +146,6 @@ namespace DarkDomains
             TriangulateEdgeStrip(m, colour1, cell.TerrainTypeIndex, e, colour1, cell.TerrainTypeIndex);
             TriangulateEdgeFan(centre, m, cell.TerrainTypeIndex);
 
-            if(cell.IsUnderwater)
-                return;
-
             var reversed = cell.IncomingRiver == direction;
             TriangulateRiverQuad(m.v2, m.v4, e.v2, e.v4, cell.RiverSurfaceY, 0.6f, reversed);
             centre.y = m.v2.y = m.v4.y = cell.RiverSurfaceY;
@@ -214,32 +211,11 @@ namespace DarkDomains
             Terrain.AddQuadTerrainTypes(types);
             Terrain.AddTriangleTerrainTypes(types);
 
-            if(cell.IsUnderwater)
-                return;
-
             var reversed = cell.IncomingRiver == direction;
             TriangulateRiverQuad(centreL, centreR, m.v2, m.v4, cell.RiverSurfaceY, 0.4f, reversed);
             TriangulateRiverQuad(m.v2, m.v4, e.v2, e.v4, cell.RiverSurfaceY, 0.6f, reversed);
         }
 
-        private void TriangulateWaterfallInWater(
-            Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4,
-            float y1, float y2, float waterY)
-        {
-            v1.y = v2.y = y1;
-            v3.y = v4.y = y2;
-            v1 = HexMetrics.Perturb(v1);
-            v2 = HexMetrics.Perturb(v2);
-            v3 = HexMetrics.Perturb(v3);
-            v4 = HexMetrics.Perturb(v4);
-            var t = (waterY - y2) / (y1 - y2);
-            v3 = Vector3.Lerp(v3, v1, t);
-            v4 = Vector3.Lerp(v4, v2, t);
-            Rivers.AddQuadUnperterbed(v1, v2, v3, v4);
-            Rivers.AddQuadUV(0f, 1f, 0.8f, 1f);
-        }
-
-        // adds bridges and corner triangles
         private void TriangulateConnection(HexDirection direction, HexCell cell, EdgeVertices e1)
         {
             var neighbour = cell.GetNeighbour(direction);
@@ -255,23 +231,28 @@ namespace DarkDomains
 
             if (cell.HasRiverThroughEdge(direction))
             {
+                var startV3 = e2.v3.y;
                 e2.v3.y = neighbour.StreamBedY;
 
-                if(!cell.IsUnderwater)
-                    if(!neighbour.IsUnderwater)
-                        TriangulateRiverQuad(
-                            e1.v2, e1.v4, e2.v2, e2.v4, cell.RiverSurfaceY, neighbour.RiverSurfaceY, 0.8f,
-                            cell.HasIncomingRiver && cell.IncomingRiver == direction);
-                    else if(cell.Elevation > neighbour.WaterLevel)
-                        TriangulateWaterfallInWater(
-                            e1.v2, e1.v4, e2.v2, e2.v4, 
-                            cell.RiverSurfaceY, neighbour.RiverSurfaceY,
-                            neighbour.WaterLevel);
-                else if (!neighbour.IsUnderwater && neighbour.Elevation > cell.WaterLevel)
+                // if im a river and the neighbour is a river
+                if(!cell.IsUnderwater && !neighbour.IsUnderwater)
+                    TriangulateRiverQuad(
+                        e1.v2, e1.v4, e2.v2, e2.v4, cell.RiverSurfaceY, neighbour.RiverSurfaceY, 0.8f,
+                        cell.HasIncomingRiver && cell.IncomingRiver == direction);
+                // if im a river and the neighbour is beneath me
+                else if(!cell.IsUnderwater && cell.Elevation > neighbour.WaterLevel)
+                    TriangulateWaterfallInWater(
+                        e1.v2, e1.v4, e2.v2, e2.v4, 
+                        cell.RiverSurfaceY, neighbour.RiverSurfaceY,
+                        neighbour.WaterLevel);
+                // im underwater but the neighbour is heigher than me
+                else if (cell.IsUnderwater && !neighbour.IsUnderwater && neighbour.Elevation > cell.WaterLevel)
                     TriangulateWaterfallInWater(
                             e2.v2, e2.v4, e1.v2, e1.v4, 
                             neighbour.RiverSurfaceY, cell.RiverSurfaceY,
                             cell.WaterLevel);
+                else if (!cell.IsUnderwater && neighbour.IsUnderwater)
+                    e2.v3.y = startV3; // merge river bed with water bed (cell normal surface, as water is above)
             }
 
             if (HexMetrics.GetEdgeType(cell.Elevation, neighbour.Elevation) == HexEdgeType.Slope)
@@ -299,6 +280,23 @@ namespace DarkDomains
                 TriangulateCorner(e2.v5, neighbour, v5, nextNeighbour, e1.v5, cell);
             else
                 TriangulateCorner(v5, nextNeighbour, e1.v5, cell, e2.v5, neighbour);
+        }
+
+        private void TriangulateWaterfallInWater(
+            Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4,
+            float y1, float y2, float waterY)
+        {
+            v1.y = v2.y = y1;
+            v3.y = v4.y = y2;
+            v1 = HexMetrics.Perturb(v1);
+            v2 = HexMetrics.Perturb(v2);
+            v3 = HexMetrics.Perturb(v3);
+            v4 = HexMetrics.Perturb(v4);
+            var t = (waterY - y2) / (y1 - y2);
+            v3 = Vector3.Lerp(v3, v1, t);
+            v4 = Vector3.Lerp(v4, v2, t);
+            Rivers.AddQuadUnperterbed(v1, v2, v3, v4);
+            Rivers.AddQuadUV(0f, 1f, 0.8f, 1f);
         }
 
         private void TriangulateEdgeTerrace(EdgeVertices begin, HexCell beginCell, EdgeVertices end, HexCell endCell, bool hasRoad)

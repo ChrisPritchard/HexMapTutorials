@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: River
-  m_Shader: {fileID: 4800000, guid: d5f95d4f06dca574ebd1c60fc2e7a416, type: 3}
+  m_Shader: {fileID: 4800000, guid: 4eb5207f9c41dcf49a42f282bfd41cc6, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
