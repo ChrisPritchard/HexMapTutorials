@@ -251,7 +251,7 @@ namespace DarkDomains
                             e2.v2, e2.v4, e1.v2, e1.v4, 
                             neighbour.RiverSurfaceY, cell.RiverSurfaceY,
                             cell.WaterLevel);
-                else if (!cell.IsUnderwater && neighbour.IsUnderwater)
+                else if (cell.IsUnderwater == neighbour.IsUnderwater == true)
                     e2.v3.y = startV3; // merge river bed with water bed (cell normal surface, as water is above)
             }
 
