@@ -95,13 +95,20 @@ namespace DarkDomains
         {
             get
             {
+                if (IsUnderwater)
+                    return false;
                 foreach(var road in roads)
                     if (road) return true;
                 return false;
             }
         }
 
-        public bool HasRoadThroughEdge(HexDirection direction) => roads[(int)direction];
+        public bool HasRoadThroughEdge(HexDirection direction)
+        {
+            if (IsUnderwater || (GetNeighbour(direction) != null && GetNeighbour(direction).IsUnderwater))
+                return false;
+            return roads[(int)direction];
+        }
 
         public void RemoveRoad()
         {
