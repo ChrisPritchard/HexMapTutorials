@@ -50,6 +50,10 @@ namespace DarkDomains
 
         public const int MaxRoadSlope = 1;
 
+        public const int HashGridSize = 256;
+
+        static float[] hashGrid;
+
         // hex points, pointy-top, with half above and half below 0 on the Z access
         // coords are in XYZ, but Z is as Y in this, with Y always 0, in order to align 
         // with the 3D plain in Unity. coords are clockwise from top.
@@ -132,5 +136,26 @@ namespace DarkDomains
             // we dont perturb y so that surfaces (hex tops, terrace tops) are flat
             return position;
         }
+
+        public static void InitialiseHashGrid(int seed)
+        {
+            var state = Random.state;
+            Random.InitState(seed);
+
+            hashGrid = new float[HashGridSize * HashGridSize];
+            for(var i = 0; i < hashGrid.Length; i++)
+                hashGrid[i] = Random.value;
+
+            Random.state = state; // restore original state unaltered by explicit seed
+        }
+
+        public static float SampleHashGrid(Vector3 position)
+        {
+            var x = (int)position.x % HashGridSize;
+            if (x < 0) x += HashGridSize;
+            var z = (int)position.z % HashGridSize;
+            if (z < 0) z += HashGridSize;
+            return hashGrid[z * HashGridSize + x];
+        }            
     }
 }

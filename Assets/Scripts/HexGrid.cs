@@ -18,12 +18,15 @@ namespace DarkDomains
         public Text CellLabelPrefab;
         public Texture2D NoiseSource;
 
+        public int Seed;
+
         HexGridChunk[] chunks;
         HexCell[] cells;
 
         private void Awake()
         {
             HexMetrics.NoiseSource = NoiseSource;
+            HexMetrics.InitialiseHashGrid(Seed);
 
             CreateChunks();
             CreateCells();
@@ -31,7 +34,11 @@ namespace DarkDomains
 
         private void OnEnable() 
         {
-            HexMetrics.NoiseSource = NoiseSource;    
+            if(HexMetrics.NoiseSource)
+                return;
+
+            HexMetrics.NoiseSource = NoiseSource;
+            HexMetrics.InitialiseHashGrid(Seed);
         }
 
         private void CreateChunks()
