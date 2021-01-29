@@ -10,6 +10,8 @@ namespace DarkDomains
         
         public HexMesh Terrain, Rivers, Roads, Water, WaterShore, Estuaries;
 
+        public HexFeatureManager Features;
+
         static Color colour1 = new Color(1f, 0f, 0f);
         static Color colour2 = new Color(0f, 1f, 0f);
         static Color colour3 = new Color(0f, 0f, 1f);
@@ -48,6 +50,7 @@ namespace DarkDomains
             Water.Clear();
             WaterShore.Clear();
             Estuaries.Clear();
+            Features.Clear();
 
             foreach(var cell in cells)
                 Triangulate(cell);
@@ -58,17 +61,21 @@ namespace DarkDomains
             Water.Apply();
             WaterShore.Apply();
             Estuaries.Apply();
+            Features.Apply();
         }
 
         private void Triangulate(HexCell cell)
         {
             for (var d = HexDirection.NE; d <= HexDirection.NW; d++)
-                Triangulate(d, cell);
+                TriangulateCellDirection(d, cell);
+
+            if(!cell.HasRiver && !cell.HasRoads && !cell.IsUnderwater)
+                Features.AddFeature(cell.Position);
         }
 
         // triangulates one of the six cores of a hex cell
         // and, if the conditions are met, the bridge and corner on that side
-        private void Triangulate(HexDirection direction, HexCell cell)
+        private void TriangulateCellDirection(HexDirection direction, HexCell cell)
         {
             var e = new EdgeVertices(
                 cell.Position + HexMetrics.GetFirstSolidCorner(direction),
@@ -89,7 +96,12 @@ namespace DarkDomains
                     TriangulateAdjacentToRiver(direction, cell, cell.Position, e);
             }
             else
+            {
                 TriangulateWithoutRiver(direction, cell, cell.Position, e);
+
+                if(!cell.IsUnderwater && !cell.HasRoadThroughEdge(direction))
+                    Features.AddFeature((cell.Position + e.v1 + e.v5) * (1f/3));
+            }
 
             if(direction <= HexDirection.SE)
                 TriangulateConnection(direction, cell, e);
@@ -134,6 +146,9 @@ namespace DarkDomains
 
             TriangulateEdgeStrip(m, colour1, cell.TerrainTypeIndex, e, colour1, cell.TerrainTypeIndex);
             TriangulateEdgeFan(centre, m, cell.TerrainTypeIndex);
+
+            if(!cell.IsUnderwater && !cell.HasRoadThroughEdge(direction))
+                Features.AddFeature((cell.Position + e.v1 + e.v5) * (1f/3));
         }
 
         private void TriangulateWithRiverBeginOrEnd(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e)
