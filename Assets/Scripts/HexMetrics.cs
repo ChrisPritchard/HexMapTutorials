@@ -9,10 +9,10 @@ namespace DarkDomains
 
     public struct HexHash
     {
-        public float A;
-        public float B;
+        public float A, B, C, D, E;
         
-        public static HexHash Create() => new HexHash { A = Random.value, B = Random.value };
+        public static HexHash Create() => 
+            new HexHash { A = Random.value, B = Random.value, C = Random.value, D = Random.value, E = Random.value };
     }
 
     public static class HexMetrics
@@ -62,10 +62,18 @@ namespace DarkDomains
 
         static HexHash[] hashGrid;
 
+        // at each density from low to high, the chances of a feature prefab size from high to low
+        static float[][] featureThresholds = 
+        {
+            new float[] {0.0f, 0.0f, 0.4f},
+            new float[] {0.0f, 0.4f, 0.6f},
+            new float[] {0.4f, 0.6f, 0.8f}
+        };
+
         // hex points, pointy-top, with half above and half below 0 on the Z access
         // coords are in XYZ, but Z is as Y in this, with Y always 0, in order to align 
         // with the 3D plain in Unity. coords are clockwise from top.
-        private static readonly Vector3[] corners = new Vector3[]
+        static readonly Vector3[] corners = new Vector3[]
         {
             new Vector3(0f,             0f,     OuterRadius), // top
             new Vector3(InnerRadius,    0f,     OuterRadius/2), // top-right
@@ -164,6 +172,8 @@ namespace DarkDomains
             var z = (int)position.z % HashGridSize;
             if (z < 0) z += HashGridSize;
             return hashGrid[z * HashGridSize + x];
-        }            
+        }    
+
+        public static float[] GetFeatureThresholds(int level) => featureThresholds[level];
     }
 }

@@ -77,8 +77,8 @@ namespace DarkDomains
 
         public bool IsUnderwater => waterLevel > elevation;
 
-        float urbanLevel;
-        public float UrbanLevel
+        int urbanLevel;
+        public int UrbanLevel
         {
             get => urbanLevel;
             set
