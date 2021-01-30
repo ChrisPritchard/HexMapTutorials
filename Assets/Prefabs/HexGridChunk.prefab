@@ -618,6 +618,26 @@ MonoBehaviour:
   - Prefabs:
     - {fileID: 256650680450138053, guid: 7ea94e3f8a6154d46bc2fd7a158355f5, type: 3}
     - {fileID: 2009322501764893152, guid: 6ca3e95e536ebc948be4e04f54a1fe8a, type: 3}
+  FarmPrefabs:
+  - Prefabs:
+    - {fileID: 9182159299973825640, guid: 36e950573e39abf45a5bd7137fbbce38, type: 3}
+    - {fileID: 7242986484462924495, guid: c2c479e8ca0c55c428f014347c846c31, type: 3}
+  - Prefabs:
+    - {fileID: 5565513793213580484, guid: a449641e85c28aa4a855b5bb3d4ce5d1, type: 3}
+    - {fileID: 8840744060216646861, guid: beafe61e5f648bd429bb949d56e7b6b7, type: 3}
+  - Prefabs:
+    - {fileID: 3732105383250984953, guid: d877828e2c884454a95706bd204629fa, type: 3}
+    - {fileID: 6091390109225546579, guid: 2e7a8438f4d648b4ebd6ac6f7fdfa8d3, type: 3}
+  ForestPrefabs:
+  - Prefabs:
+    - {fileID: 6026340340284735486, guid: 6c9712172ca20bb43a39e71b4d8c6484, type: 3}
+    - {fileID: 7021621991479523402, guid: ce9d948649a412644972ef490e704a99, type: 3}
+  - Prefabs:
+    - {fileID: 1538816923239311361, guid: 8444b923652403b458961e885f387d9e, type: 3}
+    - {fileID: 4653760738761342377, guid: ec8ce3a0b24b3894ca9002aaf74cbccd, type: 3}
+  - Prefabs:
+    - {fileID: 7726153971247396774, guid: 6602111ebbc8dd04db76226a259db6d3, type: 3}
+    - {fileID: 4719609958209520907, guid: 65d9d22eba2b756458a18c572ebe7fc6, type: 3}
 --- !u!1 &8117932234392943723
 GameObject:
   m_ObjectHideFlags: 0

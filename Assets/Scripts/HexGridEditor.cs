@@ -5,7 +5,7 @@ namespace DarkDomains
     using UnityEngine.UI;
     using UnityEngine.EventSystems;
     
-    public enum BrushMode { Terrain, Elevation, WaterLevel, Rivers, Roads, Urban }
+    public enum BrushMode { Terrain, Elevation, WaterLevel, Rivers, Roads, Features }
 
     public class HexGridEditor : MonoBehaviour 
     {
@@ -25,8 +25,8 @@ namespace DarkDomains
 
         bool addRoads = true;
 
-        float activeUrbanLevel = 0f;
-        public Text UrbanLevelText;
+        float activeUrbanLevel, activeFarmLevel, activeForestLevel;
+        public Text UrbanLevelText, FarmLevelText, ForestLevelText;
         
         int brushSize = 1;
         public Text BrushSizeText;
@@ -106,8 +106,12 @@ namespace DarkDomains
                 cell.RemoveRoad();
             if(Mode == BrushMode.Roads && addRoads && isDrag)
                 previousCell.AddRoad(dragDirection); 
-            if(Mode == BrushMode.Urban)
-                cell.UrbanLevel = (int)activeUrbanLevel;      
+            if(Mode == BrushMode.Features)
+            {
+                cell.UrbanLevel = (int)activeUrbanLevel;
+                cell.FarmLevel = (int)activeFarmLevel;
+                cell.ForestLevel = (int)activeForestLevel;
+            }
         }
 
         // test if cell is neighbour of previous cell
@@ -143,6 +147,18 @@ namespace DarkDomains
         {
             activeUrbanLevel = amount;
             UrbanLevelText.text = amount.ToString();
+        }
+
+        public void SelectFarmFeatureLevel(float amount)
+        {
+            activeFarmLevel = amount;
+            FarmLevelText.text = amount.ToString();
+        }
+
+        public void SelectForestFeatureLevel(float amount)
+        {
+            activeForestLevel = amount;
+            ForestLevelText.text = amount.ToString();
         }
 
         public void SelectBrushSize(float amount)

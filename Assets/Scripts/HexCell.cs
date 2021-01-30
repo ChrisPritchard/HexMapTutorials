@@ -77,7 +77,8 @@ namespace DarkDomains
 
         public bool IsUnderwater => waterLevel > elevation;
 
-        int urbanLevel;
+        int urbanLevel, farmLevel, forestLevel;
+
         public int UrbanLevel
         {
             get => urbanLevel;
@@ -87,6 +88,32 @@ namespace DarkDomains
                     return;
 
                 urbanLevel = value;
+                Refresh();
+            }
+        }
+
+        public int FarmLevel
+        {
+            get => farmLevel;
+            set
+            {
+                if (farmLevel == value)
+                    return;
+
+                farmLevel = value;
+                Refresh();
+            }
+        }
+
+        public int ForestLevel
+        {
+            get => forestLevel;
+            set
+            {
+                if (forestLevel == value)
+                    return;
+
+                forestLevel = value;
                 Refresh();
             }
         }

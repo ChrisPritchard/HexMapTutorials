@@ -11,8 +11,10 @@ namespace DarkDomains
     {
         public float A, B, C, D, E;
         
+        private static float rv() => Random.value * 0.999f; // precludes 1.0 from occuring
+
         public static HexHash Create() => 
-            new HexHash { A = Random.value, B = Random.value, C = Random.value, D = Random.value, E = Random.value };
+            new HexHash { A = rv(), B = rv(), C = rv(), D = rv(), E = rv() };
     }
 
     public static class HexMetrics
