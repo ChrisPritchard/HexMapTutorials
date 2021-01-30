@@ -180,5 +180,8 @@ namespace DarkDomains
         }    
 
         public static float[] GetFeatureThresholds(int level) => featureThresholds[level];
+        
+        public static Vector3 WallThicknessOffset(Vector3 near, Vector3 far) =>
+            new Vector3(far.x - near.x, 0f, far.z - near.z).normalized * (WallWidth * 0.5f);
     }
 }

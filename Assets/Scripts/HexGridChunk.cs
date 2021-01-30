@@ -381,6 +381,8 @@ namespace DarkDomains
                     rightCell.TerrainTypeIndex);
                 Terrain.AddTriangleTerrainTypes(types);
             }
+
+            Features.AddWall(bottom, bottomCell, left, leftCell, right, rightCell);
         }
 
         private void TriangulateCornerTerraces(
