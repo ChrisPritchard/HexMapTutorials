@@ -53,7 +53,7 @@ namespace DarkDomains
             Features.Clear();
 
             foreach(var cell in cells)
-                Triangulate(cell);
+                TriangulateCell(cell);
 
             Terrain.Apply();
             Rivers.Apply();
@@ -64,7 +64,7 @@ namespace DarkDomains
             Features.Apply();
         }
 
-        private void Triangulate(HexCell cell)
+        private void TriangulateCell(HexCell cell)
         {
             for (var d = HexDirection.NE; d <= HexDirection.NW; d++)
                 TriangulateCellDirection(d, cell);
@@ -776,13 +776,13 @@ namespace DarkDomains
             var c2 = centre + HexMetrics.GetSecondWaterCorner(direction);
             Water.AddTriangle(centre, c1, c2);
 
-            if(direction > HexDirection.SE)
+            if(neighbour == null || direction > HexDirection.SE)
                 return;
                 
             var bridge = HexMetrics.GetWaterBridge(direction);
             var e1 = c1 + bridge;
             var e2 = c2 + bridge;
-
+            
             Water.AddQuad(c1, c2, e1, e2);
 
             if(direction > HexDirection.E)
