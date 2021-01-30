@@ -244,7 +244,10 @@ namespace DarkDomains
                 e1.v5 + bridge
             );
 
-            if (cell.HasRiverThroughEdge(direction))
+            var hasRiver = cell.HasRiverThroughEdge(direction);
+            var hasRoad = cell.HasRoadThroughEdge(direction);
+
+            if (hasRiver)
             {
                 var startV3 = e2.v3.y;
                 e2.v3.y = neighbour.StreamBedY;
@@ -278,14 +281,11 @@ namespace DarkDomains
             }
 
             if (HexMetrics.GetEdgeType(cell.Elevation, neighbour.Elevation) == HexEdgeType.Slope)
-                TriangulateEdgeTerrace(e1, cell, e2, neighbour, cell.HasRoadThroughEdge(direction));
+                TriangulateEdgeTerrace(e1, cell, e2, neighbour, hasRoad);
             else
-                TriangulateEdgeStrip(
-                    e1, colour1, cell.TerrainTypeIndex, 
-                    e2, colour2, neighbour.TerrainTypeIndex, 
-                    cell.HasRoadThroughEdge(direction));
-
-            Features.AddWall(e1, cell, e2, neighbour);
+                TriangulateEdgeStrip(e1, colour1, cell.TerrainTypeIndex, e2, colour2, neighbour.TerrainTypeIndex, hasRoad);
+            
+            Features.AddWall(e1, cell, e2, neighbour, hasRiver, hasRoad);
 
             if(direction > HexDirection.E)
                 return;

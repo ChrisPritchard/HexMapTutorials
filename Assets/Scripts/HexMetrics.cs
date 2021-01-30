@@ -64,6 +64,7 @@ namespace DarkDomains
 
         public const float WallHeight = 3f;
         public const float WallWidth = 0.75f;
+        public const float WallElevationOffset = VerticalTerraceStepSize;
 
         static HexHash[] hashGrid;
 
@@ -180,8 +181,17 @@ namespace DarkDomains
         }    
 
         public static float[] GetFeatureThresholds(int level) => featureThresholds[level];
-        
+
         public static Vector3 WallThicknessOffset(Vector3 near, Vector3 far) =>
             new Vector3(far.x - near.x, 0f, far.z - near.z).normalized * (WallWidth * 0.5f);
+
+        public static Vector3 WallLerp(Vector3 near, Vector3 far)
+        {
+            near.x += (far.x - near.x) * 0.5f;
+            near.z += (far.z - near.z) * 0.5f;
+            var v = near.y < far.y ? WallElevationOffset : 1f - WallElevationOffset;
+            near.y += (far.y - near.y) * v;
+            return near;
+        }
     }
 }

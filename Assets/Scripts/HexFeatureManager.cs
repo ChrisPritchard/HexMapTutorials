@@ -82,10 +82,31 @@ namespace DarkDomains
             return null;
         }
 
-        public void AddWall(EdgeVertices near, HexCell nearCell, EdgeVertices far, HexCell farCell)
+        public void AddWall(EdgeVertices near, HexCell nearCell, EdgeVertices far, HexCell farCell, bool hasRiver, bool hasRoad)
         { 
             if(nearCell.Walled != farCell.Walled)
-                AddWallSegment(near.v1, far.v1, near.v5, far.v5);
+            {
+                AddWallSegment(near.v1, far.v1, near.v2, far.v2);
+                if (hasRiver || hasRoad)
+                {
+                    AddWallCap(near.v2, far.v2);
+                    AddWallCap(far.v4, near.v4);
+                }
+                else
+                {
+                    AddWallSegment(near.v2, far.v2, near.v3, far.v3);
+                    AddWallSegment(near.v3, far.v3, near.v4, far.v4);
+                }
+                AddWallSegment(near.v4, far.v4, near.v5, far.v5);
+
+                foreach(var neighbour in nearCell.Neighbours)
+                    if(neighbour == null) // edge of map
+                    {
+                        AddWallCap(far.v1, near.v1);
+                        AddWallCap(near.v5, far.v5);
+                        return;
+                    }
+            }
         }
 
         public void AddWall(Vector3 c1, HexCell cell1, Vector3 c2, HexCell cell2, Vector3 c3, HexCell cell3)
@@ -101,28 +122,55 @@ namespace DarkDomains
 
         private void AddWallSegment(Vector3 nearLeft, Vector3 farLeft, Vector3 nearRight, Vector3 farRight)
         {
-            var left = Vector3.Lerp(nearLeft, farLeft, 0.5f);
-            var right = Vector3.Lerp(nearRight, farRight, 0.5f);
+            nearLeft = HexMetrics.Perturb(nearLeft);
+            farLeft = HexMetrics.Perturb(farLeft);
+            nearRight = HexMetrics.Perturb(nearRight);
+            farRight = HexMetrics.Perturb(farRight);
+
+            var left = HexMetrics.WallLerp(nearLeft, farLeft);
+            var right = HexMetrics.WallLerp(nearRight, farRight);
+
+            var leftTop = left.y + HexMetrics.WallHeight;
+            var rightTop = right.y + HexMetrics.WallHeight;
+
             var leftThickness = HexMetrics.WallThicknessOffset(nearLeft, farLeft);
             var rightThickness = HexMetrics.WallThicknessOffset(nearRight, farRight);
 
             Vector3 v1, v2, v3, v4;
             v1 = v3 = left - leftThickness;
             v2 = v4 = right - rightThickness;
-            v3.y = v4.y = left.y + HexMetrics.WallHeight;
-            Walls.AddQuad(v1, v2, v3, v4);
+            v3.y = leftTop;
+            v4.y = rightTop;
+            Walls.AddQuadUnperterbed(v1, v2, v3, v4);
 
             Vector3 t1 = v3, t2 = v4; // first two top vertices
 
             v1 = v3 = left + leftThickness;
             v2 = v4 = right + rightThickness;
-            v3.y = v4.y = left.y + HexMetrics.WallHeight;
-            Walls.AddQuad(v2, v1, v4, v3);
+            v3.y = leftTop;
+            v4.y = rightTop;
+            Walls.AddQuadUnperterbed(v2, v1, v4, v3);
 
-            Walls.AddQuad(t1, t2, v3, v4); // top
+            Walls.AddQuadUnperterbed(t1, t2, v3, v4); // top
         }
 
         private void AddWallSegment(Vector3 pivot, HexCell pivotCell, Vector3 left, HexCell leftCell, Vector3 right, HexCell rightCell)
             => AddWallSegment(pivot, left, pivot, right);
+
+        private void AddWallCap(Vector3 near, Vector3 far)
+        {
+            near = HexMetrics.Perturb(near);
+            far = HexMetrics.Perturb(far);
+
+            var centre = HexMetrics.WallLerp(near, far);
+            var thickness = HexMetrics.WallThicknessOffset(near, far);
+
+            Vector3 v1, v2, v3, v4;
+            v1 = v3 = centre - thickness;
+            v2 = v4 = centre + thickness;
+            v3.y = v4.y = centre.y + HexMetrics.WallHeight;
+
+            Walls.AddQuadUnperterbed(v1, v2, v3, v4);
+        }
     }
 }
