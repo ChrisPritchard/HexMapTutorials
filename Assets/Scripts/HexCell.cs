@@ -15,6 +15,8 @@ namespace DarkDomains
         [SerializeField]
         bool[] roads;
 
+        bool walled;
+
         public Vector3 Position => transform.localPosition;
 
         float terrainTypeIndex;
@@ -114,6 +116,18 @@ namespace DarkDomains
                     return;
 
                 forestLevel = value;
+                Refresh();
+            }
+        }
+        public bool Walled
+        {
+            get => walled;
+            set
+            {
+                if (walled == value)
+                    return;
+
+                walled = value;
                 Refresh();
             }
         }
