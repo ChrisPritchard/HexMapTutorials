@@ -7,6 +7,14 @@ namespace DarkDomains
     
     public enum HexEdgeType { Flat, Slope, Cliff }
 
+    public struct HexHash
+    {
+        public float A;
+        public float B;
+        
+        public static HexHash Create() => new HexHash { A = Random.value, B = Random.value };
+    }
+
     public static class HexMetrics
     {
         public const float OuterToInner = 0.866025404f;
@@ -52,7 +60,7 @@ namespace DarkDomains
 
         public const int HashGridSize = 256;
 
-        static float[] hashGrid;
+        static HexHash[] hashGrid;
 
         // hex points, pointy-top, with half above and half below 0 on the Z access
         // coords are in XYZ, but Z is as Y in this, with Y always 0, in order to align 
@@ -142,14 +150,14 @@ namespace DarkDomains
             var state = Random.state;
             Random.InitState(seed);
 
-            hashGrid = new float[HashGridSize * HashGridSize];
+            hashGrid = new HexHash[HashGridSize * HashGridSize];
             for(var i = 0; i < hashGrid.Length; i++)
-                hashGrid[i] = Random.value;
+                hashGrid[i] = HexHash.Create();
 
             Random.state = state; // restore original state unaltered by explicit seed
         }
 
-        public static float SampleHashGrid(Vector3 position)
+        public static HexHash SampleHashGrid(Vector3 position)
         {
             var x = (int)position.x % HashGridSize;
             if (x < 0) x += HashGridSize;

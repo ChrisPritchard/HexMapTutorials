@@ -22,10 +22,13 @@ namespace DarkDomains
         public void AddFeature (Vector3 position) 
         { 
             var hash = HexMetrics.SampleHashGrid(position);
+            if(hash.A >= 0.5f)
+                return;
+
             var instance = Instantiate(FeaturePrefab);
             position.y += instance.localScale.y /2;
             instance.localPosition = HexMetrics.Perturb(position);
-            instance.localRotation = Quaternion.Euler(0f, 360f * hash, 0f);
+            instance.localRotation = Quaternion.Euler(0f, 360f * hash.B, 0f);
             instance.SetParent(container, false);
         }
     }
