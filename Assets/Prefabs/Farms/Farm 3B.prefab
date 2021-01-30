@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 7242986484462924495}
   - component: {fileID: 5334497830226621079}
   - component: {fileID: 5449072920833408383}
-  - component: {fileID: 6947562553264707327}
   m_Layer: 0
   m_Name: Farm 3B
   m_TagString: Untagged
@@ -80,16 +79,3 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!65 &6947562553264707327
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6880332384545102946}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
