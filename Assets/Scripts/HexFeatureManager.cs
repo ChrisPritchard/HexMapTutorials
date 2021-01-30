@@ -84,7 +84,9 @@ namespace DarkDomains
 
         public void AddWall(EdgeVertices near, HexCell nearCell, EdgeVertices far, HexCell farCell, bool hasRiver, bool hasRoad)
         { 
-            if(nearCell.Walled != farCell.Walled)
+            if(nearCell.Walled != farCell.Walled
+            && !nearCell.IsUnderwater && !farCell.IsUnderwater
+            && nearCell.GetEdgeType(farCell) != HexEdgeType.Cliff)
             {
                 AddWallSegment(near.v1, far.v1, near.v2, far.v2);
                 if (hasRiver || hasRoad)
@@ -155,7 +157,27 @@ namespace DarkDomains
         }
 
         private void AddWallSegment(Vector3 pivot, HexCell pivotCell, Vector3 left, HexCell leftCell, Vector3 right, HexCell rightCell)
-            => AddWallSegment(pivot, left, pivot, right);
+        {
+            if(pivotCell.IsUnderwater)
+                return;
+
+            var leftWall = !leftCell.IsUnderwater && pivotCell.GetEdgeType(leftCell) != HexEdgeType.Cliff;
+            var rightWall = !rightCell.IsUnderwater && pivotCell.GetEdgeType(rightCell) != HexEdgeType.Cliff;
+
+            if(leftWall && rightWall)
+                AddWallSegment(pivot, left, pivot, right);
+            if(leftWall && !rightWall)
+                if (leftCell.Elevation < rightCell.Elevation)
+                    AddWallWedge(pivot, left, right);
+                else
+                    AddWallCap(pivot, left);
+            if (rightWall && !leftWall)
+                if (rightCell.Elevation < leftCell.Elevation)
+                    AddWallWedge(right, pivot, left);
+                else
+                    AddWallCap(right, pivot);
+
+        }
 
         private void AddWallCap(Vector3 near, Vector3 far)
         {
@@ -171,6 +193,28 @@ namespace DarkDomains
             v3.y = v4.y = centre.y + HexMetrics.WallHeight;
 
             Walls.AddQuadUnperterbed(v1, v2, v3, v4);
+        }
+
+        private void AddWallWedge(Vector3 near, Vector3 far, Vector3 point)
+        {
+            near = HexMetrics.Perturb(near);
+            far = HexMetrics.Perturb(far);
+            point = HexMetrics.Perturb(point);
+
+            var centre = HexMetrics.WallLerp(near, far);
+            var thickness = HexMetrics.WallThicknessOffset(near, far);
+
+            Vector3 v1, v2, v3, v4;
+            var pointTop = point;
+            point.y = centre.y;
+
+            v1 = v3 = centre - thickness;
+            v2 = v4 = centre + thickness;
+            v3.y = v4.y = pointTop.y = centre.y + HexMetrics.WallHeight;
+
+            Walls.AddQuadUnperterbed(v1, point, v3, pointTop);
+            Walls.AddQuadUnperterbed(point, v2, pointTop, v4);
+            Walls.AddTriangleUnperturbed(pointTop, v3, v4);
         }
     }
 }
