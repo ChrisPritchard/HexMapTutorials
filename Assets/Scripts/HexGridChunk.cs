@@ -285,6 +285,8 @@ namespace DarkDomains
                     e2, colour2, neighbour.TerrainTypeIndex, 
                     cell.HasRoadThroughEdge(direction));
 
+            Features.AddWall(e1, cell, e2, neighbour);
+
             if(direction > HexDirection.E)
                 return;
             var nextDirection = direction.Next();

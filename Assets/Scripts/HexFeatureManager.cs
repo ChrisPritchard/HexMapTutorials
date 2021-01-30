@@ -8,6 +8,7 @@ namespace DarkDomains
     [Serializable]
     public class HexFeatureCollection
     {
+
         public Transform[] Prefabs;
 
         // choice is 0 <= N < 1
@@ -16,6 +17,8 @@ namespace DarkDomains
 
     public class HexFeatureManager : MonoBehaviour 
     {
+        public HexMesh Walls;
+        
         public HexFeatureCollection[] UrbanPrefabs, FarmPrefabs, ForestPrefabs;
 
         Transform container;
@@ -26,9 +29,14 @@ namespace DarkDomains
                 Destroy(container.gameObject);
             container = new GameObject("Features Container").transform;
             container.SetParent(this.transform, false);
+
+            Walls.Clear();
         }
 
-        public void Apply() { }
+        public void Apply() 
+        { 
+            Walls.Apply();
+        }
 
         public void AddFeature (HexCell cell, Vector3 position) 
         { 
@@ -72,6 +80,25 @@ namespace DarkDomains
                         return collection[i].Pick(choice);
             }
             return null;
+        }
+
+        public void AddWall(EdgeVertices near, HexCell nearCell, EdgeVertices far, HexCell farCell)
+        { 
+            if(nearCell.Walled != farCell.Walled)
+                AddWallSegment(near.v1, far.v1, near.v5, far.v5);
+        }
+
+        private void AddWallSegment(Vector3 nearLeft, Vector3 farLeft, Vector3 nearRight, Vector3 farRight)
+        {
+            var left = Vector3.Lerp(nearLeft, farLeft, 0.5f);
+            var right = Vector3.Lerp(nearRight, farRight, 0.5f);
+
+            Vector3 v1, v2, v3, v4;
+            v1 = v3 = left;
+            v2 = v4 = right;
+            v3.y = v4.y = left.y + HexMetrics.WallHeight;
+            Walls.AddQuad(v1, v2, v3, v4);
+            Walls.AddQuad(v2, v1, v4, v3);
         }
     }
 }

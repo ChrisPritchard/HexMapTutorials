@@ -62,6 +62,9 @@ namespace DarkDomains
 
         public const int HashGridSize = 256;
 
+        public const float WallHeight = 3f;
+        public const float WallWidth = 0.75f;
+
         static HexHash[] hashGrid;
 
         // at each density from low to high, the chances of a feature prefab size from high to low
