@@ -77,6 +77,20 @@ namespace DarkDomains
 
         public bool IsUnderwater => waterLevel > elevation;
 
+        float urbanLevel;
+        public float UrbanLevel
+        {
+            get => urbanLevel;
+            set
+            {
+                if (urbanLevel == value)
+                    return;
+
+                urbanLevel = value;
+                Refresh();
+            }
+        }
+
         public float StreamBedY => (elevation + HexMetrics.StreamBedElevationOffset) * HexMetrics.ElevationStep;
 
         public float RiverSurfaceY => (elevation + HexMetrics.WaterElevationOffset) * HexMetrics.ElevationStep;

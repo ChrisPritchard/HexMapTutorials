@@ -19,10 +19,10 @@ namespace DarkDomains
 
         public void Apply() { }
 
-        public void AddFeature (Vector3 position) 
+        public void AddFeature (HexCell cell, Vector3 position) 
         { 
             var hash = HexMetrics.SampleHashGrid(position);
-            if(hash.A >= 0.5f)
+            if(hash.A >= cell.UrbanLevel * 0.25f)
                 return;
 
             var instance = Instantiate(FeaturePrefab);

@@ -70,7 +70,7 @@ namespace DarkDomains
                 TriangulateCellDirection(d, cell);
 
             if(!cell.HasRiver && !cell.HasRoads && !cell.IsUnderwater)
-                Features.AddFeature(cell.Position);
+                Features.AddFeature(cell, cell.Position);
         }
 
         // triangulates one of the six cores of a hex cell
@@ -100,7 +100,7 @@ namespace DarkDomains
                 TriangulateWithoutRiver(direction, cell, cell.Position, e);
 
                 if(!cell.IsUnderwater && !cell.HasRoadThroughEdge(direction))
-                    Features.AddFeature((cell.Position + e.v1 + e.v5) * (1f/3));
+                    Features.AddFeature(cell, (cell.Position + e.v1 + e.v5) * (1f/3));
             }
 
             if(direction <= HexDirection.SE)
@@ -148,7 +148,7 @@ namespace DarkDomains
             TriangulateEdgeFan(centre, m, cell.TerrainTypeIndex);
 
             if(!cell.IsUnderwater && !cell.HasRoadThroughEdge(direction))
-                Features.AddFeature((cell.Position + e.v1 + e.v5) * (1f/3));
+                Features.AddFeature(cell, (cell.Position + e.v1 + e.v5) * (1f/3));
         }
 
         private void TriangulateWithRiverBeginOrEnd(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e)
