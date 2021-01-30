@@ -5,30 +5,28 @@ namespace DarkDomains
     using UnityEngine.UI;
     using UnityEngine.EventSystems;
     
-    public enum RiverMode { Off, Add, Remove }
-    public enum RoadMode { Off, Add, Remove }
+    public enum BrushMode { Terrain, Elevation, WaterLevel, Rivers, Roads }
 
     public class HexGridEditor : MonoBehaviour 
     {
         public HexGrid HexGrid;
 
+        public BrushMode Mode;
+
         int activeTerrain;
-        bool applyTerrain = true;
 
         float activeElevation = 0f;
-        bool applyElevation = true;
         public Text ElevationText;
 
         float activeWaterLevel = 0f;
-        bool applyWaterLevel = false;
         public Text WaterLevelText;
 
+        bool addRivers = true;
+
+        bool addRoads = true;
+        
         int brushSize = 1;
         public Text BrushSizeText;
-
-        RiverMode riverMode;
-
-        RoadMode roadMode;
 
         new Camera camera;
         EventSystem eventSystem;
@@ -90,19 +88,20 @@ namespace DarkDomains
         {
             if(!cell)
                 return;
-            if(applyTerrain)
+
+            if (Mode == BrushMode.Terrain)
                 cell.TerrainTypeIndex = activeTerrain;
-            if(applyElevation)
+            if(Mode == BrushMode.Elevation)
                 cell.Elevation = (int)activeElevation;
-            if(applyWaterLevel)
+            if(Mode == BrushMode.WaterLevel)
                 cell.WaterLevel = (int)activeWaterLevel;
-            if(riverMode == RiverMode.Remove)
+            if(Mode == BrushMode.Rivers && !addRivers)
                 cell.RemoveRiver();
-            if(isDrag && riverMode == RiverMode.Add)
+            if(Mode == BrushMode.Rivers && addRivers && isDrag)
                 previousCell.SetOutgoingRiver(dragDirection);
-            if(roadMode == RoadMode.Remove)
+            if(Mode == BrushMode.Roads && !addRoads)
                 cell.RemoveRoad();
-            if(isDrag && roadMode == RoadMode.Add)
+            if(Mode == BrushMode.Roads && addRoads && isDrag)
                 previousCell.AddRoad(dragDirection);       
         }
 
@@ -115,19 +114,19 @@ namespace DarkDomains
             return false;
         }
 
-        public void ApplyTerrain(bool disable) => applyTerrain = !disable;
+        public void SelectBrushMode(int mode)
+        { 
+            Mode = (BrushMode)mode;
+            Debug.Log("Mode is now " + Mode);
+        }
 
         public void SelectTerrain(int index) => activeTerrain = index;
-
-        public void ApplyElevation(bool disable) => applyElevation = !disable;
 
         public void SelectElevation(float amount)
         {
             activeElevation = amount;
             ElevationText.text = amount.ToString();
         }
-
-        public void ApplyWaterLevel(bool disable) => applyWaterLevel = !disable;
 
         public void SelectWaterLevel(float amount)
         {
@@ -141,9 +140,9 @@ namespace DarkDomains
             BrushSizeText.text = brushSize.ToString();
         }
 
-        public void SelectRiverMode(int mode) => riverMode = (RiverMode)mode;
+        public void AddRivers(bool value) => addRivers = value;
 
-        public void SelectRoadMode(int mode) => roadMode = (RoadMode)mode;
+        public void AddRoads(bool value) => addRoads = value;
 
         public void ShowUI(bool visible) => HexGrid.ShowUI(visible);
     }
