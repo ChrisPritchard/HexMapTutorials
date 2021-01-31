@@ -133,7 +133,15 @@ namespace DarkDomains
             var rightWall = !rightCell.IsUnderwater && pivotCell.GetEdgeType(rightCell) != HexEdgeType.Cliff;
 
             if(leftWall && rightWall)
-                AddWallSegment(pivot, left, pivot, right, true);
+            {
+                var hasWall = false;
+                if(leftCell.Elevation == rightCell.Elevation)
+                {
+                    var hash = HexMetrics.SampleHashGrid((pivot + left + right) / 3);
+                    hasWall = hash.E < HexMetrics.WallTowerThreashold;
+                }
+                AddWallSegment(pivot, left, pivot, right, hasWall);
+            }
             if(leftWall && !rightWall)
                 if (leftCell.Elevation < rightCell.Elevation)
                     AddWallWedge(pivot, left, right);
@@ -185,12 +193,11 @@ namespace DarkDomains
 
             var towerInstance = Instantiate(WallTowerPrefab);
             towerInstance.transform.localPosition = (left + right) / 2;
-            towerInstance.transform.Translate(0, towerInstance.transform.localScale.y / 2, 0, Space.World);
 
             var rightDirection = right - left;
             rightDirection.y = 0;
             towerInstance.transform.right = rightDirection;
-            
+
             towerInstance.SetParent(container, false);
         }
 

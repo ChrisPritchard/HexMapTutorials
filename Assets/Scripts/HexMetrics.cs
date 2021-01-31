@@ -62,9 +62,11 @@ namespace DarkDomains
 
         public const int HashGridSize = 256;
 
-        public const float WallHeight = 3f;
+        public const float WallHeight = 4f;
         public const float WallWidth = 0.75f;
         public const float WallElevationOffset = VerticalTerraceStepSize;
+        public const float WallYOffset = -1f; // buries towers and walls, so they merge with the terrain
+        public const float WallTowerThreashold = 0.5f;
 
         static HexHash[] hashGrid;
 
@@ -190,7 +192,7 @@ namespace DarkDomains
             near.x += (far.x - near.x) * 0.5f;
             near.z += (far.z - near.z) * 0.5f;
             var v = near.y < far.y ? WallElevationOffset : 1f - WallElevationOffset;
-            near.y += (far.y - near.y) * v;
+            near.y += (far.y - near.y) * v + WallYOffset;
             return near;
         }
     }
