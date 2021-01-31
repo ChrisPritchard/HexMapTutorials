@@ -613,12 +613,12 @@ namespace DarkDomains
                     corner = HexMetrics.GetFirstSolidCorner(direction);
                 }
 
-                roadCentre += corner * 0.5f;
+                roadCentre += corner / 2;
                 if(cell.IncomingRiver == direction.Next()
                 && (cell.HasRoadThroughEdge(direction.Next2()) || 
                     cell.HasRoadThroughEdge(direction.Opposite())))
                     Features.AddBridge(roadCentre, centre - corner / 2);
-                centre += corner * 0.25f;
+                centre += corner / 4;
             }
             else if(cell.IncomingRiver == cell.OutgoingRiver.Previous()) // zigzag river orientation 1
                 roadCentre -= HexMetrics.GetSecondSolidCorner(cell.IncomingRiver) * 0.2f;
@@ -630,7 +630,7 @@ namespace DarkDomains
                     return; // isolated road - i.e road didn't come from this edge, and doesn't connect out either.
                 var offset = HexMetrics.GetSolidEdgeMiddle(direction) * HexMetrics.InnerToOuter;
                 roadCentre += offset * 0.7f;
-                centre += offset * 0.5f;
+                centre += offset / 2;
             }
             else // outside of curved river
             {
@@ -643,7 +643,11 @@ namespace DarkDomains
                     middle = direction;
                 if (!cell.HasRoadThroughEdge(middle) && !cell.HasRoadThroughEdge(middle.Previous()) && !cell.HasRoadThroughEdge(middle.Next()))
                     return; // prune orphaned rivers on the inside of a curve
-                roadCentre += HexMetrics.GetSolidEdgeMiddle(middle) * 0.25f;
+                
+                var offset = HexMetrics.GetSolidEdgeMiddle(middle);
+                roadCentre += offset / 4;
+                if(direction == middle && cell.HasRoadThroughEdge(direction.Opposite()))
+                    Features.AddBridge(roadCentre, centre - offset * (HexMetrics.InnerToOuter * 0.7f));
             }
 
             var ml = Vector3.Lerp(roadCentre, e.v1, interpolators.x);
