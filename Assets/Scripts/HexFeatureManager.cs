@@ -241,9 +241,16 @@ namespace DarkDomains
 
         public void AddBridge(Vector3 roadCentre1, Vector3 roadCentre2)
         {
+            roadCentre1 = HexMetrics.Perturb(roadCentre1);
+            roadCentre2 = HexMetrics.Perturb(roadCentre2);
+
             var instance = Instantiate(BridgePrefab);
             instance.localPosition = (roadCentre1 + roadCentre2) / 2;
-            instance.forward = roadCentre1 - roadCentre2;
+            instance.forward = roadCentre1 - roadCentre2; // rotate appropriatly
+
+            var length = Vector3.Distance(roadCentre1, roadCentre2);
+            instance.localScale = new Vector3(1f, 1f, length * (1f / HexMetrics.BridgeDesignLength));
+
             instance.SetParent(container, false);
         }
     }

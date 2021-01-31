@@ -67,6 +67,8 @@ namespace DarkDomains
         public const float WallElevationOffset = VerticalTerraceStepSize;
         public const float WallYOffset = -1f; // buries towers and walls, so they merge with the terrain
         public const float WallTowerThreashold = 0.5f;
+        
+        public const float BridgeDesignLength = 7f;
 
         static HexHash[] hashGrid;
 
