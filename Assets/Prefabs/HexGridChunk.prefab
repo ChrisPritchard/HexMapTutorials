@@ -609,6 +609,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Walls: {fileID: 5515722740268110709}
+  WallTowerPrefab: {fileID: 2764035686754061773, guid: 3faa8c75bcec88b4487376478f55af46,
+    type: 3}
   UrbanPrefabs:
   - Prefabs:
     - {fileID: 7671464912914132069, guid: a5bba83fd45324c4a971ea4c758cc384, type: 3}

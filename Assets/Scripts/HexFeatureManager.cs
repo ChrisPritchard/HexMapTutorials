@@ -18,6 +18,8 @@ namespace DarkDomains
     public class HexFeatureManager : MonoBehaviour 
     {
         public HexMesh Walls;
+
+        public Transform WallTowerPrefab;
         
         public HexFeatureCollection[] UrbanPrefabs, FarmPrefabs, ForestPrefabs;
 
@@ -122,7 +124,30 @@ namespace DarkDomains
                 AddWallSegment(c1, cell1, c2, cell2, c3, cell3);
         }
 
-        private void AddWallSegment(Vector3 nearLeft, Vector3 farLeft, Vector3 nearRight, Vector3 farRight)
+        private void AddWallSegment(Vector3 pivot, HexCell pivotCell, Vector3 left, HexCell leftCell, Vector3 right, HexCell rightCell)
+        {
+            if(pivotCell.IsUnderwater)
+                return;
+
+            var leftWall = !leftCell.IsUnderwater && pivotCell.GetEdgeType(leftCell) != HexEdgeType.Cliff;
+            var rightWall = !rightCell.IsUnderwater && pivotCell.GetEdgeType(rightCell) != HexEdgeType.Cliff;
+
+            if(leftWall && rightWall)
+                AddWallSegment(pivot, left, pivot, right, true);
+            if(leftWall && !rightWall)
+                if (leftCell.Elevation < rightCell.Elevation)
+                    AddWallWedge(pivot, left, right);
+                else
+                    AddWallCap(pivot, left);
+            if (rightWall && !leftWall)
+                if (rightCell.Elevation < leftCell.Elevation)
+                    AddWallWedge(right, pivot, left);
+                else
+                    AddWallCap(right, pivot);
+
+        }
+
+        private void AddWallSegment(Vector3 nearLeft, Vector3 farLeft, Vector3 nearRight, Vector3 farRight, bool addTower = false)
         {
             nearLeft = HexMetrics.Perturb(nearLeft);
             farLeft = HexMetrics.Perturb(farLeft);
@@ -154,29 +179,19 @@ namespace DarkDomains
             Walls.AddQuadUnperterbed(v2, v1, v4, v3);
 
             Walls.AddQuadUnperterbed(t1, t2, v3, v4); // top
-        }
 
-        private void AddWallSegment(Vector3 pivot, HexCell pivotCell, Vector3 left, HexCell leftCell, Vector3 right, HexCell rightCell)
-        {
-            if(pivotCell.IsUnderwater)
+            if(!addTower)
                 return;
 
-            var leftWall = !leftCell.IsUnderwater && pivotCell.GetEdgeType(leftCell) != HexEdgeType.Cliff;
-            var rightWall = !rightCell.IsUnderwater && pivotCell.GetEdgeType(rightCell) != HexEdgeType.Cliff;
+            var towerInstance = Instantiate(WallTowerPrefab);
+            towerInstance.transform.localPosition = (left + right) / 2;
+            towerInstance.transform.Translate(0, towerInstance.transform.localScale.y / 2, 0, Space.World);
 
-            if(leftWall && rightWall)
-                AddWallSegment(pivot, left, pivot, right);
-            if(leftWall && !rightWall)
-                if (leftCell.Elevation < rightCell.Elevation)
-                    AddWallWedge(pivot, left, right);
-                else
-                    AddWallCap(pivot, left);
-            if (rightWall && !leftWall)
-                if (rightCell.Elevation < leftCell.Elevation)
-                    AddWallWedge(right, pivot, left);
-                else
-                    AddWallCap(right, pivot);
-
+            var rightDirection = right - left;
+            rightDirection.y = 0;
+            towerInstance.transform.right = rightDirection;
+            
+            towerInstance.SetParent(container, false);
         }
 
         private void AddWallCap(Vector3 near, Vector3 far)
