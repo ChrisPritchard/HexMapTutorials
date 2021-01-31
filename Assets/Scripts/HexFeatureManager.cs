@@ -19,7 +19,7 @@ namespace DarkDomains
     {
         public HexMesh Walls;
 
-        public Transform WallTowerPrefab;
+        public Transform WallTowerPrefab, BridgePrefab;
         
         public HexFeatureCollection[] UrbanPrefabs, FarmPrefabs, ForestPrefabs;
 
@@ -237,6 +237,14 @@ namespace DarkDomains
             Walls.AddQuadUnperterbed(v1, point, v3, pointTop);
             Walls.AddQuadUnperterbed(point, v2, pointTop, v4);
             Walls.AddTriangleUnperturbed(pointTop, v3, v4);
+        }
+
+        public void AddBridge(Vector3 roadCentre1, Vector3 roadCentre2)
+        {
+            var instance = Instantiate(BridgePrefab);
+            instance.localPosition = (roadCentre1 + roadCentre2) / 2;
+            instance.forward = roadCentre1 - roadCentre2;
+            instance.SetParent(container, false);
         }
     }
 }

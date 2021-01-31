@@ -612,7 +612,12 @@ namespace DarkDomains
                         return; // isolated on one side of the river
                     corner = HexMetrics.GetFirstSolidCorner(direction);
                 }
+
                 roadCentre += corner * 0.5f;
+                if(cell.IncomingRiver == direction.Next()
+                && (cell.HasRoadThroughEdge(direction.Next2()) || 
+                    cell.HasRoadThroughEdge(direction.Opposite())))
+                    Features.AddBridge(roadCentre, centre - corner / 2);
                 centre += corner * 0.25f;
             }
             else if(cell.IncomingRiver == cell.OutgoingRiver.Previous()) // zigzag river orientation 1
