@@ -5,7 +5,7 @@ namespace DarkDomains
     using UnityEngine.UI;
     using UnityEngine.EventSystems;
     
-    public enum BrushMode { Terrain, Elevation, WaterLevel, Rivers, Roads, Features, Walls }
+    public enum BrushMode { Terrain, Elevation, WaterLevel, Rivers, Roads, Features, Walls, SpecialFeatures }
 
     public class HexGridEditor : MonoBehaviour 
     {
@@ -14,7 +14,7 @@ namespace DarkDomains
         public BrushMode Mode;
         public GameObject[] BrushOptions;
 
-        int activeTerrain;
+        int activeTerrain, activeSpecialFeature;
 
         float activeElevation = 0f;
         public Text ElevationText;
@@ -46,7 +46,7 @@ namespace DarkDomains
         {
             camera = Camera.main;
             eventSystem = EventSystem.current;
-            activeTerrain = 0;
+            SelectBrushMode(0); // start with terrain options shown
         }
 
         private void Update() 
@@ -117,6 +117,8 @@ namespace DarkDomains
             }
             if(Mode == BrushMode.Walls)
                 cell.Walled = addWalls;
+            if(Mode == BrushMode.SpecialFeatures)
+                cell.SpecialFeatureIndex = activeSpecialFeature;
         }
 
         // test if cell is neighbour of previous cell
@@ -179,6 +181,8 @@ namespace DarkDomains
         public void AddRoads(bool value) => addRoads = value;
 
         public void AddWalls(bool value) => addWalls = value;
+
+        public void SelectSpecialFeature(int index) => activeSpecialFeature = index;
 
         public void ShowUI(bool visible) => HexGrid.ShowUI(visible);
     }

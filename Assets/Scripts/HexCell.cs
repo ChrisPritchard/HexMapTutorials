@@ -132,6 +132,20 @@ namespace DarkDomains
             }
         }
 
+        float specialFeatureIndex;
+        public float SpecialFeatureIndex
+        {
+            get => specialFeatureIndex;
+            set
+            {
+                if (specialFeatureIndex == value)
+                    return;
+
+                specialFeatureIndex = value;
+                RefreshSelfOnly();
+            }
+        }
+
         public float StreamBedY => (elevation + HexMetrics.StreamBedElevationOffset) * HexMetrics.ElevationStep;
 
         public float RiverSurfaceY => (elevation + HexMetrics.WaterElevationOffset) * HexMetrics.ElevationStep;
