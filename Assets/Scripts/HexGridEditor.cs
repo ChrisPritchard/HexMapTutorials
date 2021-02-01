@@ -12,6 +12,7 @@ namespace DarkDomains
         public HexGrid HexGrid;
 
         public BrushMode Mode;
+        public GameObject[] BrushOptions;
 
         int activeTerrain;
 
@@ -129,6 +130,8 @@ namespace DarkDomains
 
         public void SelectBrushMode(int mode)
         { 
+            for(var i = 0; i < BrushOptions.Length; i++)
+                BrushOptions[i].SetActive(i == mode);
             Mode = (BrushMode)mode;
             Debug.Log("Mode is now " + Mode);
         }
