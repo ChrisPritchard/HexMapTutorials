@@ -71,6 +71,9 @@ namespace DarkDomains
 
             if(!cell.HasRiver && !cell.HasRoads && !cell.IsUnderwater)
                 Features.AddFeature(cell, cell.Position);
+
+            if(cell.IsSpecial)
+                Features.AddSpecialFeature(cell, cell.Position);
         }
 
         // triangulates one of the six cores of a hex cell

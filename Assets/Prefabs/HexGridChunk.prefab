@@ -613,6 +613,9 @@ MonoBehaviour:
     type: 3}
   BridgePrefab: {fileID: 8045843273424122748, guid: d146667b6d5e18849b91e017a633baee,
     type: 3}
+  SpecialFeatures:
+  - {fileID: 141617440346912929, guid: b8ec048dde0bf494081d6a3928af84b8, type: 3}
+  - {fileID: 3551248235846856700, guid: 48fc248324cd6aa469131f523bd25134, type: 3}
   UrbanPrefabs:
   - Prefabs:
     - {fileID: 7671464912914132069, guid: a5bba83fd45324c4a971ea4c758cc384, type: 3}

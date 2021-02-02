@@ -132,19 +132,21 @@ namespace DarkDomains
             }
         }
 
-        float specialFeatureIndex;
+        float specialFeatureIndex = -1;
         public float SpecialFeatureIndex
         {
             get => specialFeatureIndex;
             set
             {
-                if (specialFeatureIndex == value)
+                if (specialFeatureIndex == value || HasRiver)
                     return;
 
                 specialFeatureIndex = value;
                 RefreshSelfOnly();
             }
         }
+
+        public bool IsSpecial => SpecialFeatureIndex >= 0;
 
         public float StreamBedY => (elevation + HexMetrics.StreamBedElevationOffset) * HexMetrics.ElevationStep;
 
@@ -283,10 +285,12 @@ namespace DarkDomains
             
             outgoingRiver = direction;
             hasOutgoingRiver = true;
+            specialFeatureIndex = -1;
 
             neighbour.RemoveIncomingRiver();
             neighbour.hasIncomingRiver = true;
             neighbour.incomingRiver = direction.Opposite();
+            neighbour.specialFeatureIndex = -1;
 
             SetRoad((int)direction, false); // this will also refresh this cell
         }

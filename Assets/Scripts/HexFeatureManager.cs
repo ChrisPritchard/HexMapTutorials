@@ -20,6 +20,8 @@ namespace DarkDomains
         public HexMesh Walls;
 
         public Transform WallTowerPrefab, BridgePrefab;
+
+        public Transform[] SpecialFeatures;
         
         public HexFeatureCollection[] UrbanPrefabs, FarmPrefabs, ForestPrefabs;
 
@@ -42,6 +44,8 @@ namespace DarkDomains
 
         public void AddFeature (HexCell cell, Vector3 position) 
         { 
+            if(cell.IsSpecial)
+                return;
             var hash = HexMetrics.SampleHashGrid(position);
 
             var prefab = PickPrefab(cell, hash);
@@ -251,6 +255,15 @@ namespace DarkDomains
             var length = Vector3.Distance(roadCentre1, roadCentre2);
             instance.localScale = new Vector3(1f, 1f, length * (1f / HexMetrics.BridgeDesignLength));
 
+            instance.SetParent(container, false);
+        }
+
+        public void AddSpecialFeature(HexCell cell, Vector3 position)
+        {
+            var instance = Instantiate(SpecialFeatures[(int)cell.SpecialFeatureIndex]);
+            instance.localPosition = HexMetrics.Perturb(position);
+            var hash = HexMetrics.SampleHashGrid(position);
+            instance.localRotation = Quaternion.Euler(0f, 360f * hash.E, 0f);
             instance.SetParent(container, false);
         }
     }
