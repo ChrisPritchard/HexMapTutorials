@@ -1,6 +1,7 @@
 
 namespace DarkDomains
 {
+    using System.IO;
     using UnityEngine;
 
     public class HexCell : MonoBehaviour
@@ -9,18 +10,18 @@ namespace DarkDomains
         public HexCoordinates Coordinates;
         public RectTransform UIRect;
 
-        bool hasIncomingRiver, hasOutgoingRiver;
-        HexDirection incomingRiver, outgoingRiver;
+        private bool hasIncomingRiver, hasOutgoingRiver;
+        private HexDirection incomingRiver, outgoingRiver;
 
         [SerializeField]
-        bool[] roads;
+        private bool[] roads;
 
-        bool walled;
+        private bool walled;
 
         public Vector3 Position => transform.localPosition;
 
-        float terrainTypeIndex;
-        public float TerrainTypeIndex
+        private int terrainTypeIndex;
+        public int TerrainTypeIndex
         {
             get => terrainTypeIndex;
             set
@@ -33,7 +34,7 @@ namespace DarkDomains
             }
         }
 
-        int elevation = int.MinValue;
+        private int elevation = int.MinValue;
         public int Elevation
         {
             get => elevation;
@@ -304,6 +305,42 @@ namespace DarkDomains
                 RemoveOutgoingRiver();
             if (hasIncomingRiver && !GetNeighbour(incomingRiver).IsValidRiverDestination(this))
                 RemoveIncomingRiver();
+        }
+
+        public void Save(BinaryWriter writer)
+        {
+            writer.Write(elevation);
+            writer.Write(waterLevel);
+            writer.Write(terrainTypeIndex);
+            foreach(var road in roads)
+                writer.Write(road);
+            writer.Write(hasIncomingRiver);
+            writer.Write((int)incomingRiver);
+            writer.Write(hasOutgoingRiver);
+            writer.Write((int)outgoingRiver);
+            writer.Write(urbanLevel);
+            writer.Write(farmLevel);
+            writer.Write(forestLevel);
+            writer.Write(specialFeatureIndex);
+            writer.Write(walled);
+        }
+
+        public void Load(BinaryReader reader)
+        {
+            Elevation = reader.ReadInt32();
+            waterLevel = reader.ReadInt32();
+            terrainTypeIndex = reader.ReadInt32();
+            for(var i = 0; i < roads.Length; i++)
+                roads[i] = reader.ReadBoolean();
+            hasIncomingRiver = reader.ReadBoolean();
+            incomingRiver = (HexDirection)(reader.ReadInt32());
+            hasOutgoingRiver = reader.ReadBoolean();
+            outgoingRiver = (HexDirection)(reader.ReadInt32());
+            urbanLevel = reader.ReadInt32();
+            farmLevel = reader.ReadInt32();
+            forestLevel = reader.ReadInt32();
+            specialFeatureIndex = reader.ReadInt32();
+            walled = reader.ReadBoolean();
         }
     }
 }

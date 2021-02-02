@@ -1,6 +1,7 @@
 
 namespace DarkDomains
 {
+    using System.IO;
     using UnityEngine;
     using UnityEngine.UI;
     using UnityEngine.EventSystems;
@@ -185,5 +186,21 @@ namespace DarkDomains
         public void SelectSpecialFeature(int index) => activeSpecialFeature = index;
 
         public void ShowUI(bool visible) => HexGrid.ShowUI(visible);
+
+        private string SavePath() => Path.Combine(Application.persistentDataPath, "test.map");
+
+        public void Save()
+        {
+            using (var file = File.OpenWrite(SavePath()))
+            using (var writer = new BinaryWriter(file))
+            { HexGrid.Save(writer); }
+        }
+
+        public void Load()
+        {
+            using (var file = File.OpenRead(SavePath()))
+            using (var reader = new BinaryReader(file))
+            { HexGrid.Load(reader); }
+        }
     }
 }

@@ -1,6 +1,7 @@
 
 namespace DarkDomains
 {
+    using System.IO;
     using UnityEngine;
     using UnityEngine.UI;
 
@@ -143,6 +144,20 @@ namespace DarkDomains
         public void ShowUI(bool visible)
         {
             foreach(var chunk in chunks) chunk.ShowUI(visible);
+        }
+
+        public void Save(BinaryWriter writer)
+        {
+            foreach(var cell in cells)
+                cell.Save(writer);
+        }
+
+        public void Load(BinaryReader reader)
+        {
+            foreach(var cell in cells)
+                cell.Load(reader);
+            foreach(var chunk in chunks)
+                chunk.Refresh();
         }
     }
 }
