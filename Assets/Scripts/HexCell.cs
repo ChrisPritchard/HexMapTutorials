@@ -20,43 +20,39 @@ namespace DarkDomains
 
         public Vector3 Position => transform.localPosition;
 
-        private int terrainTypeIndex;
-        public int TerrainTypeIndex
+        private byte terrainTypeIndex;
+        public byte TerrainTypeIndex
         {
             get => terrainTypeIndex;
             set
             {
                 if (terrainTypeIndex == value)
                     return;
-
-                terrainTypeIndex = value;
+                terrainTypeIndex = (byte)value;
                 Refresh();
             }
         }
 
-        private int elevation = int.MinValue;
-        public int Elevation
+        private byte elevation;
+        public byte Elevation
         {
             get => elevation;
             set
             {
                 if(value == elevation)
                     return;
-
                 elevation = value;
                 RefreshPosition();
-
                 ValidateRivers();
                 for(var direction = HexDirection.NE; direction <= HexDirection.NW; direction++)
                     if(HasRoadThroughEdge(direction) && GetElevationDifference(direction) > HexMetrics.MaxRoadSlope)
                         SetRoad((int)direction, false);
-
                 Refresh();
             }
         }
 
-        private int waterLevel;
-        public int WaterLevel
+        private byte waterLevel;
+        public byte WaterLevel
         {
             get => waterLevel;
             set
@@ -71,42 +67,39 @@ namespace DarkDomains
 
         public bool IsUnderwater => waterLevel > elevation;
 
-        int urbanLevel, farmLevel, forestLevel;
+        byte urbanLevel, farmLevel, forestLevel;
 
-        public int UrbanLevel
+        public byte UrbanLevel
         {
             get => urbanLevel;
             set
             {
                 if (urbanLevel == value)
                     return;
-
                 urbanLevel = value;
                 Refresh();
             }
         }
 
-        public int FarmLevel
+        public byte FarmLevel
         {
             get => farmLevel;
             set
             {
                 if (farmLevel == value)
                     return;
-
                 farmLevel = value;
                 Refresh();
             }
         }
 
-        public int ForestLevel
+        public byte ForestLevel
         {
             get => forestLevel;
             set
             {
                 if (forestLevel == value)
                     return;
-
                 forestLevel = value;
                 Refresh();
             }
@@ -118,27 +111,25 @@ namespace DarkDomains
             {
                 if (walled == value)
                     return;
-
                 walled = value;
                 Refresh();
             }
         }
 
-        float specialFeatureIndex = -1;
-        public float SpecialFeatureIndex
+        byte specialFeatureIndex;
+        public byte SpecialFeatureIndex
         {
             get => specialFeatureIndex;
             set
             {
                 if (specialFeatureIndex == value || HasRiver)
                     return;
-
                 specialFeatureIndex = value;
                 RefreshSelfOnly();
             }
         }
 
-        public bool IsSpecial => SpecialFeatureIndex >= 0;
+        public bool IsSpecial => SpecialFeatureIndex > 0;
 
         public float StreamBedY => (elevation + HexMetrics.StreamBedElevationOffset) * HexMetrics.ElevationStep;
 
@@ -277,12 +268,12 @@ namespace DarkDomains
             
             outgoingRiver = direction;
             hasOutgoingRiver = true;
-            specialFeatureIndex = -1;
+            specialFeatureIndex = 0;
 
             neighbour.RemoveIncomingRiver();
             neighbour.hasIncomingRiver = true;
             neighbour.incomingRiver = direction.Opposite();
-            neighbour.specialFeatureIndex = -1;
+            neighbour.specialFeatureIndex = 0;
 
             SetRoad((int)direction, false); // this will also refresh this cell
         }
@@ -315,12 +306,14 @@ namespace DarkDomains
             writer.Write(elevation);
             writer.Write(waterLevel);
             writer.Write(terrainTypeIndex);
-            foreach(var road in roads)
-                writer.Write(road);
-            writer.Write(hasIncomingRiver);
-            writer.Write((int)incomingRiver);
-            writer.Write(hasOutgoingRiver);
-            writer.Write((int)outgoingRiver);
+
+            var roadFlags = 0;
+            for(var i = 0; i < roads.Length; i++)
+                if(roads[i]) roadFlags |= 1 << i;
+            writer.Write((byte)roadFlags);
+
+            writer.Write((byte)(hasIncomingRiver ? incomingRiver + 128 : 0));
+            writer.Write((byte)(hasOutgoingRiver ? outgoingRiver + 128 : 0));
             writer.Write(urbanLevel);
             writer.Write(farmLevel);
             writer.Write(forestLevel);
@@ -330,19 +323,28 @@ namespace DarkDomains
 
         public void Load(BinaryReader reader)
         {
-            elevation = reader.ReadInt32();
-            waterLevel = reader.ReadInt32();
-            terrainTypeIndex = reader.ReadInt32();
+            elevation = reader.ReadByte();
+            waterLevel = reader.ReadByte();
+            terrainTypeIndex = reader.ReadByte();
+
+            var roadFlags = reader.ReadByte();
             for(var i = 0; i < roads.Length; i++)
-                roads[i] = reader.ReadBoolean();
-            hasIncomingRiver = reader.ReadBoolean();
-            incomingRiver = (HexDirection)(reader.ReadInt32());
-            hasOutgoingRiver = reader.ReadBoolean();
-            outgoingRiver = (HexDirection)(reader.ReadInt32());
-            urbanLevel = reader.ReadInt32();
-            farmLevel = reader.ReadInt32();
-            forestLevel = reader.ReadInt32();
-            specialFeatureIndex = reader.ReadInt32();
+                roads[i] = (roadFlags & (1 << i)) != 0;
+
+            var incoming = reader.ReadByte();
+            hasIncomingRiver = incoming >= 128;
+            if(hasIncomingRiver)
+                incomingRiver = (HexDirection)(incoming - 128);
+
+            var outgoing = reader.ReadByte();
+            hasOutgoingRiver = outgoing >= 128;
+            if(hasOutgoingRiver)
+                outgoingRiver = (HexDirection)(outgoing - 128);
+                
+            urbanLevel = reader.ReadByte();
+            farmLevel = reader.ReadByte();
+            forestLevel = reader.ReadByte();
+            specialFeatureIndex = reader.ReadByte();
             walled = reader.ReadBoolean();
 
             RefreshPosition();

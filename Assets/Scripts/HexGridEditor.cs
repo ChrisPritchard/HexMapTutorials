@@ -10,17 +10,19 @@ namespace DarkDomains
 
     public class HexGridEditor : MonoBehaviour 
     {
+        const int version = 0;
+
         public HexGrid HexGrid;
 
         public BrushMode Mode;
         public GameObject[] BrushOptions;
 
-        int activeTerrain, activeSpecialFeature;
+        byte activeTerrain, activeSpecialFeature;
 
-        float activeElevation = 0f;
+        byte activeElevation;
         public Text ElevationText;
 
-        float activeWaterLevel = 0f;
+        byte activeWaterLevel;
         public Text WaterLevelText;
 
         bool addRivers = true;
@@ -29,7 +31,7 @@ namespace DarkDomains
 
         bool addWalls = true;
 
-        float activeUrbanLevel, activeFarmLevel, activeForestLevel;
+        byte activeUrbanLevel, activeFarmLevel, activeForestLevel;
         public Text UrbanLevelText, FarmLevelText, ForestLevelText;
         
         int brushSize = 1;
@@ -99,9 +101,9 @@ namespace DarkDomains
             if (Mode == BrushMode.Terrain)
                 cell.TerrainTypeIndex = activeTerrain;
             if(Mode == BrushMode.Elevation)
-                cell.Elevation = (int)activeElevation;
+                cell.Elevation = activeElevation;
             if(Mode == BrushMode.WaterLevel)
-                cell.WaterLevel = (int)activeWaterLevel;
+                cell.WaterLevel = activeWaterLevel;
             if(Mode == BrushMode.Rivers && !addRivers)
                 cell.RemoveRiver();
             if(Mode == BrushMode.Rivers && addRivers && isDrag)
@@ -112,9 +114,9 @@ namespace DarkDomains
                 previousCell.AddRoad(dragDirection); 
             if(Mode == BrushMode.Features)
             {
-                cell.UrbanLevel = (int)activeUrbanLevel;
-                cell.FarmLevel = (int)activeFarmLevel;
-                cell.ForestLevel = (int)activeForestLevel;
+                cell.UrbanLevel = activeUrbanLevel;
+                cell.FarmLevel = activeFarmLevel;
+                cell.ForestLevel = activeForestLevel;
             }
             if(Mode == BrushMode.Walls)
                 cell.Walled = addWalls;
@@ -139,35 +141,35 @@ namespace DarkDomains
             Debug.Log("Mode is now " + Mode);
         }
 
-        public void SelectTerrain(int index) => activeTerrain = index;
+        public void SelectTerrain(int index) => activeTerrain = (byte)index;
 
         public void SelectElevation(float amount)
         {
-            activeElevation = amount;
+            activeElevation = (byte)amount;
             ElevationText.text = amount.ToString();
         }
 
         public void SelectWaterLevel(float amount)
         {
-            activeWaterLevel = amount;
+            activeWaterLevel = (byte)amount;
             WaterLevelText.text = amount.ToString();
         }
 
         public void SelectUrbanFeatureLevel(float amount)
         {
-            activeUrbanLevel = amount;
+            activeUrbanLevel = (byte)amount;
             UrbanLevelText.text = amount.ToString();
         }
 
         public void SelectFarmFeatureLevel(float amount)
         {
-            activeFarmLevel = amount;
+            activeFarmLevel = (byte)amount;
             FarmLevelText.text = amount.ToString();
         }
 
         public void SelectForestFeatureLevel(float amount)
         {
-            activeForestLevel = amount;
+            activeForestLevel = (byte)amount;
             ForestLevelText.text = amount.ToString();
         }
 
@@ -183,7 +185,7 @@ namespace DarkDomains
 
         public void AddWalls(bool value) => addWalls = value;
 
-        public void SelectSpecialFeature(int index) => activeSpecialFeature = index;
+        public void SelectSpecialFeature(int index) => activeSpecialFeature = (byte)index;
 
         public void ShowUI(bool visible) => HexGrid.ShowUI(visible);
 
@@ -191,16 +193,29 @@ namespace DarkDomains
 
         public void Save()
         {
-            using (var file = File.OpenWrite(SavePath()))
+            using (var file = File.Open(SavePath(), FileMode.Create))
             using (var writer = new BinaryWriter(file))
-            { HexGrid.Save(writer); }
+            { 
+                writer.Write(version);
+                HexGrid.Save(writer); 
+            }
+            Debug.Log("Saved to " + SavePath());
         }
 
         public void Load()
         {
             using (var file = File.OpenRead(SavePath()))
             using (var reader = new BinaryReader(file))
-            { HexGrid.Load(reader); }
+            { 
+                var fileVersion = reader.ReadInt32();
+                if(fileVersion != version)
+                    Debug.Log("invalid version in save file: " + fileVersion);
+                else
+                {
+                    HexGrid.Load(reader); 
+                    Debug.Log("Loaded from " + SavePath());
+                }
+            }
         }
     }
 }
