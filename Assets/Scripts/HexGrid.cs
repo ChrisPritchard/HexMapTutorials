@@ -7,10 +7,10 @@ namespace DarkDomains
 
     public class HexGrid : MonoBehaviour
     {
-        public int ChunkCountX = 4, ChunkCountZ = 3;
+        private int chunkCountX = 8, chunkCountZ = 6;
 
-        public int CellCountX => ChunkCountX * HexMetrics.ChunkSizeX;
-        public int CellCountZ => ChunkCountZ * HexMetrics.ChunkSizeZ;
+        public int CellCountX => chunkCountX * HexMetrics.ChunkSizeX;
+        public int CellCountZ => chunkCountZ * HexMetrics.ChunkSizeZ;
 
         public Color DefaultColour = Color.white;
 
@@ -44,10 +44,10 @@ namespace DarkDomains
 
         private void CreateChunks()
         {
-            chunks = new HexGridChunk[ChunkCountX * ChunkCountZ];
+            chunks = new HexGridChunk[chunkCountX * chunkCountZ];
 
-            for(var z = 0; z < ChunkCountZ; z++)
-                for(var x = 0; x < ChunkCountX; x++)
+            for(var z = 0; z < chunkCountZ; z++)
+                for(var x = 0; x < chunkCountX; x++)
                     CreateChunk(x, z);
         }
 
@@ -57,7 +57,7 @@ namespace DarkDomains
             chunk.transform.SetParent(this.transform);
             chunk.ShowUI(false);
 
-            var index = z * ChunkCountX + x;
+            var index = z * chunkCountX + x;
             chunks[index] = chunk;
         }
 
@@ -111,6 +111,8 @@ namespace DarkDomains
 
             // defaults - will trigger an initial perturb of height          
             cell.Elevation = 0;
+            cell.TerrainTypeIndex = 2; // mud
+            cell.WaterLevel = 1; // covered in water
 
             AddCellToChunk(x, z, cell);
         }
@@ -119,7 +121,7 @@ namespace DarkDomains
         {
             var chunkX = x / HexMetrics.ChunkSizeX;
             var chunkZ = z / HexMetrics.ChunkSizeZ;
-            var chunk = chunks[chunkZ * ChunkCountX + chunkX];
+            var chunk = chunks[chunkZ * chunkCountX + chunkX];
 
             var localX = x - chunkX * HexMetrics.ChunkSizeX; // index in chunk
             var localZ = z - chunkZ * HexMetrics.ChunkSizeZ;

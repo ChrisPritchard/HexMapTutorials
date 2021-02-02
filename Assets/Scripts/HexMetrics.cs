@@ -48,7 +48,7 @@ namespace DarkDomains
 
         public static Texture2D NoiseSource;
 
-        public const int ChunkSizeX = 5, ChunkSizeZ = 5; // this can be tweaked, but note that the full map will always be a multiple of theses
+        public const int ChunkSizeX = 5, ChunkSizeZ = 5; // this can be tweaked, but note that the full map will always be a multiple of these
 
         public const float StreamBedElevationOffset = -1.75f;
 

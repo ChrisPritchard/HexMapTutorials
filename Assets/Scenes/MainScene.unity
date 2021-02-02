@@ -10419,8 +10419,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d75addb8fa9ebf40882d498f9bac628, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ChunkCountX: 4
-  ChunkCountZ: 3
+  ChunkCountX: 10
+  ChunkCountZ: 10
   DefaultColour: {r: 1, g: 1, b: 1, a: 1}
   ChunkPrefab: {fileID: 4779644730300728779, guid: 3ef3e9916b1b6bc409c1b3ade8166688,
     type: 3}
