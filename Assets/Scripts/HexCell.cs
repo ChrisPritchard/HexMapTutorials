@@ -44,18 +44,9 @@ namespace DarkDomains
                     return;
 
                 elevation = value;
-
-                var position = transform.localPosition;
-                position.y = elevation * HexMetrics.ElevationStep;
-                position.y += (HexMetrics.SampleNoise(position).y * 2f - 1f) * HexMetrics.ElevationPerturbStrength;
-                transform.localPosition = position;
-
-                var uiPosition = UIRect.localPosition;
-                uiPosition.z = -position.y;
-                UIRect.localPosition = uiPosition;
+                RefreshPosition();
 
                 ValidateRivers();
-
                 for(var direction = HexDirection.NE; direction <= HexDirection.NW; direction++)
                     if(HasRoadThroughEdge(direction) && GetElevationDifference(direction) > HexMetrics.MaxRoadSlope)
                         SetRoad((int)direction, false);
@@ -307,6 +298,18 @@ namespace DarkDomains
                 RemoveIncomingRiver();
         }
 
+        private void RefreshPosition()
+        {
+             var position = transform.localPosition;
+            position.y = elevation * HexMetrics.ElevationStep;
+            position.y += (HexMetrics.SampleNoise(position).y * 2f - 1f) * HexMetrics.ElevationPerturbStrength;
+            transform.localPosition = position;
+
+            var uiPosition = UIRect.localPosition;
+            uiPosition.z = -position.y;
+            UIRect.localPosition = uiPosition;
+        }
+
         public void Save(BinaryWriter writer)
         {
             writer.Write(elevation);
@@ -327,7 +330,7 @@ namespace DarkDomains
 
         public void Load(BinaryReader reader)
         {
-            Elevation = reader.ReadInt32();
+            elevation = reader.ReadInt32();
             waterLevel = reader.ReadInt32();
             terrainTypeIndex = reader.ReadInt32();
             for(var i = 0; i < roads.Length; i++)
@@ -341,6 +344,8 @@ namespace DarkDomains
             forestLevel = reader.ReadInt32();
             specialFeatureIndex = reader.ReadInt32();
             walled = reader.ReadBoolean();
+
+            RefreshPosition();
         }
     }
 }
