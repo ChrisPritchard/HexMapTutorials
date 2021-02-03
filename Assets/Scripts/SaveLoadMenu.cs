@@ -8,7 +8,7 @@ namespace DarkDomains
     
     public class SaveLoadMenu : MonoBehaviour 
     {
-        const int version = 1;
+        const int version = 0;
         
         public HexGrid HexGrid;
         public HexMapCamera HexMapCamera;
@@ -16,6 +16,9 @@ namespace DarkDomains
         public Text Heading;
         public Text ActionButton;
         public ScrollRect FolderView;
+        public InputField FileName;
+
+        public SaveLoadFileItem ItemPrefab;
 
         private Action onAction;
 
@@ -23,6 +26,8 @@ namespace DarkDomains
         {
             HexMapCamera.Locked = true;
             gameObject.SetActive(true);
+
+            ResetView();
 
             if(saveMode)
             {
@@ -40,9 +45,42 @@ namespace DarkDomains
 
         public void OnAction() => onAction();
 
+        public void Select(string file) => FileName.text = file;
+
+        private void ResetView()
+        {
+            FileName.text = "";
+            var files = FolderView.content.GetComponentsInChildren<SaveLoadFileItem>();
+            foreach(var file in files)
+                Destroy(file.gameObject);
+
+            var existing = Directory.GetFiles(Application.persistentDataPath, "*.map");
+            Array.Sort(existing);
+            foreach(var file in existing)
+            {
+                var instance = Instantiate(ItemPrefab);
+                instance.Label.text = Path.GetFileNameWithoutExtension(file);
+                instance.Menu = this;
+                instance.transform.SetParent(FolderView.content);
+            }
+        }
+
         public void Delete()
         {
+            if(FileName.text.Trim().Length == 0)
+                return;
+            var path = Path.Combine(Application.persistentDataPath, FileName.text + ".map");
 
+            if(!File.Exists(path))
+            {
+                Debug.Log("File " + FileName.text + " does not exist");
+                return;
+            }
+            
+            // todo confirm
+
+            File.Delete(path);
+            ResetView();
         }
 
         public void Hide()
@@ -51,11 +89,15 @@ namespace DarkDomains
             HexMapCamera.Locked = false;
         }
 
-        private string SavePath() => Path.Combine(Application.persistentDataPath, "test.map");
-
         private void SaveMap()
         {
-            using (var file = File.Open(SavePath(), FileMode.Create))
+            if(FileName.text.Trim().Length == 0)
+                return;
+            var path = Path.Combine(Application.persistentDataPath, FileName.text + ".map");
+
+            // todo confirm overwrite
+
+            using (var file = File.Open(path, FileMode.Create))
             using (var writer = new BinaryWriter(file))
             { 
                 writer.Write(version);
@@ -67,17 +109,24 @@ namespace DarkDomains
 
         private void LoadMap()
         {
-            using (var file = File.OpenRead(SavePath()))
+            if(FileName.text.Trim().Length == 0)
+                return;
+            var path = Path.Combine(Application.persistentDataPath, FileName.text + ".map");
+
+            if(!File.Exists(path))
+            {
+                Debug.Log("File " + FileName.text + " does not exist");
+                return;
+            }
+
+            using (var file = File.OpenRead(path))
             using (var reader = new BinaryReader(file))
             { 
                 var fileVersion = reader.ReadInt32();
                 if(fileVersion != version)
                     Debug.Log("invalid version in save file: " + fileVersion);
                 else
-                {
-                    HexGrid.Load(reader); 
-                    Debug.Log("Loaded from " + SavePath());
-                }
+                    HexGrid.Load(reader);
             }
             
             HexMapCamera.ValidatePosition();

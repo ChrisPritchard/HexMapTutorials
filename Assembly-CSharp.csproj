@@ -48,6 +48,7 @@
      <Compile Include="Assets\Scripts\HexMetrics.cs" />
      <Compile Include="Assets\Scripts\ListPool.cs" />
      <Compile Include="Assets\Scripts\NewGameMenu.cs" />
+     <Compile Include="Assets\Scripts\SaveLoadFileItem.cs" />
      <Compile Include="Assets\Scripts\SaveLoadMenu.cs" />
      <None Include="Assets\Shaders\Estuaries.shader" />
      <None Include="Assets\Shaders\Water.shader" />
