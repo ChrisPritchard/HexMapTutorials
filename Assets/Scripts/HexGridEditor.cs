@@ -1,7 +1,6 @@
 
 namespace DarkDomains
 {
-    using System.IO;
     using UnityEngine;
     using UnityEngine.UI;
     using UnityEngine.EventSystems;
@@ -10,8 +9,6 @@ namespace DarkDomains
 
     public class HexGridEditor : MonoBehaviour 
     {
-        const int version = 0;
-
         public HexGrid HexGrid;
         public HexMapCamera HexMapCamera;
 
@@ -47,6 +44,8 @@ namespace DarkDomains
         HexCell prevPreviousCell;
 
         public NewGameMenu NewGameMenu;
+
+        public SaveLoadMenu SaveLoadMenu;
 
         private void Awake() 
         {
@@ -192,36 +191,9 @@ namespace DarkDomains
 
         public void ShowUI(bool visible) => HexGrid.ShowUI(visible);
 
-        private string SavePath() => Path.Combine(Application.persistentDataPath, "test.map");
+        public void Save() => SaveLoadMenu.Show(true);
 
-        public void Save()
-        {
-            using (var file = File.Open(SavePath(), FileMode.Create))
-            using (var writer = new BinaryWriter(file))
-            { 
-                writer.Write(version);
-                HexGrid.Save(writer); 
-            }
-            Debug.Log("Saved to " + SavePath());
-        }
-
-        public void Load()
-        {
-            using (var file = File.OpenRead(SavePath()))
-            using (var reader = new BinaryReader(file))
-            { 
-                var fileVersion = reader.ReadInt32();
-                if(fileVersion != version)
-                    Debug.Log("invalid version in save file: " + fileVersion);
-                else
-                {
-                    HexGrid.Load(reader); 
-                    Debug.Log("Loaded from " + SavePath());
-                }
-            }
-            
-            HexMapCamera.ValidatePosition();
-        }
+        public void Load() => SaveLoadMenu.Show(false);
 
         public void NewGame() => NewGameMenu.Show();
     }
