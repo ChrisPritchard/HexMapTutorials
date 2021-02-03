@@ -274,7 +274,7 @@ namespace DarkDomains
                 // im underwater but the neighbour is heigher than me
                 else if (cell.IsUnderwater && !neighbour.IsUnderwater && neighbour.Elevation > cell.WaterLevel)
                     TriangulateWaterfallInWater(
-                            e2.v2, e2.v4, e1.v2, e1.v4, 
+                            e2.v4, e2.v2, e1.v4, e1.v2, 
                             neighbour.RiverSurfaceY, cell.RiverSurfaceY,
                             cell.WaterLevel);
                 else if ((cell.IsUnderwater == neighbour.IsUnderwater == true) // both underwater
