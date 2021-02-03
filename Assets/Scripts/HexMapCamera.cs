@@ -16,6 +16,8 @@ namespace DarkDomains
         public float MoveSpeedMinZoom, MoveSpeedMaxZoom;
         public float RotationSpeed;
 
+        public bool Locked = false;
+
         private void Awake() 
         {
             swivel = transform.GetChild(0);
@@ -26,6 +28,9 @@ namespace DarkDomains
 
         private void Update() 
         {
+            if(Locked)
+                return;
+
             var zoomDelta = Input.GetAxis("Mouse ScrollWheel");
             if (zoomDelta != 0f) 
                 AdjustZoom(zoomDelta);
@@ -78,5 +83,7 @@ namespace DarkDomains
                 rotationAngle -= 360f;
             transform.localRotation = Quaternion.Euler(0f, rotationAngle, 0f);
         }
+
+        public void ValidatePosition() => AdjustPosition(0, 0); // will trigger a clamp if outside of camera bounds
     }
 }

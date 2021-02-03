@@ -260,7 +260,7 @@ namespace DarkDomains
 
         public void AddSpecialFeature(HexCell cell, Vector3 position)
         {
-            var instance = Instantiate(SpecialFeatures[(int)cell.SpecialFeatureIndex+1]);
+            var instance = Instantiate(SpecialFeatures[(int)cell.SpecialFeatureIndex-1]);
             instance.localPosition = HexMetrics.Perturb(position);
             var hash = HexMetrics.SampleHashGrid(position);
             instance.localRotation = Quaternion.Euler(0f, 360f * hash.E, 0f);

@@ -29,8 +29,7 @@ namespace DarkDomains
             HexMetrics.NoiseSource = NoiseSource;
             HexMetrics.InitialiseHashGrid(Seed);
 
-            CreateChunks();
-            CreateCells();
+            CreateMap(8, 6);
         }
 
         private void OnEnable() 
@@ -40,6 +39,19 @@ namespace DarkDomains
 
             HexMetrics.NoiseSource = NoiseSource;
             HexMetrics.InitialiseHashGrid(Seed);
+        }
+
+        public void CreateMap(int xChunks, int zChunks)
+        {
+            if(chunks != null)
+                foreach(var chunk in chunks)
+                    Destroy(chunk.gameObject);
+
+            chunkCountX = xChunks;
+            chunkCountZ = zChunks;
+
+            CreateChunks();
+            CreateCells();
         }
 
         private void CreateChunks()
@@ -150,12 +162,19 @@ namespace DarkDomains
 
         public void Save(BinaryWriter writer)
         {
+            writer.Write(chunkCountX);
+            writer.Write(chunkCountZ);
+
             foreach(var cell in cells)
                 cell.Save(writer);
         }
 
         public void Load(BinaryReader reader)
         {
+            var cX = reader.ReadInt32();
+            var cY = reader.ReadInt32();
+            CreateMap(cX, cY); // ensures the right size max is created
+
             foreach(var cell in cells)
                 cell.Load(reader);
             foreach(var chunk in chunks)

@@ -13,6 +13,7 @@ namespace DarkDomains
         const int version = 0;
 
         public HexGrid HexGrid;
+        public HexMapCamera HexMapCamera;
 
         public BrushMode Mode;
         public GameObject[] BrushOptions;
@@ -44,6 +45,8 @@ namespace DarkDomains
         HexDirection dragDirection;
         HexCell previousCell;
         HexCell prevPreviousCell;
+
+        public NewGameMenu NewGameMenu;
 
         private void Awake() 
         {
@@ -216,6 +219,10 @@ namespace DarkDomains
                     Debug.Log("Loaded from " + SavePath());
                 }
             }
+            
+            HexMapCamera.ValidatePosition();
         }
+
+        public void NewGame() => NewGameMenu.Show();
     }
 }
