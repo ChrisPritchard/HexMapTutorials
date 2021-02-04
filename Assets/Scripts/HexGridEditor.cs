@@ -11,6 +11,7 @@ namespace DarkDomains
     {
         public HexGrid HexGrid;
         public HexMapCamera HexMapCamera;
+        public Material TerrainMaterial;
 
         public BrushMode Mode;
         public GameObject[] BrushOptions;
@@ -189,7 +190,14 @@ namespace DarkDomains
 
         public void SelectSpecialFeature(int index) => activeSpecialFeature = (byte)index;
 
-        public void ShowUI(bool visible) => HexGrid.ShowUI(visible);
+        public void ShowUI(bool visible)
+        {
+            HexGrid.ShowUI(visible);
+            if(visible)
+                TerrainMaterial.EnableKeyword("GRID_ON");
+            else
+                TerrainMaterial.DisableKeyword("GRID_ON");
+        }
 
         public void Save() => SaveLoadMenu.Show(true);
 
