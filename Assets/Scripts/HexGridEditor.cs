@@ -44,6 +44,8 @@ namespace DarkDomains
         HexCell previousCell;
         HexCell prevPreviousCell;
 
+        bool editMode = true;
+
         public NewGameMenu NewGameMenu;
 
         public SaveLoadMenu SaveLoadMenu;
@@ -53,6 +55,7 @@ namespace DarkDomains
             camera = Camera.main;
             eventSystem = EventSystem.current;
             SelectBrushMode(0); // start with terrain options shown
+            TerrainMaterial.DisableKeyword("GRID_ON");
         }
 
         private void Update() 
@@ -69,7 +72,10 @@ namespace DarkDomains
             if (Physics.Raycast(inputRay, out RaycastHit hit))
             {
                 var target = HexGrid.GetCell(hit.point);
-                EditCells(target);
+                if(editMode)
+                    EditCells(target);
+                else
+                    HexGrid.FindDistancesTo(target);
                 prevPreviousCell = previousCell;
                 previousCell = target;
             }
@@ -190,13 +196,18 @@ namespace DarkDomains
 
         public void SelectSpecialFeature(int index) => activeSpecialFeature = (byte)index;
 
-        public void ShowUI(bool visible)
+        public void ShowGrid(bool visible)
         {
-            HexGrid.ShowUI(visible);
             if(visible)
                 TerrainMaterial.EnableKeyword("GRID_ON");
             else
                 TerrainMaterial.DisableKeyword("GRID_ON");
+        }
+
+        public void SetEditMode(bool active)
+        {
+            editMode = active;
+            HexGrid.ShowUI(!active);
         }
 
         public void Save() => SaveLoadMenu.Show(true);

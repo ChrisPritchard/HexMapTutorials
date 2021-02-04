@@ -50,5 +50,12 @@ namespace DarkDomains
         }
 
         public bool IsTheSameAs(HexCoordinates other) => other.X == X && other.Y == Y && other.Z == Z;
+
+        internal int DistanceTo(HexCoordinates other) =>
+            (
+                (X < other.X ? other.X - X : X - other.X) + 
+                (Y < other.Y ? other.Y - Y : Y - other.Y) + 
+                (Z < other.Z ? other.Z - Z : Z - other.Z)
+            ) / 2;
     }
 }

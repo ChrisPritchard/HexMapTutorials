@@ -118,7 +118,6 @@ namespace DarkDomains
 
             var label = Instantiate<Text>(CellLabelPrefab);
             label.rectTransform.anchoredPosition = new Vector2(position.x, position.z);
-            label.text = cell.Coordinates.ToString("\n");
             cell.UIRect = label.rectTransform;
 
             // defaults - will trigger an initial perturb of height          
@@ -157,7 +156,14 @@ namespace DarkDomains
 
         public void ShowUI(bool visible)
         {
-            foreach(var chunk in chunks) chunk.ShowUI(visible);
+            foreach(var chunk in chunks) 
+                chunk.ShowUI(visible);
+        }
+
+        public void FindDistancesTo(HexCell cell)
+        {
+            for(var i = 0; i < cells.Length; i++)
+                cells[i].Distance = cell.Coordinates.DistanceTo(cells[i].Coordinates);
         }
 
         public void Save(BinaryWriter writer)

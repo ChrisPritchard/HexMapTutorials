@@ -3,6 +3,7 @@ namespace DarkDomains
 {
     using System.IO;
     using UnityEngine;
+    using UnityEngine.UI;
 
     public class HexCell : MonoBehaviour
     {
@@ -126,6 +127,19 @@ namespace DarkDomains
                     return;
                 specialFeatureIndex = value;
                 RefreshSelfOnly();
+            }
+        }
+
+        int distance;
+        public int Distance
+        {
+            get => distance;
+            set
+            {
+                if (distance == value)
+                    return;
+                distance = value;
+                UpdateDistanceLabel();
             }
         }
 
@@ -299,6 +313,12 @@ namespace DarkDomains
             var uiPosition = UIRect.localPosition;
             uiPosition.z = -position.y;
             UIRect.localPosition = uiPosition;
+        }
+
+        private void UpdateDistanceLabel()
+        {
+            var label = UIRect.GetComponent<Text>();
+            label.text = distance.ToString();
         }
 
         public void Save(BinaryWriter writer)
