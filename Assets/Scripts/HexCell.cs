@@ -318,7 +318,7 @@ namespace DarkDomains
         private void UpdateDistanceLabel()
         {
             var label = UIRect.GetComponent<Text>();
-            label.text = distance.ToString();
+            label.text = distance == int.MaxValue ? "" : distance.ToString();
         }
 
         public void Save(BinaryWriter writer)

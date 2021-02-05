@@ -2,6 +2,7 @@
 namespace DarkDomains
 {
     using System.Collections;
+    using System.Collections.Generic;
     using System.IO;
     using UnityEngine;
     using UnityEngine.UI;
@@ -169,11 +170,54 @@ namespace DarkDomains
 
         IEnumerator Search(HexCell cell)
         {
-            var delay = new WaitForSeconds(1 / 60f);
             for(var i = 0; i < cells.Length; i++)
+                cells[i].Distance = int.MaxValue;
+
+            var delay = new WaitForSeconds(1 / 60f);
+
+            cell.Distance = 0;
+            var frontier = new List<HexCell> { cell };
+                        
+            while(frontier.Count > 0)
             {
                 yield return delay;
-                cells[i].Distance = cell.Coordinates.DistanceTo(cells[i].Coordinates);
+
+                var current = frontier[0];
+                frontier.RemoveAt(0);
+
+                for(var d = HexDirection.NE; d <= HexDirection.NW; d++)
+                {
+                    var neighbour = current.Neighbours[(int)d];
+
+                    if(neighbour == null || neighbour.IsUnderwater)
+                        continue;
+
+                    var edgeType = current.GetEdgeType(neighbour);
+                    if(edgeType == HexEdgeType.Cliff)
+                        continue;
+
+                    var distance = 10;
+                    if(current.HasRoadThroughEdge(d))
+                        distance = 1;
+                    else if(current.Walled != neighbour.Walled)
+                        continue;
+                    else
+                    {
+                        if (edgeType == HexEdgeType.Flat)
+                            distance = 5;
+                        distance += neighbour.UrbanLevel + neighbour.FarmLevel + neighbour.ForestLevel;
+                    }
+                    var newDistance = current.Distance + distance;
+
+                    if(neighbour.Distance == int.MaxValue)
+                    {
+                        neighbour.Distance = newDistance;
+                        frontier.Add(neighbour);
+                    } else if(newDistance < neighbour.Distance)
+                        neighbour.Distance = newDistance;
+                }
+
+                frontier.Sort((a, b) => a.Distance.CompareTo(b.Distance));
             }
         }
 
