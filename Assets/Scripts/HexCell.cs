@@ -37,6 +37,7 @@ namespace DarkDomains
         public HexCell PathFrom { get; set; }
         public int SearchHeuristic { get; set; }
         public int SearchPriority => distance + SearchHeuristic;
+        public HexCell NextWithSamePriority { get; set; }
 
         private byte terrainTypeIndex;
         public byte TerrainTypeIndex
