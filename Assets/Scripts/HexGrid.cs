@@ -229,6 +229,7 @@ namespace DarkDomains
                     {
                         neighbour.Distance = newDistance;
                         neighbour.PathFrom = current;
+                        neighbour.SearchHeuristic = neighbour.Coordinates.DistanceTo(toCell.Coordinates);
                         frontier.Add(neighbour);
                     } 
                     else if(newDistance < neighbour.Distance)
@@ -238,7 +239,7 @@ namespace DarkDomains
                     }
                 }
 
-                frontier.Sort((a, b) => a.Distance.CompareTo(b.Distance));
+                frontier.Sort((a, b) => a.SearchPriority.CompareTo(b.SearchPriority));
             }
         }
 
