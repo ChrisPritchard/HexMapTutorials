@@ -54,6 +54,7 @@
      <None Include="Assets\Shaders\Water.shader" />
      <None Include="Assets\Shaders\Roads.shader" />
      <None Include="Assets\Shaders\WaterShore.shader" />
+     <None Include="Assets\Shaders\Highlight.shader" />
      <None Include="Assets\Shaders\Rivers.shader" />
      <None Include="Assets\Shaders\WaterShared.cginc" />
      <None Include="Assets\Shaders\Terrain.shader" />

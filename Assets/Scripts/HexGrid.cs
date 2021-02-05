@@ -162,21 +162,26 @@ namespace DarkDomains
                 chunk.ShowUI(visible);
         }
 
-        public void FindDistancesTo(HexCell cell)
+        public void FindPath(HexCell fromCell, HexCell toCell)
         {
             StopAllCoroutines();
-            StartCoroutine(Search(cell));
+            StartCoroutine(Search(fromCell, toCell));
         }
 
-        IEnumerator Search(HexCell cell)
+        IEnumerator Search(HexCell fromCell, HexCell toCell)
         {
             for(var i = 0; i < cells.Length; i++)
+            {
                 cells[i].Distance = int.MaxValue;
+                cells[i].DisableHighlight();
+            }
+            fromCell.EnableHighlight(Color.blue);
+            toCell.EnableHighlight(Color.red);
 
             var delay = new WaitForSeconds(1 / 60f);
 
-            cell.Distance = 0;
-            var frontier = new List<HexCell> { cell };
+            fromCell.Distance = 0;
+            var frontier = new List<HexCell> { fromCell };
                         
             while(frontier.Count > 0)
             {
@@ -184,6 +189,17 @@ namespace DarkDomains
 
                 var current = frontier[0];
                 frontier.RemoveAt(0);
+
+                if(current == toCell)
+                {
+                    current = current.PathFrom;
+                    while(current != fromCell)
+                    {
+                        current.EnableHighlight(Color.white);
+                        current = current.PathFrom;
+                    }
+                    break;
+                }
 
                 for(var d = HexDirection.NE; d <= HexDirection.NW; d++)
                 {
@@ -212,9 +228,14 @@ namespace DarkDomains
                     if(neighbour.Distance == int.MaxValue)
                     {
                         neighbour.Distance = newDistance;
+                        neighbour.PathFrom = current;
                         frontier.Add(neighbour);
-                    } else if(newDistance < neighbour.Distance)
+                    } 
+                    else if(newDistance < neighbour.Distance)
+                    {
                         neighbour.Distance = newDistance;
+                        neighbour.PathFrom = current;
+                    }
                 }
 
                 frontier.Sort((a, b) => a.Distance.CompareTo(b.Distance));

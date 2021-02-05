@@ -41,7 +41,7 @@ namespace DarkDomains
 
         bool isDrag;
         HexDirection dragDirection;
-        HexCell previousCell;
+        HexCell previousCell, searchFromCell, searchToCell;
         HexCell prevPreviousCell;
 
         bool editMode = true;
@@ -74,8 +74,19 @@ namespace DarkDomains
                 var target = HexGrid.GetCell(hit.point);
                 if(editMode)
                     EditCells(target);
+                else if (Input.GetKey(KeyCode.LeftShift))
+                {
+                    searchFromCell = target;
+                    if(searchToCell && searchToCell != target)
+                        HexGrid.FindPath(searchFromCell, searchToCell);
+                } 
                 else
-                    HexGrid.FindDistancesTo(target);
+                {
+                    searchToCell = target;
+                    if(searchFromCell && searchFromCell != target)
+                        HexGrid.FindPath(searchFromCell, searchToCell);
+                }
+                    
                 prevPreviousCell = previousCell;
                 previousCell = target;
             }

@@ -21,6 +21,8 @@ namespace DarkDomains
 
         public Vector3 Position => transform.localPosition;
 
+        public HexCell PathFrom { get; set; }
+
         private byte terrainTypeIndex;
         public byte TerrainTypeIndex
         {
@@ -319,6 +321,15 @@ namespace DarkDomains
         {
             var label = UIRect.GetComponent<Text>();
             label.text = distance == int.MaxValue ? "" : distance.ToString();
+        }
+
+        public void DisableHighlight() => UIRect.GetChild(0).GetComponent<Image>().enabled = false;
+
+        public void EnableHighlight(Color colour)
+        {
+            var highlight = UIRect.GetChild(0).GetComponent<Image>();
+            highlight.color = colour;
+            highlight.enabled = true;
         }
 
         public void Save(BinaryWriter writer)
