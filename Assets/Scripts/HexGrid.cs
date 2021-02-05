@@ -1,6 +1,7 @@
 
 namespace DarkDomains
 {
+    using System.Collections;
     using System.IO;
     using UnityEngine;
     using UnityEngine.UI;
@@ -162,8 +163,18 @@ namespace DarkDomains
 
         public void FindDistancesTo(HexCell cell)
         {
+            StopAllCoroutines();
+            StartCoroutine(Search(cell));
+        }
+
+        IEnumerator Search(HexCell cell)
+        {
+            var delay = new WaitForSeconds(1 / 60f);
             for(var i = 0; i < cells.Length; i++)
+            {
+                yield return delay;
                 cells[i].Distance = cell.Coordinates.DistanceTo(cells[i].Coordinates);
+            }
         }
 
         public void Save(BinaryWriter writer)
@@ -177,6 +188,7 @@ namespace DarkDomains
 
         public void Load(BinaryReader reader)
         {
+            StopAllCoroutines();
             var cX = reader.ReadInt32();
             var cY = reader.ReadInt32();
             CreateMap(cX, cY); // ensures the right size max is created
