@@ -77,12 +77,14 @@ namespace DarkDomains
                 else if (Input.GetKey(KeyCode.LeftShift))
                 {
                     searchFromCell = target;
+                    searchFromCell.EnableHighlight(Color.blue);
                     if(searchToCell && searchToCell != target)
                         HexGrid.FindPath(searchFromCell, searchToCell);
                 } 
                 else
                 {
                     searchToCell = target;
+                    searchToCell.EnableHighlight(Color.red);
                     if(searchFromCell && searchFromCell != target)
                         HexGrid.FindPath(searchFromCell, searchToCell);
                 }
