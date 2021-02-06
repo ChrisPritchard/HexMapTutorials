@@ -74,14 +74,14 @@ namespace DarkDomains
                 var target = HexGrid.GetCell(hit.point);
                 if(editMode)
                     EditCells(target);
-                else if (Input.GetKey(KeyCode.LeftShift))
+                else if (Input.GetKey(KeyCode.LeftShift) && searchFromCell != target)
                 {
                     searchFromCell = target;
                     searchFromCell.EnableHighlight(Color.blue);
                     if(searchToCell && searchToCell != target)
                         HexGrid.FindPath(searchFromCell, searchToCell);
                 } 
-                else
+                else if(searchToCell != target)
                 {
                     searchToCell = target;
                     searchToCell.EnableHighlight(Color.red);
