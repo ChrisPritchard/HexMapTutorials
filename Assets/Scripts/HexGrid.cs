@@ -228,7 +228,7 @@ namespace DarkDomains
                         moveCost += neighbour.UrbanLevel + neighbour.FarmLevel + neighbour.ForestLevel;
                     }
                     var distance = current.Distance + moveCost;
-                    var turn = distance * speed;
+                    var turn = distance / speed;
                     if(turn > currentTurn)
                         distance = turn * speed + moveCost;
 

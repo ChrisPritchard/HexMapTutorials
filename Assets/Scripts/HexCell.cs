@@ -21,21 +21,11 @@ namespace DarkDomains
 
         public Vector3 Position => transform.localPosition;
 
-        int distance;
-        public int Distance
-        {
-            get => distance;
-            set
-            {
-                if (distance == value)
-                    return;
-                distance = value;
-            }
-        }
-
+        // search params
+        public int Distance { get; set; }
         public HexCell PathFrom { get; set; }
         public int SearchHeuristic { get; set; }
-        public int SearchPriority => distance + SearchHeuristic;
+        public int SearchPriority => Distance + SearchHeuristic;
         public HexCell NextWithSamePriority { get; set; }
 
         private byte terrainTypeIndex;
