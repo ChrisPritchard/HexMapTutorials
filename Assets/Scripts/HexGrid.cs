@@ -166,12 +166,6 @@ namespace DarkDomains
 
         public void FindPath(HexCell fromCell, HexCell toCell)
         {
-            StopAllCoroutines();
-            StartCoroutine(Search(fromCell, toCell));
-        }
-
-        IEnumerator Search(HexCell fromCell, HexCell toCell)
-        {
             for(var i = 0; i < cells.Length; i++)
             {
                 cells[i].Distance = int.MaxValue;
@@ -179,8 +173,6 @@ namespace DarkDomains
             }
             fromCell.EnableHighlight(Color.blue);
             toCell.EnableHighlight(Color.red);
-
-            var delay = new WaitForSeconds(1 / 60f);
 
             fromCell.Distance = fromCell.SearchHeuristic = 0;
             if(searchFrontier == null)
@@ -191,8 +183,6 @@ namespace DarkDomains
             searchFrontier.Enqueue(fromCell);
             while(searchFrontier.Count > 0)
             {
-                yield return delay;
-
                 var current = searchFrontier.Dequeue();
                 if(current == toCell)
                 {
@@ -258,7 +248,6 @@ namespace DarkDomains
 
         public void Load(BinaryReader reader)
         {
-            StopAllCoroutines();
             var cX = reader.ReadInt32();
             var cY = reader.ReadInt32();
             CreateMap(cX, cY); // ensures the right size max is created
