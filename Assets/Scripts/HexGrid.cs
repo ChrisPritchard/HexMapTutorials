@@ -199,7 +199,7 @@ namespace DarkDomains
                     while(current != fromCell)
                     {
                         current.EnableHighlight(Color.white);
-                        current.SetLabel(currentTurn.ToString());
+                        current.SetLabel((current.Distance / speed).ToString());
                         current = current.PathFrom;
                     }
                     break;
