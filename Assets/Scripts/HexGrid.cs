@@ -71,7 +71,6 @@ namespace DarkDomains
         {
             var chunk = Instantiate<HexGridChunk>(ChunkPrefab);
             chunk.transform.SetParent(this.transform);
-            chunk.ShowUI(false);
 
             var index = z * chunkCountX + x;
             chunks[index] = chunk;
@@ -172,7 +171,7 @@ namespace DarkDomains
                 cells[i].SetLabel("");
                 cells[i].DisableHighlight();
             }
-            
+
             fromCell.EnableHighlight(Color.blue);
             fromCell.Distance = fromCell.SearchHeuristic = 0;
             toCell.EnableHighlight(Color.red);
