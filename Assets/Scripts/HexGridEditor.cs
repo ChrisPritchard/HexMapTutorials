@@ -44,7 +44,7 @@ namespace DarkDomains
         HexCell previousCell, searchFromCell, searchToCell;
         HexCell prevPreviousCell;
 
-        bool editMode = true;
+        bool editMode;
 
         public NewGameMenu NewGameMenu;
 
