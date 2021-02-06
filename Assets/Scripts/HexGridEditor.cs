@@ -79,14 +79,14 @@ namespace DarkDomains
                     searchFromCell = target;
                     searchFromCell.EnableHighlight(Color.blue);
                     if(searchToCell && searchToCell != target)
-                        HexGrid.FindPath(searchFromCell, searchToCell);
+                        HexGrid.FindPath(searchFromCell, searchToCell, 24);
                 } 
                 else if(searchToCell != target)
                 {
                     searchToCell = target;
                     searchToCell.EnableHighlight(Color.red);
                     if(searchFromCell && searchFromCell != target)
-                        HexGrid.FindPath(searchFromCell, searchToCell);
+                        HexGrid.FindPath(searchFromCell, searchToCell, 24);
                 }
                     
                 prevPreviousCell = previousCell;

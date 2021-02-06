@@ -164,13 +164,15 @@ namespace DarkDomains
                 chunk.ShowUI(visible);
         }
 
-        public void FindPath(HexCell fromCell, HexCell toCell)
+        public void FindPath(HexCell fromCell, HexCell toCell, int speed)
         {
             for(var i = 0; i < cells.Length; i++)
             {
                 cells[i].Distance = int.MaxValue;
+                cells[i].SetLabel("");
                 cells[i].DisableHighlight();
             }
+            
             fromCell.EnableHighlight(Color.blue);
             fromCell.Distance = fromCell.SearchHeuristic = 0;
             toCell.EnableHighlight(Color.red);
@@ -190,6 +192,7 @@ namespace DarkDomains
                 //var current = searchFrontier.Dequeue();
                 var current = frontier[0];
                 frontier.RemoveAt(0);
+                var currentTurn = current.Distance / speed;
 
                 if(current == toCell)
                 {
@@ -197,6 +200,7 @@ namespace DarkDomains
                     while(current != fromCell)
                     {
                         current.EnableHighlight(Color.white);
+                        current.SetLabel(currentTurn.ToString());
                         current = current.PathFrom;
                     }
                     break;
@@ -213,31 +217,34 @@ namespace DarkDomains
                     if(edgeType == HexEdgeType.Cliff)
                         continue;
 
-                    var distance = 10;
+                    var moveCost = 10;
                     if(current.HasRoadThroughEdge(d))
-                        distance = 1;
+                        moveCost = 1;
                     else if(current.Walled != neighbour.Walled)
                         continue;
                     else
                     {
                         if (edgeType == HexEdgeType.Flat)
-                            distance = 5;
-                        distance += neighbour.UrbanLevel + neighbour.FarmLevel + neighbour.ForestLevel;
+                            moveCost = 5;
+                        moveCost += neighbour.UrbanLevel + neighbour.FarmLevel + neighbour.ForestLevel;
                     }
-                    var newDistance = current.Distance + distance;
+                    var distance = current.Distance + moveCost;
+                    var turn = distance * speed;
+                    if(turn > currentTurn)
+                        distance = turn * speed + moveCost;
 
                     if(neighbour.Distance == int.MaxValue)
                     {
-                        neighbour.Distance = newDistance;
+                        neighbour.Distance = distance;
                         neighbour.PathFrom = current;
                         neighbour.SearchHeuristic = neighbour.Coordinates.DistanceTo(toCell.Coordinates);
                         //searchFrontier.Enqueue(neighbour);
                         frontier.Add(neighbour);
                     } 
-                    else if(newDistance < neighbour.Distance)
+                    else if(distance < neighbour.Distance)
                     {
                         var oldPriority = neighbour.SearchPriority;
-                        neighbour.Distance = newDistance;
+                        neighbour.Distance = distance;
                         neighbour.PathFrom = current;
                         //searchFrontier.Change(neighbour, oldPriority);
                         frontier.Add(neighbour);

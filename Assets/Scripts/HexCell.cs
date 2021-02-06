@@ -30,7 +30,6 @@ namespace DarkDomains
                 if (distance == value)
                     return;
                 distance = value;
-                UpdateDistanceLabel();
             }
         }
 
@@ -320,11 +319,7 @@ namespace DarkDomains
             UIRect.localPosition = uiPosition;
         }
 
-        private void UpdateDistanceLabel()
-        {
-            var label = UIRect.GetComponent<Text>();
-            label.text = distance == int.MaxValue ? "" : distance.ToString();
-        }
+        public void SetLabel(string text) => UIRect.GetComponent<Text>().text = text;
 
         public void DisableHighlight() => UIRect.GetChild(0).GetComponent<Image>().enabled = false;
 
