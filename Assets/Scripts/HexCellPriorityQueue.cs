@@ -1,6 +1,7 @@
 
 namespace DarkDomains
 {
+    using System;
     using System.Collections.Generic;
 
     public class HexCellPriorityQueue
@@ -36,26 +37,37 @@ namespace DarkDomains
                     return cell;
                 }
             }
-            return null;
+
+            // if this is hit, there is a bug somewhere (or dequeue was called when count was <= 0)
+            throw new IndexOutOfRangeException();
         }
 
+        // re-adds cell to queue with a difference priority
+        // first removes it at the position of the old priority
+        // then re-adds it.
         public void Change(HexCell cell, int oldPriority)
         {
             var current = list[oldPriority];
             var next = current.NextWithSamePriority;
+
+            // remove from list, preserving the stack
             if(current == cell)
-                list[oldPriority] = next;
+                list[oldPriority] = next; // if the cell is top of the stack, set the stack to next
             else
             {
+                // find where it is in the stack
                 while(next != cell)
                 {
                     current = next;
                     next = current.NextWithSamePriority;
                 }
+                // at this point current is the prior cell, next is the cell to remove, and next.next is the cell after
+                // so we attack prior to next.next, snipping out the cell to remove
                 current.NextWithSamePriority = cell.NextWithSamePriority;
             }
-            Enqueue(cell);
-            count --;
+            count --; // cell has been manually removed, so decrement count
+
+            Enqueue(cell); // re-add (which increments count)
         }
 
         public void Clear()

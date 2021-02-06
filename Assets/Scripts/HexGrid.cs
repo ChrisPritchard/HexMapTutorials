@@ -175,8 +175,6 @@ namespace DarkDomains
             fromCell.EnableHighlight(Color.blue);
             fromCell.Distance = fromCell.SearchHeuristic = 0;
             toCell.EnableHighlight(Color.red);
-            
-            var frontier = new List<HexCell>();
 
             if(searchFrontier == null)
                 searchFrontier = new HexCellPriorityQueue();
@@ -184,13 +182,9 @@ namespace DarkDomains
                 searchFrontier.Clear();
             searchFrontier.Enqueue(fromCell);
 
-            frontier.Add(fromCell);
             while(searchFrontier.Count > 0)
-            //while(frontier.Count > 0)
             {
                 var current = searchFrontier.Dequeue();
-                // var current = frontier[0];
-                // frontier.RemoveAt(0);
                 var currentTurn = current.Distance / speed;
 
                 if(current == toCell)
@@ -238,7 +232,6 @@ namespace DarkDomains
                         neighbour.PathFrom = current;
                         neighbour.SearchHeuristic = neighbour.Coordinates.DistanceTo(toCell.Coordinates);
                         searchFrontier.Enqueue(neighbour);
-                        //frontier.Add(neighbour);
                     } 
                     else if(distance < neighbour.Distance)
                     {
@@ -246,11 +239,8 @@ namespace DarkDomains
                         neighbour.Distance = distance;
                         neighbour.PathFrom = current;
                         searchFrontier.Change(neighbour, oldPriority);
-                        //frontier.Add(neighbour);
                     }
                 }
-
-                //frontier.Sort((a, b) => a.SearchPriority.CompareTo(b.SearchPriority));
             }
         }
 
