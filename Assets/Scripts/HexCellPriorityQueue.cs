@@ -5,14 +5,9 @@ namespace DarkDomains
 
     public class HexCellPriorityQueue
     {
-        List<HexCell> list;
+        List<HexCell> list = new List<HexCell>();
         int count = 0;
         int minimum = 0;
-
-        public HexCellPriorityQueue(int capacity)
-        {
-            list = new List<HexCell>(capacity);
-        }
 
         public int Count => count;
 
@@ -20,15 +15,13 @@ namespace DarkDomains
         {
             count ++;
             var priority = cell.SearchPriority;
+            if(priority < minimum)
+                minimum = priority;
 
             while(priority >= list.Count)
                 list.Add(null);
-
             cell.NextWithSamePriority = list[priority];
             list[priority] = cell;
-
-            if(priority < minimum)
-                minimum = priority;
         }
 
         public HexCell Dequeue()
@@ -60,15 +53,16 @@ namespace DarkDomains
                     next = current.NextWithSamePriority;
                 }
                 current.NextWithSamePriority = cell.NextWithSamePriority;
-                Enqueue(cell);
-                count --;
             }
+            Enqueue(cell);
+            count --;
         }
 
         public void Clear()
         {
             list.Clear();
-            count = minimum = 0;
+            count = 0;
+            minimum = int.MaxValue;
         }
     }
 }
