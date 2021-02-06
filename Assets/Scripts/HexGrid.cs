@@ -26,7 +26,7 @@ namespace DarkDomains
         HexGridChunk[] chunks;
         HexCell[] cells;
 
-        HexCellPriorityQueue searchFrontier;
+        //HexCellPriorityQueue searchFrontier;
 
         private void Awake()
         {
@@ -172,18 +172,25 @@ namespace DarkDomains
                 cells[i].DisableHighlight();
             }
             fromCell.EnableHighlight(Color.blue);
-            toCell.EnableHighlight(Color.red);
-
             fromCell.Distance = fromCell.SearchHeuristic = 0;
-            if(searchFrontier == null)
-                searchFrontier = new HexCellPriorityQueue(cells.Length);
-            else
-                searchFrontier.Clear();
+            toCell.EnableHighlight(Color.red);
+            
+            var frontier = new List<HexCell>();
 
-            searchFrontier.Enqueue(fromCell);
-            while(searchFrontier.Count > 0)
+            // if(searchFrontier == null)
+            //     searchFrontier = new HexCellPriorityQueue(cells.Length);
+            // else
+            //     searchFrontier.Clear();
+            // searchFrontier.Enqueue(fromCell);
+
+            frontier.Add(fromCell);
+            //while(searchFrontier.Count > 0)
+            while(frontier.Count > 0)
             {
-                var current = searchFrontier.Dequeue();
+                //var current = searchFrontier.Dequeue();
+                var current = frontier[0];
+                frontier.RemoveAt(0);
+
                 if(current == toCell)
                 {
                     current = current.PathFrom;
@@ -224,16 +231,20 @@ namespace DarkDomains
                         neighbour.Distance = newDistance;
                         neighbour.PathFrom = current;
                         neighbour.SearchHeuristic = neighbour.Coordinates.DistanceTo(toCell.Coordinates);
-                        searchFrontier.Enqueue(neighbour);
+                        //searchFrontier.Enqueue(neighbour);
+                        frontier.Add(neighbour);
                     } 
                     else if(newDistance < neighbour.Distance)
                     {
                         var oldPriority = neighbour.SearchPriority;
                         neighbour.Distance = newDistance;
                         neighbour.PathFrom = current;
-                        searchFrontier.Change(neighbour, oldPriority);
+                        //searchFrontier.Change(neighbour, oldPriority);
+                        frontier.Add(neighbour);
                     }
                 }
+
+                frontier.Sort((a, b) => a.SearchPriority.CompareTo(b.SearchPriority));
             }
         }
 
