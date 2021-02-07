@@ -162,18 +162,21 @@ namespace DarkDomains
         }
 
         HexCellPriorityQueue searchFrontier;
+        int searchFrontierPhase;
 
         public void FindPath(HexCell fromCell, HexCell toCell, int speed)
         {
+            searchFrontierPhase += 2; 
+
             for(var i = 0; i < cells.Length; i++)
             {
-                cells[i].Distance = int.MaxValue;
                 cells[i].SetLabel("");
                 cells[i].DisableHighlight();
             }
 
             fromCell.EnableHighlight(Color.blue);
             fromCell.Distance = fromCell.SearchHeuristic = 0;
+            fromCell.SearchPhase = searchFrontierPhase;
             toCell.EnableHighlight(Color.red);
 
             if(searchFrontier == null)
@@ -185,6 +188,7 @@ namespace DarkDomains
             while(searchFrontier.Count > 0)
             {
                 var current = searchFrontier.Dequeue();
+                current.SearchPhase ++;
                 var currentTurn = current.Distance / speed;
 
                 if(current == toCell)
@@ -203,7 +207,8 @@ namespace DarkDomains
                 {
                     var neighbour = current.Neighbours[(int)d];
 
-                    if(neighbour == null || neighbour.IsUnderwater)
+                    if(neighbour == null || neighbour.IsUnderwater
+                    || neighbour.SearchPhase > searchFrontierPhase)
                         continue;
 
                     var edgeType = current.GetEdgeType(neighbour);
@@ -226,8 +231,9 @@ namespace DarkDomains
                     if(turn > currentTurn)
                         distance = turn * speed + moveCost;
 
-                    if(neighbour.Distance == int.MaxValue)
+                    if(neighbour.SearchPhase < searchFrontierPhase)
                     {
+                        neighbour.SearchPhase = searchFrontierPhase;
                         neighbour.Distance = distance;
                         neighbour.PathFrom = current;
                         neighbour.SearchHeuristic = neighbour.Coordinates.DistanceTo(toCell.Coordinates);
