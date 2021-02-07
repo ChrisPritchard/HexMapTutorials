@@ -227,7 +227,7 @@ namespace DarkDomains
             currentPathTo.EnableHighlight(Color.red);
         }
 
-        private void ClearPath()
+        public void ClearPath()
         {
             if(currentPathExists)
             {
@@ -248,6 +248,8 @@ namespace DarkDomains
             }
             currentPathFrom = currentPathTo = null;
         }
+
+        public bool HasPath => currentPathExists;
 
         private bool Search(HexCell fromCell, HexCell toCell)
         {
@@ -270,20 +272,21 @@ namespace DarkDomains
 
                 current.SearchPhase ++;
 
-                for(var d = HexDirection.NE; d <= HexDirection.NW; d++)
+                for (var d = HexDirection.NE; d <= HexDirection.NW; d++)
                 {
                     var neighbour = current.Neighbours[(int)d];
 
-                    if(neighbour == null || neighbour.IsUnderwater
-                    || neighbour.SearchPhase > searchFrontierPhase)
+                    if (neighbour == null || neighbour.SearchPhase > searchFrontierPhase)
+                        continue;
+                    if (neighbour.IsUnderwater || neighbour.Unit)
                         continue;
 
                     var edgeType = current.GetEdgeType(neighbour);
-                    if(edgeType == HexEdgeType.Cliff)
+                    if (edgeType == HexEdgeType.Cliff)
                         continue;
 
                     var moveCost = 10;
-                    if(current.HasRoadThroughEdge(d))
+                    if (current.HasRoadThroughEdge(d))
                         moveCost = 1;
                     else if(current.Walled != neighbour.Walled)
                         continue;
@@ -295,7 +298,7 @@ namespace DarkDomains
                     }
                     var distance = current.Distance + moveCost;
 
-                    if(neighbour.SearchPhase < searchFrontierPhase)
+                    if (neighbour.SearchPhase < searchFrontierPhase)
                     {
                         neighbour.SearchPhase = searchFrontierPhase;
                         neighbour.Distance = distance;

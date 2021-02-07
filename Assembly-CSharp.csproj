@@ -41,6 +41,7 @@
      <Compile Include="Assets\Scripts\HexCellPriorityQueue.cs" />
      <Compile Include="Assets\Scripts\HexCoordinates.cs" />
      <Compile Include="Assets\Scripts\HexFeatureManager.cs" />
+     <Compile Include="Assets\Scripts\HexGameUI.cs" />
      <Compile Include="Assets\Scripts\HexGrid.cs" />
      <Compile Include="Assets\Scripts\HexGridChunk.cs" />
      <Compile Include="Assets\Scripts\HexGridEditor.cs" />

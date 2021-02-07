@@ -17,6 +17,8 @@ namespace DarkDomains
             {
                 if (location == value)
                     return;
+                if (location)
+                    location.Unit = null;
                 location = value;
                 value.Unit = this;
                 transform.localPosition = value.Position;
@@ -42,6 +44,11 @@ namespace DarkDomains
         {
             location.Unit = null;
             Destroy(gameObject);
+        }
+
+        public bool IsValidDestination(HexCell cell)
+        {
+            return !cell.IsUnderwater && !cell.Unit;
         }
 
         public void Save(BinaryWriter writer)
