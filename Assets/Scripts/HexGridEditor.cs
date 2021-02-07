@@ -41,10 +41,7 @@ namespace DarkDomains
 
         bool isDrag;
         HexDirection dragDirection;
-        HexCell previousCell, searchFromCell, searchToCell;
-        HexCell prevPreviousCell;
-
-        bool editMode;
+        HexCell previousCell, prevPreviousCell;
 
         public NewGameMenu NewGameMenu;
 
@@ -55,7 +52,9 @@ namespace DarkDomains
             camera = Camera.main;
             eventSystem = EventSystem.current;
             SelectBrushMode(0); // start with terrain options shown
+            
             TerrainMaterial.DisableKeyword("GRID_ON");
+            SetEditMode(false);
         }
 
         private void Update() 
@@ -79,9 +78,7 @@ namespace DarkDomains
         private HexCell GetCellUnderCursor() 
         {
             var inputRay = camera.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(inputRay, out RaycastHit hit))
-                return HexGrid.GetCell(hit.point);
-            return null;
+            return HexGrid.GetCell(inputRay);
         }
 
         private void CreateUnit()
@@ -109,22 +106,7 @@ namespace DarkDomains
                 return;
             }
 
-            if(editMode)
-                EditCells(target);
-            else if (Input.GetKey(KeyCode.LeftShift) && searchFromCell != target)
-            {
-                searchFromCell = target;
-                searchFromCell.EnableHighlight(Color.blue);
-                if(searchToCell && searchToCell != target)
-                    HexGrid.FindPath(searchFromCell, searchToCell, 24);
-            } 
-            else if(searchToCell != target)
-            {
-                searchToCell = target;
-                searchToCell.EnableHighlight(Color.red);
-                if(searchFromCell && searchFromCell != target)
-                    HexGrid.FindPath(searchFromCell, searchToCell, 24);
-            }
+            EditCells(target);
                 
             prevPreviousCell = previousCell;
             previousCell = target;
@@ -251,11 +233,7 @@ namespace DarkDomains
                 TerrainMaterial.DisableKeyword("GRID_ON");
         }
 
-        public void SetEditMode(bool active)
-        {
-            editMode = active;
-            HexGrid.ShowUI(!active);
-        }
+        public void SetEditMode(bool active) => enabled = active;
 
         public void Save() => SaveLoadMenu.Show(true);
 

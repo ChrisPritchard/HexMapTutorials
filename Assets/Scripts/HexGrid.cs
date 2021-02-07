@@ -167,6 +167,13 @@ namespace DarkDomains
             return GetCell(coords);
         }
 
+        public HexCell GetCell(Ray ray) 
+        {
+            if (Physics.Raycast(ray, out RaycastHit hit))
+                return GetCell(hit.point);
+            return null;
+        }
+
         public HexCell GetCell(HexCoordinates coords)
         {
             var index = coords.Z *CellCountX + coords.X + coords.Z/2;
