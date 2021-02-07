@@ -11,6 +11,8 @@ namespace DarkDomains
         public HexCoordinates Coordinates;
         public RectTransform UIRect;
 
+        public HexUnit Unit { get; set; }
+
         private bool hasIncomingRiver, hasOutgoingRiver;
         private HexDirection incomingRiver, outgoingRiver;
 
@@ -225,9 +227,17 @@ namespace DarkDomains
             foreach(var neighbour in Neighbours)
                 if(neighbour != null && neighbour.Chunk != Chunk)
                     neighbour.Chunk.Refresh();
+
+            if(Unit)
+                Unit.ValidatePosition();
         }
 
-        public void RefreshSelfOnly() => Chunk?.Refresh();
+        public void RefreshSelfOnly()
+        {
+            Chunk?.Refresh();
+            if(Unit)
+                Unit.ValidatePosition();
+        }
 
         public bool HasRiverThroughEdge(HexDirection direction) =>
             (hasIncomingRiver && incomingRiver == direction) || (hasOutgoingRiver && outgoingRiver == direction);

@@ -13675,6 +13675,8 @@ MonoBehaviour:
   CellLabelPrefab: {fileID: 5023515921265215618, guid: f2ac6604b49dc674882f141860f28fe7,
     type: 3}
   NoiseSource: {fileID: 2800000, guid: 4a316e9ab1b0b824ab53de97d9499c8c, type: 3}
+  UnitPrefab: {fileID: 718214249528212208, guid: eda255bd063f5284faac0aead1b05a51,
+    type: 3}
   Seed: 0
 --- !u!4 &1756129106
 Transform:

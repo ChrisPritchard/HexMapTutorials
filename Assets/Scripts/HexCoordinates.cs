@@ -2,6 +2,7 @@
 namespace DarkDomains
 {
     using System;
+    using System.IO;
     using UnityEngine;
 
     [Serializable]
@@ -51,11 +52,24 @@ namespace DarkDomains
 
         public bool IsTheSameAs(HexCoordinates other) => other.X == X && other.Y == Y && other.Z == Z;
 
-        internal int DistanceTo(HexCoordinates other) =>
+        public int DistanceTo(HexCoordinates other) =>
             (
                 (X < other.X ? other.X - X : X - other.X) + 
                 (Y < other.Y ? other.Y - Y : Y - other.Y) + 
                 (Z < other.Z ? other.Z - Z : Z - other.Z)
             ) / 2;
+
+        public void Save(BinaryWriter writer)
+        {
+            writer.Write(X);
+            writer.Write(Z);
+        }
+
+        public static HexCoordinates Load(BinaryReader reader)
+        {
+            var x = reader.ReadInt32();
+            var z = reader.ReadInt32();
+            return new HexCoordinates(x, z);
+        }
     }
 }

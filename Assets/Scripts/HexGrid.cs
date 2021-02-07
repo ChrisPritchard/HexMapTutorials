@@ -1,7 +1,6 @@
 
 namespace DarkDomains
 {
-    using System.Collections;
     using System.Collections.Generic;
     using System.IO;
     using UnityEngine;
@@ -20,16 +19,19 @@ namespace DarkDomains
         public HexCell CellPrefab;
         public Text CellLabelPrefab;
         public Texture2D NoiseSource;
+        public HexUnit UnitPrefab;
 
         public int Seed;
 
         HexGridChunk[] chunks;
         HexCell[] cells;
+        List<HexUnit> units = new List<HexUnit>();
 
         private void Awake()
         {
             HexMetrics.NoiseSource = NoiseSource;
             HexMetrics.InitialiseHashGrid(Seed);
+            HexUnit.UnitPrefab = UnitPrefab;
 
             CreateMap(8, 6);
         }
@@ -41,11 +43,14 @@ namespace DarkDomains
 
             HexMetrics.NoiseSource = NoiseSource;
             HexMetrics.InitialiseHashGrid(Seed);
+            HexUnit.UnitPrefab = UnitPrefab;
         }
 
         public void CreateMap(int xChunks, int zChunks)
         {
             ClearPath();
+            ClearUnits();
+
             if(chunks != null)
                 foreach(var chunk in chunks)
                     Destroy(chunk.gameObject);
@@ -130,6 +135,20 @@ namespace DarkDomains
             AddCellToChunk(x, z, cell);
         }
 
+        public void AddUnit(HexUnit unit, HexCell location, float orientation)
+        {
+            units.Add(unit);
+            unit.transform.SetParent(transform, false);
+            unit.Location = location;
+            unit.Orientation = orientation;
+        }
+
+        public void RemoveUnit(HexUnit unit)
+        {
+            units.Remove(unit);
+            unit.Die();
+        }
+
         private void AddCellToChunk(int x, int z, HexCell cell)
         {
             var chunkX = x / HexMetrics.ChunkSizeX;
@@ -154,6 +173,13 @@ namespace DarkDomains
             if (index < 0 || index >= cells.Length)
                 return null;
             return cells[index];
+        }
+
+        private void ClearUnits()
+        {
+            foreach(var unit in units)
+                unit.Die();
+            units.Clear();
         }
 
         public void ShowUI(bool visible)
@@ -290,11 +316,17 @@ namespace DarkDomains
 
             foreach(var cell in cells)
                 cell.Save(writer);
+
+            writer.Write(units.Count);
+            foreach(var unit in units)
+                unit.Save(writer);
         }
 
         public void Load(BinaryReader reader)
         {
             ClearPath();
+            ClearUnits();
+
             var cX = reader.ReadInt32();
             var cY = reader.ReadInt32();
             CreateMap(cX, cY); // ensures the right size max is created
@@ -303,6 +335,10 @@ namespace DarkDomains
                 cell.Load(reader);
             foreach(var chunk in chunks)
                 chunk.Refresh();
+
+            var unitCount = reader.ReadInt32();
+            for(var i = 0; i < unitCount; i++)
+                HexUnit.Load(reader, this);
         }
     }
 }

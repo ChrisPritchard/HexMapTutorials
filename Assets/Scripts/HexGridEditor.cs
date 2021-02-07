@@ -60,40 +60,74 @@ namespace DarkDomains
 
         private void Update() 
         {
-            if(Input.GetMouseButton(0) && !eventSystem.IsPointerOverGameObject())
-                HandleInput();
+            if (!eventSystem.IsPointerOverGameObject())
+            {
+                if (Input.GetMouseButton(0))
+                    HandleInput();
+                else if (Input.GetKey(KeyCode.U))
+                {
+                    if(Input.GetKey(KeyCode.LeftShift))
+                        DestroyUnit();
+                    else
+                        CreateUnit();
+                }
+            }
             else
                 previousCell = null;
         }
 
-        private void HandleInput()
+        private HexCell GetCellUnderCursor() 
         {
             var inputRay = camera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(inputRay, out RaycastHit hit))
+                return HexGrid.GetCell(hit.point);
+            return null;
+        }
+
+        private void CreateUnit()
+        {
+            var cell = GetCellUnderCursor();
+            if(!cell || cell.Unit != null)
+                return;
+            HexGrid.AddUnit(Instantiate(HexUnit.UnitPrefab), cell, Random.Range(0f, 360f));
+        }
+
+        private void DestroyUnit()
+        {
+            var cell = GetCellUnderCursor();
+            if(!cell || !cell.Unit)
+                return;
+            HexGrid.RemoveUnit(cell.Unit);
+        }
+
+        private void HandleInput()
+        {
+            var target = GetCellUnderCursor();
+            if(target == null)
             {
-                var target = HexGrid.GetCell(hit.point);
-                if(editMode)
-                    EditCells(target);
-                else if (Input.GetKey(KeyCode.LeftShift) && searchFromCell != target)
-                {
-                    searchFromCell = target;
-                    searchFromCell.EnableHighlight(Color.blue);
-                    if(searchToCell && searchToCell != target)
-                        HexGrid.FindPath(searchFromCell, searchToCell, 24);
-                } 
-                else if(searchToCell != target)
-                {
-                    searchToCell = target;
-                    searchToCell.EnableHighlight(Color.red);
-                    if(searchFromCell && searchFromCell != target)
-                        HexGrid.FindPath(searchFromCell, searchToCell, 24);
-                }
-                    
-                prevPreviousCell = previousCell;
-                previousCell = target;
-            }
-            else
                 previousCell = null;
+                return;
+            }
+
+            if(editMode)
+                EditCells(target);
+            else if (Input.GetKey(KeyCode.LeftShift) && searchFromCell != target)
+            {
+                searchFromCell = target;
+                searchFromCell.EnableHighlight(Color.blue);
+                if(searchToCell && searchToCell != target)
+                    HexGrid.FindPath(searchFromCell, searchToCell, 24);
+            } 
+            else if(searchToCell != target)
+            {
+                searchToCell = target;
+                searchToCell.EnableHighlight(Color.red);
+                if(searchFromCell && searchFromCell != target)
+                    HexGrid.FindPath(searchFromCell, searchToCell, 24);
+            }
+                
+            prevPreviousCell = previousCell;
+            previousCell = target;
         }
 
         private void EditCells(HexCell center)
