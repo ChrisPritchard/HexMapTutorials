@@ -45,6 +45,7 @@ namespace DarkDomains
 
         public void CreateMap(int xChunks, int zChunks)
         {
+            ClearPath();
             if(chunks != null)
                 foreach(var chunk in chunks)
                     Destroy(chunk.gameObject);
@@ -163,21 +164,64 @@ namespace DarkDomains
 
         HexCellPriorityQueue searchFrontier;
         int searchFrontierPhase;
+        HexCell currentPathFrom, currentPathTo;
+        bool currentPathExists;
 
         public void FindPath(HexCell fromCell, HexCell toCell, int speed)
         {
+            ClearPath();
+            currentPathFrom = fromCell;
+            currentPathTo = toCell;
+            currentPathExists = Search(fromCell, toCell);
+            if(currentPathExists)
+                ShowPath(speed);
+        }
+
+        private void ShowPath(int speed)
+        {
+            if(currentPathExists)
+            {
+                var current = currentPathTo;
+                while(current != currentPathFrom)
+                {
+                    var turn = current.Distance / speed;
+                    current.SetLabel(turn.ToString());
+                    current.EnableHighlight(Color.white);
+                    current = current.PathFrom;
+                }
+            }
+            currentPathFrom.EnableHighlight(Color.blue);
+            currentPathTo.EnableHighlight(Color.red);
+        }
+
+        private void ClearPath()
+        {
+            if(currentPathExists)
+            {
+                var current = currentPathTo;
+                while(current != currentPathFrom)
+                {
+                    current.SetLabel("");
+                    current.DisableHighlight();
+                    current = current.PathFrom;
+                }
+                current.DisableHighlight();
+                currentPathExists = false;
+            }
+            else if (currentPathFrom)
+            {
+                currentPathFrom.DisableHighlight();
+                currentPathTo.DisableHighlight();
+            }
+            currentPathFrom = currentPathTo = null;
+        }
+
+        private bool Search(HexCell fromCell, HexCell toCell)
+        {
             searchFrontierPhase += 2; 
 
-            for(var i = 0; i < cells.Length; i++)
-            {
-                cells[i].SetLabel("");
-                cells[i].DisableHighlight();
-            }
-
-            fromCell.EnableHighlight(Color.blue);
-            fromCell.Distance = fromCell.SearchHeuristic = 0;
+            fromCell.Distance = 0;
             fromCell.SearchPhase = searchFrontierPhase;
-            toCell.EnableHighlight(Color.red);
 
             if(searchFrontier == null)
                 searchFrontier = new HexCellPriorityQueue();
@@ -188,20 +232,10 @@ namespace DarkDomains
             while(searchFrontier.Count > 0)
             {
                 var current = searchFrontier.Dequeue();
-                current.SearchPhase ++;
-                var currentTurn = current.Distance / speed;
-
                 if(current == toCell)
-                {
-                    current = current.PathFrom;
-                    while(current != fromCell)
-                    {
-                        current.EnableHighlight(Color.white);
-                        current.SetLabel((current.Distance / speed).ToString());
-                        current = current.PathFrom;
-                    }
-                    break;
-                }
+                    return true;
+
+                current.SearchPhase ++;
 
                 for(var d = HexDirection.NE; d <= HexDirection.NW; d++)
                 {
@@ -227,9 +261,6 @@ namespace DarkDomains
                         moveCost += neighbour.UrbanLevel + neighbour.FarmLevel + neighbour.ForestLevel;
                     }
                     var distance = current.Distance + moveCost;
-                    var turn = distance / speed;
-                    if(turn > currentTurn)
-                        distance = turn * speed + moveCost;
 
                     if(neighbour.SearchPhase < searchFrontierPhase)
                     {
@@ -248,6 +279,8 @@ namespace DarkDomains
                     }
                 }
             }
+
+            return false;
         }
 
         public void Save(BinaryWriter writer)
@@ -261,6 +294,7 @@ namespace DarkDomains
 
         public void Load(BinaryReader reader)
         {
+            ClearPath();
             var cX = reader.ReadInt32();
             var cY = reader.ReadInt32();
             CreateMap(cX, cY); // ensures the right size max is created
