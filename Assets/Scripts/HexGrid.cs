@@ -27,12 +27,14 @@ namespace DarkDomains
         HexCell[] cells;
         List<HexUnit> units = new List<HexUnit>();
 
+        HexCellShaderData cellShaderData;
+
         private void Awake()
         {
             HexMetrics.NoiseSource = NoiseSource;
             HexMetrics.InitialiseHashGrid(Seed);
             HexUnit.UnitPrefab = UnitPrefab;
-
+            cellShaderData = gameObject.AddComponent<HexCellShaderData>();
             CreateMap(8, 6);
         }
 
@@ -57,6 +59,7 @@ namespace DarkDomains
 
             chunkCountX = xChunks;
             chunkCountZ = zChunks;
+            cellShaderData.Initialise(CellCountX, CellCountZ);
 
             CreateChunks();
             CreateCells();
@@ -84,20 +87,23 @@ namespace DarkDomains
         {
             cells = new HexCell[CellCountX * CellCountZ];
 
+            var i = -1;
             for(var z = 0; z < CellCountZ; z++)
                 for(var x = 0; x < CellCountX; x++)
-                    CreateCell(x, z);
+                    CreateCell(x, z, i++);
         }
 
-        private void CreateCell(int x, int z)
+        private void CreateCell(int x, int z, int i)
         {
             var px = (x + z/2f - z/2) * (2 * HexMetrics.InnerRadius);
             var pz = z * (1.5f * HexMetrics.OuterRadius);
             var position = new Vector3(px, 0f, pz);
 
             var cell = Instantiate<HexCell>(CellPrefab);
+            cell.Index = i;
             cell.transform.localPosition = position;
             cell.Coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
+            cell.ShaderData = cellShaderData;
 
             var index = z * CellCountX + x;
             cells[index] = cell;

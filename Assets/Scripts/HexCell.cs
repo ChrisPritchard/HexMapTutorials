@@ -7,10 +7,12 @@ namespace DarkDomains
 
     public class HexCell : MonoBehaviour
     {
+        public int Index { get; set; }
         public HexGridChunk Chunk;
         public HexCoordinates Coordinates;
         public RectTransform UIRect;
 
+        public HexCellShaderData ShaderData { get; set; }
         public HexUnit Unit { get; set; }
 
         private bool hasIncomingRiver, hasOutgoingRiver;
@@ -40,7 +42,7 @@ namespace DarkDomains
                 if (terrainTypeIndex == value)
                     return;
                 terrainTypeIndex = (byte)value;
-                Refresh();
+                ShaderData.RefreshTerrain(this);
             }
         }
 
@@ -355,7 +357,9 @@ namespace DarkDomains
         {
             elevation = reader.ReadByte();
             waterLevel = reader.ReadByte();
+
             terrainTypeIndex = reader.ReadByte();
+            ShaderData.RefreshTerrain(this);
 
             var roadFlags = reader.ReadByte();
             for(var i = 0; i < roads.Length; i++)
