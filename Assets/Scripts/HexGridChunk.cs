@@ -675,10 +675,17 @@ namespace DarkDomains
                 centre + HexMetrics.GetFirstWaterCorner(direction),
                 centre + HexMetrics.GetSecondWaterCorner(direction)
             );
+
             Water.AddTriangle(centre, e1.v1, e1.v2);
             Water.AddTriangle(centre, e1.v2, e1.v3);
             Water.AddTriangle(centre, e1.v3, e1.v4);
             Water.AddTriangle(centre, e1.v4, e1.v5);
+
+            var indices = new Vector3(cell.Index, cell.Index, cell.Index);
+            Water.AddTriangleCellData(indices, weights1);
+            Water.AddTriangleCellData(indices, weights1);
+            Water.AddTriangleCellData(indices, weights1);
+            Water.AddTriangleCellData(indices, weights1);
 
             var centre2 = neighbour.Position;
             centre2.y = centre.y;
@@ -770,6 +777,8 @@ namespace DarkDomains
             var c1 = centre + HexMetrics.GetFirstWaterCorner(direction);
             var c2 = centre + HexMetrics.GetSecondWaterCorner(direction);
             Water.AddTriangle(centre, c1, c2);
+            var indices = new Vector3(cell.Index, cell.Index, cell.Index);
+            Water.AddTriangleCellData(indices, weights1);
 
             if(neighbour == null || direction > HexDirection.SE)
                 return;
@@ -779,6 +788,8 @@ namespace DarkDomains
             var e2 = c2 + bridge;
             
             Water.AddQuad(c1, c2, e1, e2);
+            indices.y = neighbour.Index;
+            Water.AddQuadCellData(indices, weights1, weights2);
 
             if(direction > HexDirection.E)
                 return;
@@ -788,6 +799,8 @@ namespace DarkDomains
                 return;
 
             Water.AddTriangle(c2, e2, c2 + HexMetrics.GetWaterBridge(direction.Next()));
+            indices.z = nextNeighbour.Index;
+            Water.AddTriangleCellData(indices, weights1, weights2, weights3);
         }
     }
 }

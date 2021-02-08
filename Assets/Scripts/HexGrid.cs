@@ -371,12 +371,6 @@ namespace DarkDomains
 
                     if (neighbour == null || neighbour.SearchPhase > searchFrontierPhase)
                         continue;
-                    if (neighbour.IsUnderwater || neighbour.Unit)
-                        continue;
-
-                    var edgeType = current.GetEdgeType(neighbour);
-                    if (edgeType == HexEdgeType.Cliff)
-                        continue;
 
                     var distance = current.Distance + 1;
                     if(distance > range)

@@ -17,7 +17,7 @@
         Offset -1,-1
 
         CGPROGRAM
-        #pragma surface surf Standard fullforwardshadows decal:blend
+        #pragma surface surf Standard fullforwardshadows decal:blend vertex:vert
         #pragma target 3.0
 
         #include "HexCellData.cginc"

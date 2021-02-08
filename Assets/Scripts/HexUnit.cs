@@ -128,7 +128,8 @@ namespace DarkDomains
                 b = pathToTravel[i - 1].Position;
                 c = i == pathToTravel.Count
                     ? b : (b + pathToTravel[i].Position) * 0.5f;
-                Grid.IncreaseVisibility(pathToTravel[i], visionRange);
+                if (i != pathToTravel.Count)
+                    Grid.IncreaseVisibility(pathToTravel[i], visionRange);
                 for(; t < 1f; t += Time.deltaTime * travelSpeed)
                 {
                     transform.localPosition = Bezier.GetPoint(a, b, c, t);
