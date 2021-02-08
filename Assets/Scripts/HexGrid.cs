@@ -145,6 +145,7 @@ namespace DarkDomains
         {
             units.Add(unit);
             unit.transform.SetParent(transform, false);
+            unit.Grid = this;
             unit.Location = location;
             unit.Orientation = orientation;
         }
@@ -340,6 +341,78 @@ namespace DarkDomains
             }
 
             return false;
+        }
+
+        private List<HexCell> GetVisibleCells(HexCell fromCell, int range)
+        {
+            var visibleCells = ListPool<HexCell>.Get();
+
+            searchFrontierPhase += 2; 
+
+            fromCell.Distance = 0;
+            fromCell.SearchPhase = searchFrontierPhase;
+
+            if(searchFrontier == null)
+                searchFrontier = new HexCellPriorityQueue();
+            else
+                searchFrontier.Clear();
+            searchFrontier.Enqueue(fromCell);
+
+            while(searchFrontier.Count > 0)
+            {
+                var current = searchFrontier.Dequeue();
+                current.SearchPhase ++;
+
+                visibleCells.Add(current);
+
+                for (var d = HexDirection.NE; d <= HexDirection.NW; d++)
+                {
+                    var neighbour = current.Neighbours[(int)d];
+
+                    if (neighbour == null || neighbour.SearchPhase > searchFrontierPhase)
+                        continue;
+                    if (neighbour.IsUnderwater || neighbour.Unit)
+                        continue;
+
+                    var edgeType = current.GetEdgeType(neighbour);
+                    if (edgeType == HexEdgeType.Cliff)
+                        continue;
+
+                    var distance = current.Distance + 1;
+                    if(distance > range)
+                        continue;
+
+                    if (neighbour.SearchPhase < searchFrontierPhase)
+                    {
+                        neighbour.SearchPhase = searchFrontierPhase;
+                        neighbour.Distance = distance;
+                        neighbour.SearchHeuristic = 0;
+                        searchFrontier.Enqueue(neighbour);
+                    } 
+                    else if(distance < neighbour.Distance)
+                    {
+                        var oldPriority = neighbour.SearchPriority;
+                        neighbour.Distance = distance;
+                        searchFrontier.Change(neighbour, oldPriority);
+                    }
+                }
+            }
+
+            return visibleCells;
+        }
+
+        public void IncreaseVisibility(HexCell cell, int range)
+        {
+            var cells = GetVisibleCells(cell, range);
+            cells.ForEach(c => c.IncreaseVisibility());
+            ListPool<HexCell>.Add(cells);
+        }
+
+        public void DecreaseVisibility(HexCell cell, int range)
+        {
+            var cells = GetVisibleCells(cell, range);
+            cells.ForEach(c => c.DecreaseVisibility());
+            ListPool<HexCell>.Add(cells);
         }
 
         public void Save(BinaryWriter writer)

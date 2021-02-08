@@ -33,6 +33,23 @@ namespace DarkDomains
         public HexCell NextWithSamePriority { get; set; }
         public int SearchPhase { get; set; }
 
+        private int visibility;
+        public bool IsVisible => visibility > 0;
+
+        public void IncreaseVisibility()
+        {
+            visibility++;
+            if(visibility == 1)
+                ShaderData.RefreshVisibility(this);
+        }
+
+        public void DecreaseVisibility()
+        {
+            visibility--;
+            if(visibility == 0)
+                ShaderData.RefreshVisibility(this);
+        }
+
         private byte terrainTypeIndex;
         public byte TerrainTypeIndex
         {

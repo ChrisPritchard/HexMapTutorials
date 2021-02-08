@@ -37,6 +37,12 @@ namespace DarkDomains
             enabled = true;
         }
 
+        public void RefreshVisibility(HexCell cell)
+        {
+            cellTextureData[cell.Index].r = (byte)(cell.IsVisible ? 255 : 0);
+            enabled = true;
+        }
+
         private void LateUpdate() 
         {
             cellTexture.SetPixels32(cellTextureData);
