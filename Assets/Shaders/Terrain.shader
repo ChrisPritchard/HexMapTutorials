@@ -28,6 +28,7 @@
             float4 colour : COLOR; // this gets populated automatically because of its type, with the assigned colour for the vertex in the mesh
             float3 worldPos;
             float3 terrain;
+            float3 visibility;
         };
 
         void vert (inout appdata_full v, out Input data) {
@@ -40,6 +41,11 @@
             data.terrain.x = cell0.w;
             data.terrain.y = cell1.w;
             data.terrain.z = cell2.w;
+
+            data.visibility.x = cell0.x;
+            data.visibility.y = cell1.x;
+            data.visibility.z = cell2.x;
+            data.visibility = lerp(0.25, 1, data.visibility); // ensures that the min visibility is 0.25
         }
 
         half _Glossiness;
@@ -53,7 +59,7 @@
         float4 GetTerrainColour (Input IN, int index) {
             float3 uvw = float3(IN.worldPos.xz * 0.02, IN.terrain[index]);
             float4 c = UNITY_SAMPLE_TEX2DARRAY(_MainTex, uvw);
-            return c * IN.colour[index];
+            return c * (IN.colour[index] * IN.visibility[index]);
         }
 
         void surf (Input IN, inout SurfaceOutputStandard o)
