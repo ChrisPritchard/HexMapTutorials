@@ -681,7 +681,7 @@ namespace DarkDomains
             Water.AddTriangle(centre, e1.v3, e1.v4);
             Water.AddTriangle(centre, e1.v4, e1.v5);
 
-            var indices = new Vector3(cell.Index, cell.Index, cell.Index);
+            var indices = new Vector3(cell.Index, neighbour.Index, cell.Index);
             Water.AddTriangleCellData(indices, weights1);
             Water.AddTriangleCellData(indices, weights1);
             Water.AddTriangleCellData(indices, weights1);
@@ -695,7 +695,7 @@ namespace DarkDomains
             ); // rather than calculating from current centre, work backwards from neighbour centre to find edge
 
             if(cell.HasRiverThroughEdge(direction))
-                TriangulateEstuary(e1, e2, cell.IncomingRiver == direction);
+                TriangulateEstuary(e1, e2, cell.IncomingRiver == direction, indices);
             else
             {
                 WaterShore.AddQuad(e1.v1, e1.v2, e2.v1, e2.v2);
@@ -706,6 +706,10 @@ namespace DarkDomains
                 WaterShore.AddQuadUV(0f, 0f, 0f, 1f);
                 WaterShore.AddQuadUV(0f, 0f, 0f, 1f);
                 WaterShore.AddQuadUV(0f, 0f, 0f, 1f);
+                WaterShore.AddQuadCellData(indices, weights1, weights2);
+                WaterShore.AddQuadCellData(indices, weights1, weights2);
+                WaterShore.AddQuadCellData(indices, weights1, weights2);
+                WaterShore.AddQuadCellData(indices, weights1, weights2);
             }
 
             var nextNeighbour = cell.GetNeighbour(direction.Next());
@@ -722,9 +726,11 @@ namespace DarkDomains
                 new Vector2(0f, 0f), 
                 new Vector2(0f, 1f), 
                 new Vector2(0f, nextNeighbour.IsUnderwater ? 0f : 1f));
+            indices.z = nextNeighbour.Index;
+            WaterShore.AddTriangleCellData(indices, weights1, weights2, weights3);
         }
 
-        private void TriangulateEstuary(EdgeVertices e1, EdgeVertices e2, bool incomingRiver)
+        private void TriangulateEstuary(EdgeVertices e1, EdgeVertices e2, bool incomingRiver, Vector3 indices)
         {
             WaterShore.AddTriangle(e2.v1, e1.v2, e1.v1);
             WaterShore.AddTriangle(e2.v5, e1.v5, e1.v4);
@@ -734,6 +740,8 @@ namespace DarkDomains
             WaterShore.AddTriangleUV(
                 new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(0f, 0f)
             );
+            WaterShore.AddTriangleCellData(indices, weights2, weights1, weights1);
+            WaterShore.AddTriangleCellData(indices, weights2, weights1, weights1);
 
             Estuaries.AddQuad(e2.v1, e1.v2, e2.v2, e1.v3);
             Estuaries.AddTriangle(e1.v3, e2.v2, e2.v4);
@@ -747,6 +755,10 @@ namespace DarkDomains
             Estuaries.AddQuadUV(
                 new Vector2(0f, 0f), new Vector2(0f, 0f), 
                 new Vector2(1f, 1f), new Vector2(0f, 1f));
+
+            Estuaries.AddQuadCellData(indices, weights2, weights1, weights2, weights1);
+            Estuaries.AddTriangleCellData(indices, weights1, weights2, weights2);
+            Estuaries.AddQuadCellData(indices, weights1, weights2);
 
             if(incomingRiver)
             {
