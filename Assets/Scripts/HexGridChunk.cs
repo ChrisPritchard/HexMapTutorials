@@ -122,7 +122,7 @@ namespace DarkDomains
                 var interpolators = GetRoadInterpolators(direction, cell);
                 TriangulateRoad(centre, 
                     Vector3.Lerp(centre, e.v1, interpolators.x), Vector3.Lerp(centre, e.v5, interpolators.y), 
-                    e, cell.HasRoadThroughEdge(direction));
+                    e, cell.HasRoadThroughEdge(direction), cell.Index);
             }
         }
 
@@ -505,7 +505,7 @@ namespace DarkDomains
             Terrain.AddQuadCellData(indices, w1, w2);
 
             if(hasRoad)
-                TriangulateRoadSegment(e1.v2, e1.v3, e1.v4, e2.v2, e2.v3, e2.v4);
+                TriangulateRoadSegment(e1.v2, e1.v3, e1.v4, e2.v2, e2.v3, e2.v4, w1, w2, indices);
         }
 
         private void TriangulateRiverQuad(
@@ -527,35 +527,45 @@ namespace DarkDomains
                 Rivers.AddQuadUV(0f, 1f, v, v + 0.2f); // left to right, bottom to top.
         }
 
+        private void TriangulateRoad(
+            Vector3 centre, Vector3 ml, Vector3 mr, 
+            EdgeVertices e, bool hasRoadThroughEdge, float index)
+        {
+            if(hasRoadThroughEdge)
+            {
+                var indices = new Vector3(index, index, index);
+                var mc = Vector3.Lerp(ml, mr, 0.5f);
+                TriangulateRoadSegment(ml, mc, mr, e.v2, e.v3, e.v4, weights1, weights1, indices);
+                Roads.AddTriangle(centre, ml, mc);
+                Roads.AddTriangle(centre, mc, mr);
+                Roads.AddTriangleUV(new Vector3(1f, 0f), new Vector3(0f, 0f), new Vector3(1f, 0f));
+                Roads.AddTriangleUV(new Vector3(1f, 0f), new Vector3(1f, 0f), new Vector3(0f, 0f));
+                Roads.AddTriangleCellData(indices, weights1);
+                Roads.AddTriangleCellData(indices, weights1);
+            }
+            else
+                TriangulateRoadEdge(centre, ml, mr, index);
+        }
+
         private void TriangulateRoadSegment(
             Vector3 v1, Vector3 v2, Vector3 v3, 
-            Vector3 v4, Vector3 v5, Vector3 v6)
+            Vector3 v4, Vector3 v5, Vector3 v6,
+            Color w1, Color w2, Vector3 indices)
         {
             Roads.AddQuad(v1, v2, v4, v5);
             Roads.AddQuad(v2, v3, v5, v6);
             Roads.AddQuadUV(0f, 1f, 0f, 0f);
             Roads.AddQuadUV(1f, 0f, 0f, 0f);
+            Roads.AddQuadCellData(indices, w1, w2);
+            Roads.AddQuadCellData(indices, w1, w2);
         }
 
-        private void TriangulateRoad(Vector3 centre, Vector3 ml, Vector3 mr, EdgeVertices e, bool hasRoadThroughEdge)
-        {
-            if(hasRoadThroughEdge)
-            {
-                var mc = Vector3.Lerp(ml, mr, 0.5f);
-                TriangulateRoadSegment(ml, mc, mr, e.v2, e.v3, e.v4);
-                Roads.AddTriangle(centre, ml, mc);
-                Roads.AddTriangle(centre, mc, mr);
-                Roads.AddTriangleUV(new Vector3(1f, 0f), new Vector3(0f, 0f), new Vector3(1f, 0f));
-                Roads.AddTriangleUV(new Vector3(1f, 0f), new Vector3(1f, 0f), new Vector3(0f, 0f));
-            }
-            else
-                TriangulateRoadEdge(centre, ml, mr);
-        }
-
-        private void TriangulateRoadEdge(Vector3 centre, Vector3 ml, Vector3 mr)
+        private void TriangulateRoadEdge(Vector3 centre, Vector3 ml, Vector3 mr, float index)
         {
             Roads.AddTriangle(centre, ml, mr);
             Roads.AddTriangleUV(new Vector3(1f, 0f), new Vector3(0f, 0f), new Vector3(0f, 0f));
+            var indices = new Vector3(index, index, index);
+            Roads.AddTriangleCellData(indices, weights1);
         }
 
         private void TriangulateRoadAdjacentToRiver(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e)
@@ -625,12 +635,12 @@ namespace DarkDomains
             var ml = Vector3.Lerp(roadCentre, e.v1, interpolators.x);
             var mr = Vector3.Lerp(roadCentre, e.v5, interpolators.y);
 
-            TriangulateRoad(roadCentre, ml, mr, e, edgeRoad);
+            TriangulateRoad(roadCentre, ml, mr, e, edgeRoad, cell.Index);
 
             if(previousRiver)
-                TriangulateRoadEdge(roadCentre, centre, ml);
+                TriangulateRoadEdge(roadCentre, centre, ml, cell.Index);
             if(nextRiver)
-                TriangulateRoadEdge(roadCentre, mr, centre);
+                TriangulateRoadEdge(roadCentre, mr, centre, cell.Index);
         }
 
         // the center of a hex is filled by the road when a road passes through this edge, or when there is a road on each side (so inner turn)

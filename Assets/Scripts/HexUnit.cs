@@ -123,7 +123,7 @@ namespace DarkDomains
             for(var i = 1; i <= pathToTravel.Count; i++)
             {
                 if(i != pathToTravel.Count)
-                    currentTravelLocation = pathToTravel[i]
+                    currentTravelLocation = pathToTravel[i];
                 a = c;
                 b = pathToTravel[i - 1].Position;
                 c = i == pathToTravel.Count
