@@ -36,6 +36,7 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\Bezier.cs" />
      <Compile Include="Assets\Scripts\EdgeVertices.cs" />
      <Compile Include="Assets\Scripts\HexCell.cs" />
      <Compile Include="Assets\Scripts\HexCellPriorityQueue.cs" />

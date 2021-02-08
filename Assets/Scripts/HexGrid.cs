@@ -205,7 +205,7 @@ namespace DarkDomains
             ClearPath();
             currentPathFrom = fromCell;
             currentPathTo = toCell;
-            currentPathExists = Search(fromCell, toCell);
+            currentPathExists = Search(fromCell, toCell, speed);
             if(currentPathExists)
                 ShowPath(speed);
         }
@@ -217,7 +217,7 @@ namespace DarkDomains
                 var current = currentPathTo;
                 while(current != currentPathFrom)
                 {
-                    var turn = current.Distance / speed;
+                    var turn = (current.Distance - 1) / speed;
                     current.SetLabel(turn.ToString());
                     current.EnableHighlight(Color.white);
                     current = current.PathFrom;
@@ -251,7 +251,19 @@ namespace DarkDomains
 
         public bool HasPath => currentPathExists;
 
-        private bool Search(HexCell fromCell, HexCell toCell)
+        public List<HexCell> GetPath()
+        {
+            if(!currentPathExists)
+                return null;
+            var path = ListPool<HexCell>.Get();
+            for(var c = currentPathTo; c != currentPathFrom; c = c.PathFrom)
+                path.Add(c);
+            path.Add(currentPathFrom);
+            path.Reverse();
+            return path;
+        }
+
+        private bool Search(HexCell fromCell, HexCell toCell, int speed)
         {
             searchFrontierPhase += 2; 
 
@@ -271,6 +283,7 @@ namespace DarkDomains
                     return true;
 
                 current.SearchPhase ++;
+                var currentTurn = (current.Distance - 1) / speed;
 
                 for (var d = HexDirection.NE; d <= HexDirection.NW; d++)
                 {
@@ -296,7 +309,11 @@ namespace DarkDomains
                             moveCost = 5;
                         moveCost += neighbour.UrbanLevel + neighbour.FarmLevel + neighbour.ForestLevel;
                     }
+
                     var distance = current.Distance + moveCost;
+                    var turn = (distance - 1) / speed;
+                    if (turn > currentTurn)
+                        distance = turn * speed + moveCost;
 
                     if (neighbour.SearchPhase < searchFrontierPhase)
                     {

@@ -64,7 +64,7 @@ namespace DarkDomains
         {
             if (Grid.HasPath && selectedUnit)
             {
-                selectedUnit.Location = currentCell;
+                selectedUnit.Travel(Grid.GetPath());
                 Grid.ClearPath();
             }
         }
