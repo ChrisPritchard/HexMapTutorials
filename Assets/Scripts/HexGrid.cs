@@ -87,7 +87,7 @@ namespace DarkDomains
         {
             cells = new HexCell[CellCountX * CellCountZ];
 
-            var i = -1;
+            var i = 0;
             for(var z = 0; z < CellCountZ; z++)
                 for(var x = 0; x < CellCountX; x++)
                     CreateCell(x, z, i++);
