@@ -165,13 +165,18 @@ namespace DarkDomains
             TriangulateEdgeFan(centre, m, cell.Index);
 
             var reversed = cell.HasIncomingRiver;
-            TriangulateRiverQuad(m.v2, m.v4, e.v2, e.v4, cell.RiverSurfaceY, 0.6f, reversed);
+            var indices = new Vector3(cell.Index, cell.Index, cell.Index);
+
+            TriangulateRiverQuad(m.v2, m.v4, e.v2, e.v4, cell.RiverSurfaceY, 0.6f, reversed, indices);
+
             centre.y = m.v2.y = m.v4.y = cell.RiverSurfaceY;
             Rivers.AddTriangle(centre, m.v2, m.v4);
             if (reversed)
                 Rivers.AddTriangleUV(new Vector2(0.5f, 0.4f), new Vector2(1f, 0.2f), new Vector2(0f, 0.2f));
             else
                 Rivers.AddTriangleUV(new Vector2(0.5f, 0.4f), new Vector2(0f, 0.6f), new Vector2(1f, 0.6f));
+
+            Rivers.AddTriangleCellData(indices, weights1);
         }
 
         private void TriangulateWithRiver(HexDirection direction, HexCell cell, Vector3 centre, EdgeVertices e)
@@ -225,8 +230,8 @@ namespace DarkDomains
             Terrain.AddTriangleCellData(indices, weights1);
 
             var reversed = cell.IncomingRiver == direction;
-            TriangulateRiverQuad(centreL, centreR, m.v2, m.v4, cell.RiverSurfaceY, 0.4f, reversed);
-            TriangulateRiverQuad(m.v2, m.v4, e.v2, e.v4, cell.RiverSurfaceY, 0.6f, reversed);
+            TriangulateRiverQuad(centreL, centreR, m.v2, m.v4, cell.RiverSurfaceY, 0.4f, reversed, indices);
+            TriangulateRiverQuad(m.v2, m.v4, e.v2, e.v4, cell.RiverSurfaceY, 0.6f, reversed, indices);
         }
 
         private void TriangulateConnection(HexDirection direction, HexCell cell, EdgeVertices e1)
@@ -249,6 +254,7 @@ namespace DarkDomains
             {
                 var startV3 = e2.v3.y;
                 e2.v3.y = neighbour.StreamBedY;
+                var indices = new Vector3(cell.Index, neighbour.Index, cell.Index);
 
                 // by definition, both cells have rivers through them
                 // however, if both are underwater, then we want (i want) no river bed
@@ -259,19 +265,19 @@ namespace DarkDomains
                 if(!cell.IsUnderwater && !neighbour.IsUnderwater)
                     TriangulateRiverQuad(
                         e1.v2, e1.v4, e2.v2, e2.v4, cell.RiverSurfaceY, neighbour.RiverSurfaceY, 0.8f,
-                        cell.HasIncomingRiver && cell.IncomingRiver == direction);
+                        cell.HasIncomingRiver && cell.IncomingRiver == direction, indices);
                 // if im a river and the neighbour is beneath me
                 else if(!cell.IsUnderwater && cell.Elevation > neighbour.WaterLevel)
                     TriangulateWaterfallInWater(
                         e1.v2, e1.v4, e2.v2, e2.v4, 
                         cell.RiverSurfaceY, neighbour.RiverSurfaceY,
-                        neighbour.WaterLevel);
+                        neighbour.WaterLevel, indices);
                 // im underwater but the neighbour is heigher than me
                 else if (cell.IsUnderwater && !neighbour.IsUnderwater && neighbour.Elevation > cell.WaterLevel)
                     TriangulateWaterfallInWater(
                             e2.v4, e2.v2, e1.v4, e1.v2, 
                             neighbour.RiverSurfaceY, cell.RiverSurfaceY,
-                            cell.WaterLevel);
+                            cell.WaterLevel, indices);
                 else if ((cell.IsUnderwater == neighbour.IsUnderwater == true) // both underwater
                 || !cell.IsUnderwater && neighbour.IsUnderwater) // river into water on same level
                     e2.v3.y = startV3; // if a river, this will smooth e1 (river side) into e2 (lake/sea bed, which is normal surface)
@@ -306,7 +312,7 @@ namespace DarkDomains
 
         private void TriangulateWaterfallInWater(
             Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4,
-            float y1, float y2, float waterY)
+            float y1, float y2, float waterY, Vector3 indices)
         {
             v1.y = v2.y = y1;
             v3.y = v4.y = y2;
@@ -319,6 +325,7 @@ namespace DarkDomains
             v4 = Vector3.Lerp(v4, v2, t);
             Rivers.AddQuadUnperterbed(v1, v2, v3, v4);
             Rivers.AddQuadUV(0f, 1f, 0.8f, 1f);
+            Rivers.AddQuadCellData(indices, weights1, weights2);
         }
 
         private void TriangulateEdgeTerrace(EdgeVertices begin, HexCell beginCell, EdgeVertices end, HexCell endCell, bool hasRoad)
@@ -511,12 +518,13 @@ namespace DarkDomains
         private void TriangulateRiverQuad(
             Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, 
             float y, float v,
-            bool reversed) => TriangulateRiverQuad(v1, v2, v3, v4, y, y, v, reversed);
+            bool reversed, Vector3 indices) => 
+                TriangulateRiverQuad(v1, v2, v3, v4, y, y, v, reversed, indices);
 
         private void TriangulateRiverQuad(
             Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, 
             float y1, float y2, float v,
-            bool reversed)
+            bool reversed, Vector3 indices)
         {
             v1.y = v2.y = y1;
             v3.y = v4.y = y2;
@@ -525,6 +533,8 @@ namespace DarkDomains
                 Rivers.AddQuadUV(1f, 0f, 0.8f - v, 0.6f - v);
             else
                 Rivers.AddQuadUV(0f, 1f, v, v + 0.2f); // left to right, bottom to top.
+            
+            Rivers.AddQuadCellData(indices, weights1, weights2);
         }
 
         private void TriangulateRoad(
