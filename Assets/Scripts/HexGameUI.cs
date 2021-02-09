@@ -78,7 +78,7 @@ namespace DarkDomains
             if(!UpdateCurrentCell())
                 return;
             if(currentCell && selectedUnit.IsValidDestination(currentCell))
-                Grid.FindPath(selectedUnit.Location, currentCell, 24);
+                Grid.FindPath(selectedUnit.Location, currentCell, selectedUnit);
             else
                 Grid.ClearPath();
         }

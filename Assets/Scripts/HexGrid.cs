@@ -207,14 +207,14 @@ namespace DarkDomains
         HexCell currentPathFrom, currentPathTo;
         bool currentPathExists;
 
-        public void FindPath(HexCell fromCell, HexCell toCell, int speed)
+        public void FindPath(HexCell fromCell, HexCell toCell, HexUnit unit)
         {
             ClearPath();
             currentPathFrom = fromCell;
             currentPathTo = toCell;
-            currentPathExists = Search(fromCell, toCell, speed);
+            currentPathExists = Search(fromCell, toCell, unit);
             if(currentPathExists)
-                ShowPath(speed);
+                ShowPath(unit.Speed);
         }
 
         private void ShowPath(int speed)
@@ -270,7 +270,7 @@ namespace DarkDomains
             return path;
         }
 
-        private bool Search(HexCell fromCell, HexCell toCell, int speed)
+        private bool Search(HexCell fromCell, HexCell toCell, HexUnit unit)
         {
             searchFrontierPhase += 2; 
 
@@ -290,7 +290,7 @@ namespace DarkDomains
                     return true;
 
                 current.SearchPhase ++;
-                var currentTurn = (current.Distance - 1) / speed;
+                var currentTurn = (current.Distance - 1) / unit.Speed;
 
                 for (var d = HexDirection.NE; d <= HexDirection.NW; d++)
                 {
@@ -298,29 +298,16 @@ namespace DarkDomains
 
                     if (neighbour == null || neighbour.SearchPhase > searchFrontierPhase)
                         continue;
-                    if (neighbour.IsUnderwater || neighbour.Unit)
+                    if(!unit.IsValidDestination(neighbour))
                         continue;
-
-                    var edgeType = current.GetEdgeType(neighbour);
-                    if (edgeType == HexEdgeType.Cliff)
+                    var moveCost = unit.GetMoveCost(current, neighbour, d);
+                    if(moveCost < 0)
                         continue;
-
-                    var moveCost = 10;
-                    if (current.HasRoadThroughEdge(d))
-                        moveCost = 1;
-                    else if(current.Walled != neighbour.Walled)
-                        continue;
-                    else
-                    {
-                        if (edgeType == HexEdgeType.Flat)
-                            moveCost = 5;
-                        moveCost += neighbour.UrbanLevel + neighbour.FarmLevel + neighbour.ForestLevel;
-                    }
 
                     var distance = current.Distance + moveCost;
-                    var turn = (distance - 1) / speed;
+                    var turn = (distance - 1) / unit.Speed;
                     if (turn > currentTurn)
-                        distance = turn * speed + moveCost;
+                        distance = turn * unit.Speed + moveCost;
 
                     if (neighbour.SearchPhase < searchFrontierPhase)
                     {

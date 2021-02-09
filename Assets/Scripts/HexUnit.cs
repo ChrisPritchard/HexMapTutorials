@@ -20,6 +20,8 @@ namespace DarkDomains
 
         HexCell location, currentTravelLocation;
 
+        public int Speed => 24;
+
         public HexCell Location
         {
             get => location;
@@ -75,9 +77,27 @@ namespace DarkDomains
             Destroy(gameObject);
         }
 
-        public bool IsValidDestination(HexCell cell)
+        public bool IsValidDestination(HexCell cell) => cell.IsExplored && !cell.IsUnderwater && !cell.Unit;
+
+        public int GetMoveCost(HexCell fromCell, HexCell toCell, HexDirection direction)
         {
-            return !cell.IsUnderwater && !cell.Unit;
+            var edgeType = fromCell.GetEdgeType(toCell);
+            if (edgeType == HexEdgeType.Cliff)
+                return -1;
+
+            var moveCost = 10;
+            if (fromCell.HasRoadThroughEdge(direction))
+                moveCost = 1;
+            else if(fromCell.Walled != toCell.Walled)
+                return -1;
+            else
+            {
+                if (edgeType == HexEdgeType.Flat)
+                    moveCost = 5;
+                moveCost += toCell.UrbanLevel + toCell.FarmLevel + toCell.ForestLevel;
+            }
+
+            return moveCost;
         }
 
         IEnumerator LookAt(Vector3 point)
