@@ -1474,7 +1474,7 @@ MonoBehaviour:
       m_Image: {fileID: 0}
     - m_Text: Roads
       m_Image: {fileID: 0}
-    - m_Text: Urban Features
+    - m_Text: Features
       m_Image: {fileID: 0}
     - m_Text: Walls
       m_Image: {fileID: 0}

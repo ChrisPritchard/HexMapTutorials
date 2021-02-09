@@ -52,8 +52,8 @@
         }
 
         half _Glossiness;
-        fixed3 _Specular;
         fixed4 _Color;
+        fixed3 _Specular;
         half3 _BackgroundColor;
         sampler2D _GridTex;
 
