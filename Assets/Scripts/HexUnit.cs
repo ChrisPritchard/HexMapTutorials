@@ -146,7 +146,7 @@ namespace DarkDomains
             {
                 a = c;
                 b = pathToTravel[i - 1].Position;
-                c = (b + pathToTravel[i].Position) * 0.5f;
+                c = (b + pathToTravel[i].Position) * 0.5f; // moves toward edges
 
                 Grid.IncreaseVisibility(pathToTravel[i], visionRange);
 
