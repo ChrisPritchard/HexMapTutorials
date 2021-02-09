@@ -18,6 +18,7 @@
 
         CGPROGRAM
         #pragma surface surf Standard fullforwardshadows decal:blend vertex:vert
+        #pragma multi_compile _ HEX_MAP_EDIT_MODE
         #pragma target 3.0
 
         #include "HexCellData.cginc"
