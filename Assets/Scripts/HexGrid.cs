@@ -108,6 +108,8 @@ namespace DarkDomains
             cell.Coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
             cell.ShaderData = cellShaderData;
 
+            cell.Explorable = x > 0 && z > 0 && x < CellCountX - 1 && z < CellCountZ - 1;
+
             var index = z * CellCountX + x;
             cells[index] = cell;
 
@@ -367,7 +369,8 @@ namespace DarkDomains
 
                     var distance = current.Distance + 1;
                     if(distance + neighbour.ViewElevation > range
-                    || distance > fromCoordinates.DistanceTo(neighbour.Coordinates))
+                    || distance > fromCoordinates.DistanceTo(neighbour.Coordinates)
+                    || !neighbour.Explorable)
                         continue;
 
                     if (neighbour.SearchPhase < searchFrontierPhase)

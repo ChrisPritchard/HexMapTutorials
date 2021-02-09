@@ -34,8 +34,11 @@ namespace DarkDomains
         public int SearchPhase { get; set; }
 
         private int visibility;
-        public bool IsVisible => visibility > 0;
-        public bool IsExplored { get; private set; }
+        private bool explored;
+
+        public bool IsVisible => Explorable && visibility > 0;
+        public bool IsExplored { get => Explorable && explored; private set => explored = value; }
+        public bool Explorable { get; set; }
 
         public void IncreaseVisibility()
         {
