@@ -348,6 +348,9 @@ namespace DarkDomains
                 searchFrontier.Clear();
             searchFrontier.Enqueue(fromCell);
 
+            var fromCoordinates = fromCell.Coordinates;
+            range += fromCell.ViewElevation;
+
             while(searchFrontier.Count > 0)
             {
                 var current = searchFrontier.Dequeue();
@@ -363,7 +366,8 @@ namespace DarkDomains
                         continue;
 
                     var distance = current.Distance + 1;
-                    if(distance > range)
+                    if(distance + neighbour.ViewElevation > range
+                    || distance > fromCoordinates.DistanceTo(neighbour.Coordinates))
                         continue;
 
                     if (neighbour.SearchPhase < searchFrontierPhase)
