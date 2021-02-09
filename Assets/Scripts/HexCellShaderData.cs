@@ -9,7 +9,7 @@ namespace DarkDomains
         Texture2D cellTexture;
         Color32[] cellTextureData;
 
-        public bool ImmediateMode { get; set; } = true;
+        public bool ImmediateMode { get; set; }
 
         List<HexCell> transitioningCells = new List<HexCell>();
         const float transitionSpeed = 255f;

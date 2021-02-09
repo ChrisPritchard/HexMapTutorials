@@ -135,21 +135,21 @@ namespace DarkDomains
         private IEnumerator TravelPath()
         {
             Vector3 a, b, c = pathToTravel[0].Position;
+            transform.localPosition = c;
             yield return LookAt(pathToTravel[1].Position);
+            
             Grid.DecreaseVisibility( // catches mid move switch, requiring current location to lose visibility
                 currentTravelLocation ? currentTravelLocation : pathToTravel[0], visionRange);
 
             var t = Time.deltaTime * travelSpeed;
-            for(var i = 1; i <= pathToTravel.Count; i++)
+            for(var i = 1; i < pathToTravel.Count; i++)
             {
-                if(i != pathToTravel.Count)
-                    currentTravelLocation = pathToTravel[i];
                 a = c;
                 b = pathToTravel[i - 1].Position;
-                c = i == pathToTravel.Count
-                    ? b : (b + pathToTravel[i].Position) * 0.5f;
-                if (i != pathToTravel.Count)
-                    Grid.IncreaseVisibility(pathToTravel[i], visionRange);
+                c = (b + pathToTravel[i].Position) * 0.5f;
+
+                Grid.IncreaseVisibility(pathToTravel[i], visionRange);
+
                 for(; t < 1f; t += Time.deltaTime * travelSpeed)
                 {
                     transform.localPosition = Bezier.GetPoint(a, b, c, t);
@@ -158,10 +158,28 @@ namespace DarkDomains
                     transform.localRotation = Quaternion.LookRotation(d);
                     yield return null;
                 }
-                if(i != pathToTravel.Count)
-                    Grid.DecreaseVisibility(pathToTravel[i-1], visionRange);
+                
+                Grid.DecreaseVisibility(pathToTravel[i], visionRange);
                 t -= 1f;
             }
+
+            // final move towards center
+
+            a = c;
+            b = pathToTravel[pathToTravel.Count - 1].Position;
+            c = b;
+            
+            Grid.IncreaseVisibility(Location, visionRange);
+
+            for(; t < 1f; t += Time.deltaTime * travelSpeed)
+            {
+                transform.localPosition = Bezier.GetPoint(a, b, c, t);
+                var d = Bezier.GetDirivative(a, b, c, t);
+                d.y = 0f;
+                transform.localRotation = Quaternion.LookRotation(d);
+                yield return null;
+            }
+
             currentTravelLocation = null;
             transform.localPosition = Location.Position;
             Orientation = transform.localRotation.eulerAngles.y;
