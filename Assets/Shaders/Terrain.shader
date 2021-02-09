@@ -28,7 +28,7 @@
             float4 colour : COLOR; // this gets populated automatically because of its type, with the assigned colour for the vertex in the mesh
             float3 worldPos;
             float3 terrain;
-            float3 visibility;
+            float4 visibility;
         };
 
         void vert (inout appdata_full v, out Input data) {
@@ -45,7 +45,9 @@
             data.visibility.x = cell0.x;
             data.visibility.y = cell1.x;
             data.visibility.z = cell2.x;
-            data.visibility = lerp(0.25, 1, data.visibility); // ensures that the min visibility is 0.25
+            data.visibility.xyz = lerp(0.25, 1, data.visibility); // ensures that the min visibility is 0.25
+            data.visibility.w = 
+                cell0.y * v.color.x + cell1.y * v.color.y + cell2.y * v.color.z;
         }
 
         half _Glossiness;
@@ -77,7 +79,8 @@
                 grid = tex2D(_GridTex, gridUV);
             #endif
 
-            o.Albedo = c.rgb * grid * _Color;
+            float explored = IN.visibility.w;
+            o.Albedo = c.rgb * grid * _Color * explored;
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;

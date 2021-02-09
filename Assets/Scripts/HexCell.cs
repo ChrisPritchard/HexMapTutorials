@@ -35,12 +35,16 @@ namespace DarkDomains
 
         private int visibility;
         public bool IsVisible => visibility > 0;
+        public bool IsExplored { get; private set; }
 
         public void IncreaseVisibility()
         {
             visibility++;
             if(visibility == 1)
+            {
+                IsExplored = true;
                 ShaderData.RefreshVisibility(this);
+            }
         }
 
         public void DecreaseVisibility()
@@ -368,6 +372,7 @@ namespace DarkDomains
             writer.Write(forestLevel);
             writer.Write(specialFeatureIndex);
             writer.Write(walled);
+            writer.Write(IsExplored);
         }
 
         public void Load(BinaryReader reader)
@@ -399,6 +404,9 @@ namespace DarkDomains
             walled = reader.ReadBoolean();
 
             RefreshPosition();
+
+            IsExplored = reader.ReadBoolean();
+            ShaderData.RefreshVisibility(this);
         }
     }
 }
