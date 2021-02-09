@@ -54,6 +54,15 @@ namespace DarkDomains
                 ShaderData.RefreshVisibility(this);
         }
 
+        public void ResetVisibility()
+        {
+            if(visibility > 0)
+            {
+                visibility = 0;
+                ShaderData.RefreshVisibility(this);
+            }
+        }
+
         private byte terrainTypeIndex;
         public byte TerrainTypeIndex
         {
@@ -75,7 +84,10 @@ namespace DarkDomains
             {
                 if(value == elevation)
                     return;
+                var viewElevation = ViewElevation;
                 elevation = value;
+                if(viewElevation != ViewElevation)
+                    ShaderData.ViewElevationChanged();
                 RefreshPosition();
                 ValidateRivers();
                 for(var direction = HexDirection.NE; direction <= HexDirection.NW; direction++)
@@ -93,13 +105,18 @@ namespace DarkDomains
             {
                 if (waterLevel == value)
                     return;
+                var viewElevation = ViewElevation;
                 waterLevel = value;
+                if(viewElevation != ViewElevation)
+                    ShaderData.ViewElevationChanged();
                 ValidateRivers();
                 Refresh();
             }
         }
 
         public bool IsUnderwater => waterLevel > elevation;
+
+        public int ViewElevation => elevation >= waterLevel ? elevation : waterLevel;
 
         byte urbanLevel, farmLevel, forestLevel;
 

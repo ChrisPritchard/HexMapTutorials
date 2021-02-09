@@ -6,8 +6,11 @@ namespace DarkDomains
     
     public class HexCellShaderData : MonoBehaviour 
     {
+        public HexGrid Grid { get; set; }
+
         Texture2D cellTexture;
         Color32[] cellTextureData;
+        bool needsVisibilityReset;
 
         public bool ImmediateMode { get; set; }
 
@@ -59,8 +62,20 @@ namespace DarkDomains
             enabled = true;
         }
 
+        public void ViewElevationChanged()
+        {
+            needsVisibilityReset = true;
+            enabled = true;
+        }
+
         private void LateUpdate() 
         {
+            if(needsVisibilityReset) 
+            {
+                needsVisibilityReset = false;
+                Grid.ResetVisibility();
+            }
+
             var delta = (int)(Time.deltaTime * transitionSpeed);
             if(delta == 0)
                 delta = 1;

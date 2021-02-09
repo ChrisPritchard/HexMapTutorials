@@ -35,6 +35,7 @@ namespace DarkDomains
             HexMetrics.InitialiseHashGrid(Seed);
             HexUnit.UnitPrefab = UnitPrefab;
             cellShaderData = gameObject.AddComponent<HexCellShaderData>();
+            cellShaderData.Grid = this;
             CreateMap(8, 6);
         }
 
@@ -46,6 +47,8 @@ namespace DarkDomains
             HexMetrics.NoiseSource = NoiseSource;
             HexMetrics.InitialiseHashGrid(Seed);
             HexUnit.UnitPrefab = UnitPrefab;
+
+            ResetVisibility();
         }
 
         public void CreateMap(int xChunks, int zChunks)
@@ -396,6 +399,14 @@ namespace DarkDomains
             ListPool<HexCell>.Add(cells);
         }
 
+        public void ResetVisibility()
+        {
+            foreach(var cell in cells)   
+                cell.ResetVisibility();
+            foreach(var unit in units)
+                IncreaseVisibility(unit.Location, unit.VisionRange);
+        }
+
         public void Save(BinaryWriter writer)
         {
             writer.Write(chunkCountX);
@@ -418,6 +429,9 @@ namespace DarkDomains
             var cY = reader.ReadInt32();
             CreateMap(cX, cY); // ensures the right size max is created
 
+            var mode = cellShaderData.ImmediateMode;
+            cellShaderData.ImmediateMode = true; // visibility is shown immediately on initial load
+
             foreach(var cell in cells)
                 cell.Load(reader);
             foreach(var chunk in chunks)
@@ -426,6 +440,8 @@ namespace DarkDomains
             var unitCount = reader.ReadInt32();
             for(var i = 0; i < unitCount; i++)
                 HexUnit.Load(reader, this);
+
+            cellShaderData.ImmediateMode = mode;
         }
     }
 }

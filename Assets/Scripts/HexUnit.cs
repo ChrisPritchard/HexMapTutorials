@@ -16,11 +16,12 @@ namespace DarkDomains
 
         const float travelSpeed = 4f;
         const float rotationSpeed = 180f;
-        const int visionRange = 3;
 
         HexCell location, currentTravelLocation;
 
         public int Speed => 24;
+
+        public int VisionRange => 3;
 
         public HexCell Location
         {
@@ -31,12 +32,12 @@ namespace DarkDomains
                     return;
                 if (location)
                 {
-                    Grid.DecreaseVisibility(location, visionRange);
+                    Grid.DecreaseVisibility(location, VisionRange);
                     location.Unit = null;
                 }
                 location = value;
                 value.Unit = this;
-                Grid.IncreaseVisibility(value, visionRange);
+                Grid.IncreaseVisibility(value, VisionRange);
                 transform.localPosition = value.Position;
             }
         }
@@ -61,8 +62,8 @@ namespace DarkDomains
                 transform.localPosition = location.Position;
                 if(currentTravelLocation) // catches recompile while moving... probably unnecessary
                 {
-                    Grid.IncreaseVisibility(location, visionRange);
-                    Grid.DecreaseVisibility(currentTravelLocation, visionRange);
+                    Grid.IncreaseVisibility(location, VisionRange);
+                    Grid.DecreaseVisibility(currentTravelLocation, VisionRange);
                     currentTravelLocation = null;
                 }
             }
@@ -73,7 +74,7 @@ namespace DarkDomains
         public void Die()
         {
             location.Unit = null;
-            Grid.DecreaseVisibility(location, visionRange);
+            Grid.DecreaseVisibility(location, VisionRange);
             Destroy(gameObject);
         }
 
@@ -139,16 +140,17 @@ namespace DarkDomains
             yield return LookAt(pathToTravel[1].Position);
             
             Grid.DecreaseVisibility( // catches mid move switch, requiring current location to lose visibility
-                currentTravelLocation ? currentTravelLocation : pathToTravel[0], visionRange);
+                currentTravelLocation ? currentTravelLocation : pathToTravel[0], VisionRange);
 
             var t = Time.deltaTime * travelSpeed;
+
             for(var i = 1; i < pathToTravel.Count; i++)
             {
                 a = c;
                 b = pathToTravel[i - 1].Position;
                 c = (b + pathToTravel[i].Position) * 0.5f; // moves toward edges
 
-                Grid.IncreaseVisibility(pathToTravel[i], visionRange);
+                Grid.IncreaseVisibility(pathToTravel[i], VisionRange);
 
                 for(; t < 1f; t += Time.deltaTime * travelSpeed)
                 {
@@ -159,7 +161,7 @@ namespace DarkDomains
                     yield return null;
                 }
                 
-                Grid.DecreaseVisibility(pathToTravel[i], visionRange);
+                Grid.DecreaseVisibility(pathToTravel[i], VisionRange);
                 t -= 1f;
             }
 
@@ -169,7 +171,7 @@ namespace DarkDomains
             b = pathToTravel[pathToTravel.Count - 1].Position;
             c = b;
             
-            Grid.IncreaseVisibility(Location, visionRange);
+            Grid.IncreaseVisibility(Location, VisionRange);
 
             for(; t < 1f; t += Time.deltaTime * travelSpeed)
             {
