@@ -48,6 +48,7 @@
      <Compile Include="Assets\Scripts\HexGridChunk.cs" />
      <Compile Include="Assets\Scripts\HexGridEditor.cs" />
      <Compile Include="Assets\Scripts\HexMapCamera.cs" />
+     <Compile Include="Assets\Scripts\HexMapGenerator.cs" />
      <Compile Include="Assets\Scripts\HexMesh.cs" />
      <Compile Include="Assets\Scripts\HexMetrics.cs" />
      <Compile Include="Assets\Scripts\HexUnit.cs" />

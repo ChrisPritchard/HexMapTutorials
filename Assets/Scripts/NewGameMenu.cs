@@ -7,6 +7,7 @@ namespace DarkDomains
     {
         public HexGrid HexGrid;
         public HexMapCamera HexMapCamera;
+        public HexMapGenerator Generator;
 
         public void Show()
         {
@@ -20,6 +21,10 @@ namespace DarkDomains
             HexMapCamera.Locked = false;
         }
 
+        private bool generateMap = true;
+
+        public void ToggleMapGeneration (bool toggle) => generateMap = toggle;
+
         private void CreateMap(int xChunks, int zChunks)
         {
             HexGrid.CreateMap(xChunks, zChunks);
@@ -27,10 +32,28 @@ namespace DarkDomains
             Hide();
         }
 
-        public void CreateSmallMap() => CreateMap(4, 3);
+        public void CreateSmallMap()
+        {
+            if(generateMap)
+                Generator.GenerateMap(4, 3);
+            else
+                CreateMap(4, 3);
+        }
 
-        public void CreateMediumMap() => CreateMap(8, 6);
+        public void CreateMediumMap()
+        {
+            if(generateMap)
+                Generator.GenerateMap(8, 6);
+            else
+                CreateMap(8, 6);
+        }
 
-        public void CreateLargeMap() => CreateMap(16, 12);
+        public void CreateLargeMap()
+        {
+            if(generateMap)
+                Generator.GenerateMap(16, 12);
+            else
+                CreateMap(16, 12);
+        }
     }
 }
