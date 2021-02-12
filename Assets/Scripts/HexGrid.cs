@@ -36,7 +36,7 @@ namespace DarkDomains
             HexUnit.UnitPrefab = UnitPrefab;
             cellShaderData = gameObject.AddComponent<HexCellShaderData>();
             cellShaderData.Grid = this;
-            CreateMap(8, 6);
+            CreateMap(40, 30);
         }
 
         private void OnEnable() 
@@ -51,8 +51,15 @@ namespace DarkDomains
             ResetVisibility();
         }
 
-        public void CreateMap(int xChunks, int zChunks)
+        public void CreateMap(int x, int z)
         {
+            if(x % HexMetrics.ChunkSizeX != 0
+            || z % HexMetrics.ChunkSizeZ != 0)
+            {
+                Debug.Log("invalid size specified - must be multiples of chunksize");
+                return;
+            }
+
             ClearPath();
             ClearUnits();
 
@@ -60,8 +67,8 @@ namespace DarkDomains
                 foreach(var chunk in chunks)
                     Destroy(chunk.gameObject);
 
-            chunkCountX = xChunks;
-            chunkCountZ = zChunks;
+            chunkCountX = x / HexMetrics.ChunkSizeX;
+            chunkCountZ = z / HexMetrics.ChunkSizeZ;
             cellShaderData.Initialise(CellCountX, CellCountZ);
 
             CreateChunks();
@@ -137,11 +144,10 @@ namespace DarkDomains
             var label = Instantiate<Text>(CellLabelPrefab);
             label.rectTransform.anchoredPosition = new Vector2(position.x, position.z);
             cell.UIRect = label.rectTransform;
-
-            // defaults - will trigger an initial perturb of height          
-            cell.Elevation = 0;
-            cell.TerrainTypeIndex = 2; // mud
-            cell.WaterLevel = 1; // covered in water
+    
+            //cell.Elevation = 0;
+            //cell.TerrainTypeIndex = 2; // mud
+            //cell.WaterLevel = 1; // covered in water
 
             AddCellToChunk(x, z, cell);
         }
@@ -193,6 +199,10 @@ namespace DarkDomains
                 return null;
             return cells[index];
         }
+
+        public HexCell GetCell(int xOffset, int zOffset) => cells[zOffset * CellCountX + xOffset];
+
+        public HexCell GetCell(int cellIndex) => cells[cellIndex];
 
         private void ClearUnits()
         {
