@@ -8988,6 +8988,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Grid: {fileID: 1756129105}
+  JitterProbability: 0.25
+  HighRiseProbability: 0.25
+  SinkProbability: 0.2
+  ChunkSizeMin: 30
+  ChunkSizeMax: 100
+  LandPercentage: 50
+  WaterLevel: 3
+  ElevationMinimum: -2
+  ElevationMaximum: 8
 --- !u!4 &1200516152
 Transform:
   m_ObjectHideFlags: 0
@@ -11360,7 +11369,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  m_IsOn: 0
+  m_IsOn: 1
 --- !u!1 &1426763612
 GameObject:
   m_ObjectHideFlags: 0

@@ -79,8 +79,8 @@ namespace DarkDomains
             }
         }
 
-        private byte elevation;
-        public byte Elevation
+        private int elevation;
+        public int Elevation
         {
             get => elevation;
             set
@@ -376,7 +376,7 @@ namespace DarkDomains
 
         public void Save(BinaryWriter writer)
         {
-            writer.Write(elevation);
+            writer.Write((byte)(elevation + 127));
             writer.Write(waterLevel);
             writer.Write(terrainTypeIndex);
 
@@ -397,7 +397,7 @@ namespace DarkDomains
 
         public void Load(BinaryReader reader)
         {
-            elevation = reader.ReadByte();
+            elevation = (int)(reader.ReadByte() - 127);
             waterLevel = reader.ReadByte();
 
             terrainTypeIndex = reader.ReadByte();
