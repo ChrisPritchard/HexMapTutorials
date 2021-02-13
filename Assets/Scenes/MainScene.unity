@@ -7542,8 +7542,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   HexGrid: {fileID: 1756129105}
-  StickMinZoom: -250
-  StickMaxZoom: -15
+  StickMinZoom: -300
+  StickMaxZoom: -30
   MoveSpeedMinZoom: 400
   MoveSpeedMaxZoom: 100
   RotationSpeed: 180
@@ -8988,6 +8988,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Grid: {fileID: 1756129105}
+  Seed: 0
+  UseFixedSeed: 0
   JitterProbability: 0.25
   HighRiseProbability: 0.25
   SinkProbability: 0.2
