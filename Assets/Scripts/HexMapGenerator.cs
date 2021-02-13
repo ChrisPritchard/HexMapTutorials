@@ -3,13 +3,16 @@ namespace DarkDomains
 {
     using System.Collections.Generic;
     using UnityEngine;
-    
+
     public struct MapRegion
     {
         public int XMin, XMax, ZMin, ZMax;
+
+        public static MapRegion Create(int xmin, int xmax, int zmin, int zmax) => 
+            new MapRegion { XMin = xmin, XMax = xmax, ZMin = zmin, ZMax = zmax };
     }
 
-    public class HexMapGenerator : MonoBehaviour 
+    public class HexMapGenerator : MonoBehaviour
     {
         public HexGrid Grid;
 
@@ -50,6 +53,12 @@ namespace DarkDomains
         [Range(0, 10)]
         public int MapBorderZ = 5;
 
+        [Range(0, 10)]
+        public int RegionBorder = 5;
+
+        [Range(1, 4)]
+        public int RegionCount = 1;
+
         private int cellCount;
         private HexCellPriorityQueue searchFrontier;
         private int searchFrontierPhase;
@@ -86,14 +95,31 @@ namespace DarkDomains
             else
                 regions.Clear();
 
-            var region = new MapRegion
-            {
-                XMin = MapBorderX,
-                XMax = Grid.CellCountX - MapBorderX,
-                ZMin = MapBorderZ,
-                ZMax = Grid.CellCountZ - MapBorderZ
-            };
-            regions.Add(region);
+            if (RegionCount == 1)
+                regions.Add(MapRegion.Create(MapBorderX, Grid.CellCountX - MapBorderX, MapBorderZ, Grid.CellCountZ - MapBorderZ));
+            else if (RegionCount == 2 && Random.value < 0.5f) // horizonal split
+                regions.AddRange(new [] {
+                    MapRegion.Create(MapBorderX, Grid.CellCountX / 2 - RegionBorder, MapBorderZ, Grid.CellCountZ - MapBorderZ),
+                    MapRegion.Create(Grid.CellCountX / 2 + RegionBorder, Grid.CellCountX - MapBorderX, MapBorderZ, Grid.CellCountZ - MapBorderZ)
+                });
+            else if (RegionCount == 2) // vertical split
+                regions.AddRange(new [] {
+                    MapRegion.Create(MapBorderX, Grid.CellCountX - MapBorderX, MapBorderZ, Grid.CellCountZ / 2 - RegionBorder),
+                    MapRegion.Create(MapBorderX, Grid.CellCountX - MapBorderX, Grid.CellCountZ / 2 + RegionBorder, Grid.CellCountZ - MapBorderZ)
+                });
+            else if (RegionCount == 3)
+                regions.AddRange(new [] {
+                    MapRegion.Create(MapBorderX, Grid.CellCountX / 3 - RegionBorder, MapBorderZ, Grid.CellCountZ - MapBorderZ),
+                    MapRegion.Create(Grid.CellCountX / 3 + RegionBorder, Grid.CellCountX * 2 / 3 - RegionBorder, MapBorderZ, Grid.CellCountZ - MapBorderZ),
+                    MapRegion.Create(Grid.CellCountX * 2 / 3 + RegionBorder, Grid.CellCountX - MapBorderX, MapBorderZ, Grid.CellCountZ - MapBorderZ)
+                });
+            else 
+                regions.AddRange(new [] {
+                    MapRegion.Create(MapBorderX, Grid.CellCountX / 2 - RegionBorder, MapBorderZ, Grid.CellCountZ / 2 - RegionBorder),
+                    MapRegion.Create(Grid.CellCountX / 2 + RegionBorder, Grid.CellCountX - MapBorderX, MapBorderZ, Grid.CellCountZ / 2 - RegionBorder),
+                    MapRegion.Create(MapBorderX, Grid.CellCountX / 2 - RegionBorder, Grid.CellCountZ / 2 + RegionBorder, Grid.CellCountZ - MapBorderZ),
+                    MapRegion.Create(Grid.CellCountX / 2 + RegionBorder, Grid.CellCountX - MapBorderX, Grid.CellCountZ / 2 + RegionBorder, Grid.CellCountZ - MapBorderZ)
+                });
         }
 
         private void CreateLand()
@@ -110,6 +136,8 @@ namespace DarkDomains
                         landBudget = SinkTerrain(chunkSize, landBudget, regions[i]);
                     else
                         landBudget = RaiseTerrain(chunkSize, landBudget, regions[i]);
+                    if(landBudget == 0)
+                        return;
                 }
             }
 
