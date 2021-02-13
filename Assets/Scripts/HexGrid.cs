@@ -426,8 +426,8 @@ namespace DarkDomains
 
         public void Save(BinaryWriter writer)
         {
-            writer.Write(chunkCountX);
-            writer.Write(chunkCountZ);
+            writer.Write(CellCountX);
+            writer.Write(CellCountZ);
 
             foreach(var cell in cells)
                 cell.Save(writer);
