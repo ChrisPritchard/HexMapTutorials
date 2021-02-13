@@ -7,6 +7,10 @@ namespace DarkDomains
     {
         public HexGrid Grid;
 
+        public int Seed;
+
+        public bool UseFixedSeed;
+
         [Range(0f, 0.5f)]
         public float JitterProbability = 0.25f;
 
@@ -41,6 +45,11 @@ namespace DarkDomains
 
         public void GenerateMap (int x, int z)
         {
+            var originalRandomState = Random.state;
+            if(!UseFixedSeed)
+                Seed = Random.Range(0, int.MaxValue);
+            Random.InitState(Seed);
+
             cellCount = x * z;
             Grid.CreateMap(x, z);
 
