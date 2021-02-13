@@ -1,8 +1,14 @@
 
 namespace DarkDomains
 {
+    using System.Collections.Generic;
     using UnityEngine;
     
+    public struct MapRegion
+    {
+        public int XMin, XMax, ZMin, ZMax;
+    }
+
     public class HexMapGenerator : MonoBehaviour 
     {
         public HexGrid Grid;
@@ -38,10 +44,16 @@ namespace DarkDomains
         [Range(6, 10)]
         public int ElevationMaximum = 8;
 
+        [Range(0, 10)]
+        public int MapBorderX = 5;
+
+        [Range(0, 10)]
+        public int MapBorderZ = 5;
 
         private int cellCount;
         private HexCellPriorityQueue searchFrontier;
         private int searchFrontierPhase;
+        private List<MapRegion> regions;
 
         public void GenerateMap (int x, int z)
         {
@@ -59,6 +71,7 @@ namespace DarkDomains
             for(var i = 0; i < cellCount; i++)
                 Grid.GetCell(i).WaterLevel = (byte)WaterLevel;
 
+            CreateRegions();
             CreateLand();
             SetTerrainType();
 
@@ -66,18 +79,42 @@ namespace DarkDomains
                 Grid.GetCell(i).SearchPhase = 0;
         }
 
+        private void CreateRegions()
+        {
+            if(regions == null)
+                regions = new List<MapRegion>();
+            else
+                regions.Clear();
+
+            var region = new MapRegion
+            {
+                XMin = MapBorderX,
+                XMax = Grid.CellCountX - MapBorderX,
+                ZMin = MapBorderZ,
+                ZMax = Grid.CellCountZ - MapBorderZ
+            };
+            regions.Add(region);
+        }
+
         private void CreateLand()
         {
             var landBudget = Mathf.RoundToInt(cellCount * LandPercentage * 0.01f);
 
-            while(landBudget > 0)
+            for(var guard = 0; landBudget > 0 && guard < 10000; guard++) // guard prevents against infinite loops
             {
-                var chunkSize = Random.Range(ChunkSizeMin, ChunkSizeMax + 1);
-                if(Random.value < SinkProbability)
-                    landBudget = SinkTerrain(chunkSize, landBudget);
-                else
-                    landBudget = RaiseTerrain(chunkSize, landBudget);
+                var sink = Random.value < SinkProbability;
+                for(var i = 0; i < regions.Count; i++)
+                {
+                    var chunkSize = Random.Range(ChunkSizeMin, ChunkSizeMax + 1);
+                    if(sink)
+                        landBudget = SinkTerrain(chunkSize, landBudget, regions[i]);
+                    else
+                        landBudget = RaiseTerrain(chunkSize, landBudget, regions[i]);
+                }
             }
+
+            if(landBudget > 0)
+                Debug.Log("Failed to use up landbudget. Remaining: " + landBudget);
         }
 
         private void SetTerrainType()
@@ -90,11 +127,11 @@ namespace DarkDomains
             }
         }
 
-        private int RaiseTerrain(int chunkSize, int budget)
+        private int RaiseTerrain(int chunkSize, int budget, MapRegion region)
         {
             searchFrontierPhase ++;
 
-            var firstCell = GetRandomCell();
+            var firstCell = GetRandomCell(region);
             firstCell.SearchPhase = searchFrontierPhase;
             firstCell.Distance = 0;
             firstCell.SearchHeuristic = 0;
@@ -134,11 +171,11 @@ namespace DarkDomains
             return budget;
         }
 
-        private int SinkTerrain(int chunkSize, int budget)
+        private int SinkTerrain(int chunkSize, int budget, MapRegion region)
         {
             searchFrontierPhase ++;
 
-            var firstCell = GetRandomCell();
+            var firstCell = GetRandomCell(region);
             firstCell.SearchPhase = searchFrontierPhase;
             firstCell.Distance = 0;
             firstCell.SearchHeuristic = 0;
@@ -178,9 +215,9 @@ namespace DarkDomains
             return budget;
         }
 
-        private HexCell GetRandomCell()
+        private HexCell GetRandomCell(MapRegion region)
         {
-            return Grid.GetCell(Random.Range(0, cellCount));
+            return Grid.GetCell(Random.Range(region.XMin, region.XMax), Random.Range(region.ZMin, region.ZMax));
         }
     }
 }
