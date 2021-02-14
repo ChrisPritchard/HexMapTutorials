@@ -59,6 +59,9 @@ namespace DarkDomains
         [Range(1, 4)]
         public int RegionCount = 1;
 
+        [Range(0, 100)]
+        public int ErosionPercentage = 50;
+
         private int cellCount;
         private HexCellPriorityQueue searchFrontier;
         private int searchFrontierPhase;
@@ -82,6 +85,7 @@ namespace DarkDomains
 
             CreateRegions();
             CreateLand();
+            ErodeLand();
             SetTerrainType();
 
             for(var i = 0; i < cellCount; i++)
@@ -143,6 +147,52 @@ namespace DarkDomains
 
             if(landBudget > 0)
                 Debug.Log("Failed to use up landbudget. Remaining: " + landBudget);
+        }
+
+        private void ErodeLand()
+        {
+            var erodibleCells = ListPool<HexCell>.Get();
+
+            for(var i = 0; i < cellCount; i++)
+            {
+                var cell = Grid.GetCell(i);
+                if(IsErodible(cell))
+                    erodibleCells.Add(cell);
+            }
+
+            var targetErodibleCount = (int)(erodibleCells.Count * (100 - ErosionPercentage) * 0.01f);
+
+            while(erodibleCells.Count > targetErodibleCount)
+            {
+                var index = Random.Range(0, erodibleCells.Count);
+                var cell = erodibleCells[index];
+                cell.Elevation --;
+                if(!IsErodible(cell))
+                {
+                    erodibleCells[index] = erodibleCells[erodibleCells.Count - 1];
+                    erodibleCells.RemoveAt(erodibleCells.Count - 1);
+                }
+                for(var d = HexDirection.NE; d <= HexDirection.NW; d++)
+                {
+                    var neighbour = cell.GetNeighbour(d);
+                    if(neighbour && IsErodible(neighbour) && !erodibleCells.Contains(neighbour))
+                        erodibleCells.Add(neighbour);
+                }
+            }
+
+            ListPool<HexCell>.Add(erodibleCells);
+        }
+
+        private bool IsErodible(HexCell cell)
+        {
+            var erodibleElevation = cell.Elevation - 2;
+            for(var d = HexDirection.NE; d <= HexDirection.NW; d++)
+            {
+                var neighbour = cell.GetNeighbour(d);
+                if(neighbour && neighbour.Elevation <= erodibleElevation)
+                    return true;
+            }
+            return false;
         }
 
         private void SetTerrainType()
