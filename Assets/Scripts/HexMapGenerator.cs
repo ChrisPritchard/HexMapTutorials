@@ -166,17 +166,35 @@ namespace DarkDomains
             {
                 var index = Random.Range(0, erodibleCells.Count);
                 var cell = erodibleCells[index];
+                var target = GetErosionTarget(cell);
+
                 cell.Elevation --;
+                target.Elevation ++;
+
                 if(!IsErodible(cell))
                 {
                     erodibleCells[index] = erodibleCells[erodibleCells.Count - 1];
                     erodibleCells.RemoveAt(erodibleCells.Count - 1);
                 }
+
                 for(var d = HexDirection.NE; d <= HexDirection.NW; d++)
                 {
                     var neighbour = cell.GetNeighbour(d);
-                    if(neighbour && IsErodible(neighbour) && !erodibleCells.Contains(neighbour))
+                    if(neighbour && neighbour.Elevation == cell.Elevation + 2 
+                    && !erodibleCells.Contains(neighbour))
                         erodibleCells.Add(neighbour);
+                }
+
+                if(IsErodible(target) && !erodibleCells.Contains(target))
+                    erodibleCells.Add(target);
+
+                for(var d = HexDirection.NE; d <= HexDirection.NW; d++)
+                {
+                    var neighbour = target.GetNeighbour(d);
+                    if(neighbour && neighbour != cell 
+                    && neighbour.Elevation == target.Elevation + 1 
+                    && !IsErodible(neighbour) && erodibleCells.Contains(neighbour))
+                        erodibleCells.Remove(neighbour);
                 }
             }
 
@@ -193,6 +211,23 @@ namespace DarkDomains
                     return true;
             }
             return false;
+        }
+
+        private HexCell GetErosionTarget(HexCell cell)
+        {
+            var candidates = ListPool<HexCell>.Get();
+
+            var erodibleElevation = cell.Elevation - 2;
+            for(var d = HexDirection.NE; d <= HexDirection.NW; d++)
+            {
+                var neighbour = cell.GetNeighbour(d);
+                if(neighbour && neighbour.Elevation <= erodibleElevation)
+                    candidates.Add(neighbour);
+            }
+
+            var candidate = candidates[Random.Range(0, candidates.Count)];
+            ListPool<HexCell>.Add(candidates);
+            return candidate;
         }
 
         private void SetTerrainType()
