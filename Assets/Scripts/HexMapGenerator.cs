@@ -12,6 +12,11 @@ namespace DarkDomains
             new MapRegion { XMin = xmin, XMax = xmax, ZMin = zmin, ZMax = zmax };
     }
 
+    public struct ClimateData
+    {
+        public float Clouds;
+    }
+
     public class HexMapGenerator : MonoBehaviour
     {
         public HexGrid Grid;
@@ -62,10 +67,14 @@ namespace DarkDomains
         [Range(0, 100)]
         public int ErosionPercentage = 50;
 
+        [Range(0f, 1f)]
+        public float Evaporation = 0.5f;
+
         private int cellCount;
         private HexCellPriorityQueue searchFrontier;
         private int searchFrontierPhase;
         private List<MapRegion> regions;
+        private List<ClimateData> climate = new List<ClimateData>();
 
         public void GenerateMap (int x, int z)
         {
@@ -86,6 +95,7 @@ namespace DarkDomains
             CreateRegions();
             CreateLand();
             ErodeLand();
+            CreateClimate();
             SetTerrainType();
 
             for(var i = 0; i < cellCount; i++)
@@ -230,6 +240,42 @@ namespace DarkDomains
             return candidate;
         }
 
+        private void CreateClimate()
+        {
+            climate.Clear();
+            var initialData = new ClimateData();
+
+            for(var i = 0; i < cellCount; i++)
+                climate.Add(initialData);
+
+            for(var cycle = 0; cycle < 40; cycle++)
+                for(var i = 0; i < cellCount; i++)
+                    EvolveClimate(i);
+        }
+
+        private void EvolveClimate(int cellIndex)
+        {
+            var cell = Grid.GetCell(cellIndex);
+            var cellClimate = climate[cellIndex];
+
+            if(cell.IsUnderwater)
+                cellClimate.Clouds += Evaporation;
+
+            var dispersal = cellClimate.Clouds / 6f;
+            for(var d = HexDirection.NE; d <= HexDirection.NW; d++)
+            {
+                var neighbour = cell.GetNeighbour(d);
+                if(!neighbour)
+                    continue;
+                var neighbourClimate = climate[neighbour.Index];
+                neighbourClimate.Clouds += dispersal;
+                climate[neighbour.Index] = neighbourClimate;
+            }
+            cellClimate.Clouds = 0f;
+            
+            climate[cellIndex] = cellClimate;
+        }
+
         private void SetTerrainType()
         {
             for(var i = 0; i < cellCount; i++)
@@ -238,8 +284,7 @@ namespace DarkDomains
                 if(!cell.IsUnderwater)
                     cell.TerrainTypeIndex = (byte)Mathf.Clamp(cell.Elevation - cell.WaterLevel, 0, 255);
 
-                var normalised = (cell.Elevation - ElevationMinimum) / (float)(ElevationMaximum - ElevationMinimum);
-                cell.SetMapData(normalised);
+                cell.SetMapData(climate[i].Clouds);
             }
         }
 
