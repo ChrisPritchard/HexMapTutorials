@@ -14,7 +14,7 @@ namespace DarkDomains
 
     public struct ClimateData
     {
-        public float Clouds;
+        public float Clouds, Moisture;
     }
 
     public class HexMapGenerator : MonoBehaviour
@@ -72,6 +72,9 @@ namespace DarkDomains
 
         [Range(0f, 1f)]
         public float PrecipitationFactor = 0.25f;
+
+        [Range(0f, 1f)]
+        public float EvaporationFactor = 0.5f;
 
         private int cellCount;
         private HexCellPriorityQueue searchFrontier;
@@ -161,6 +164,97 @@ namespace DarkDomains
             if(landBudget > 0)
                 Debug.Log("Failed to use up landbudget. Remaining: " + landBudget);
         }
+
+        private int RaiseTerrain(int chunkSize, int budget, MapRegion region)
+        {
+            searchFrontierPhase ++;
+
+            var firstCell = GetRandomCell(region);
+            firstCell.SearchPhase = searchFrontierPhase;
+            firstCell.Distance = 0;
+            firstCell.SearchHeuristic = 0;
+            searchFrontier.Enqueue(firstCell);
+
+            var centre = firstCell.Coordinates;
+
+            var rise = Random.value < HighRiseProbability ? 2 : 1;
+            var size = 0;
+            while (size < chunkSize && searchFrontier.Count > 0)
+            {
+                var current = searchFrontier.Dequeue();
+                var originalElevation = current.Elevation;
+                var newElevation = originalElevation + rise;
+
+                if(newElevation > ElevationMaximum)
+                    continue; // skip high point and its neighbours, so we grow around peaks
+
+                current.Elevation = newElevation;
+                if(originalElevation < WaterLevel && newElevation >= WaterLevel && --budget == 0)
+                    break;
+                size ++;
+
+                for(var d = HexDirection.NE; d <= HexDirection.NW; d++)
+                {
+                    var neighbour = current.GetNeighbour(d);
+                    if(neighbour && neighbour.SearchPhase < searchFrontierPhase)
+                    {
+                        neighbour.SearchPhase = searchFrontierPhase;
+                        neighbour.Distance = neighbour.Coordinates.DistanceTo(centre);
+                        neighbour.SearchHeuristic = Random.value < JitterProbability ? 1 : 0;
+                        searchFrontier.Enqueue(neighbour);
+                    }
+                }
+            }
+            searchFrontier.Clear();
+            return budget;
+        }
+
+        private int SinkTerrain(int chunkSize, int budget, MapRegion region)
+        {
+            searchFrontierPhase ++;
+
+            var firstCell = GetRandomCell(region);
+            firstCell.SearchPhase = searchFrontierPhase;
+            firstCell.Distance = 0;
+            firstCell.SearchHeuristic = 0;
+            searchFrontier.Enqueue(firstCell);
+
+            var centre = firstCell.Coordinates;
+
+            var sink = Random.value < SinkProbability ? 2 : 1;
+            var size = 0;
+            while (size < chunkSize && searchFrontier.Count > 0)
+            {
+                var current = searchFrontier.Dequeue();
+                var originalElevation = current.Elevation;
+                var newElevation = originalElevation - sink;
+
+                if(newElevation < ElevationMinimum)
+                    continue;
+
+                current.Elevation = newElevation;
+                if(originalElevation >= WaterLevel && newElevation < WaterLevel)
+                    budget++;
+                size ++;
+
+                for(var d = HexDirection.NE; d <= HexDirection.NW; d++)
+                {
+                    var neighbour = current.GetNeighbour(d);
+                    if(neighbour && neighbour.SearchPhase < searchFrontierPhase)
+                    {
+                        neighbour.SearchPhase = searchFrontierPhase;
+                        neighbour.Distance = neighbour.Coordinates.DistanceTo(centre);
+                        neighbour.SearchHeuristic = Random.value < JitterProbability ? 1 : 0;
+                        searchFrontier.Enqueue(neighbour);
+                    }
+                }
+            }
+            searchFrontier.Clear();
+            return budget;
+        }
+
+        private HexCell GetRandomCell(MapRegion region) => 
+            Grid.GetCell(Random.Range(region.XMin, region.XMax), Random.Range(region.ZMin, region.ZMax));
 
         private void ErodeLand()
         {
@@ -262,10 +356,20 @@ namespace DarkDomains
             var cellClimate = climate[cellIndex];
 
             if(cell.IsUnderwater)
+            {
+                cellClimate.Moisture = 1f;
                 cellClimate.Clouds += Evaporation;
+            }
+            else
+            {
+                var evaporation = cellClimate.Moisture * EvaporationFactor;
+                cellClimate.Moisture -= evaporation;
+                cellClimate.Clouds += evaporation;
+            }
 
             var precipitation = cellClimate.Clouds * PrecipitationFactor;
             cellClimate.Clouds -= precipitation;
+            cellClimate.Moisture += precipitation;
 
             var dispersal = cellClimate.Clouds / 6f;
             for(var d = HexDirection.NE; d <= HexDirection.NW; d++)
@@ -290,101 +394,8 @@ namespace DarkDomains
                 if(!cell.IsUnderwater)
                     cell.TerrainTypeIndex = (byte)Mathf.Clamp(cell.Elevation - cell.WaterLevel, 0, 255);
 
-                cell.SetMapData(climate[i].Clouds);
+                cell.SetMapData(climate[i].Moisture);
             }
-        }
-
-        private int RaiseTerrain(int chunkSize, int budget, MapRegion region)
-        {
-            searchFrontierPhase ++;
-
-            var firstCell = GetRandomCell(region);
-            firstCell.SearchPhase = searchFrontierPhase;
-            firstCell.Distance = 0;
-            firstCell.SearchHeuristic = 0;
-            searchFrontier.Enqueue(firstCell);
-
-            var centre = firstCell.Coordinates;
-
-            var rise = Random.value < HighRiseProbability ? 2 : 1;
-            var size = 0;
-            while (size < chunkSize && searchFrontier.Count > 0)
-            {
-                var current = searchFrontier.Dequeue();
-                var originalElevation = current.Elevation;
-                var newElevation = originalElevation + rise;
-
-                if(newElevation > ElevationMaximum)
-                    continue; // skip high point and its neighbours, so we grow around peaks
-
-                current.Elevation = newElevation;
-                if(originalElevation < WaterLevel && newElevation >= WaterLevel && --budget == 0)
-                    break;
-                size ++;
-
-                for(var d = HexDirection.NE; d <= HexDirection.NW; d++)
-                {
-                    var neighbour = current.GetNeighbour(d);
-                    if(neighbour && neighbour.SearchPhase < searchFrontierPhase)
-                    {
-                        neighbour.SearchPhase = searchFrontierPhase;
-                        neighbour.Distance = neighbour.Coordinates.DistanceTo(centre);
-                        neighbour.SearchHeuristic = Random.value < JitterProbability ? 1 : 0;
-                        searchFrontier.Enqueue(neighbour);
-                    }
-                }
-            }
-            searchFrontier.Clear();
-            return budget;
-        }
-
-        private int SinkTerrain(int chunkSize, int budget, MapRegion region)
-        {
-            searchFrontierPhase ++;
-
-            var firstCell = GetRandomCell(region);
-            firstCell.SearchPhase = searchFrontierPhase;
-            firstCell.Distance = 0;
-            firstCell.SearchHeuristic = 0;
-            searchFrontier.Enqueue(firstCell);
-
-            var centre = firstCell.Coordinates;
-
-            var sink = Random.value < SinkProbability ? 2 : 1;
-            var size = 0;
-            while (size < chunkSize && searchFrontier.Count > 0)
-            {
-                var current = searchFrontier.Dequeue();
-                var originalElevation = current.Elevation;
-                var newElevation = originalElevation - sink;
-
-                if(newElevation < ElevationMinimum)
-                    continue;
-
-                current.Elevation = newElevation;
-                if(originalElevation >= WaterLevel && newElevation < WaterLevel)
-                    budget++;
-                size ++;
-
-                for(var d = HexDirection.NE; d <= HexDirection.NW; d++)
-                {
-                    var neighbour = current.GetNeighbour(d);
-                    if(neighbour && neighbour.SearchPhase < searchFrontierPhase)
-                    {
-                        neighbour.SearchPhase = searchFrontierPhase;
-                        neighbour.Distance = neighbour.Coordinates.DistanceTo(centre);
-                        neighbour.SearchHeuristic = Random.value < JitterProbability ? 1 : 0;
-                        searchFrontier.Enqueue(neighbour);
-                    }
-                }
-            }
-            searchFrontier.Clear();
-            return budget;
-        }
-
-        private HexCell GetRandomCell(MapRegion region)
-        {
-            return Grid.GetCell(Random.Range(region.XMin, region.XMax), Random.Range(region.ZMin, region.ZMax));
         }
     }
 }
