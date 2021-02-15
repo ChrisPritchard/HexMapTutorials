@@ -76,6 +76,12 @@ namespace DarkDomains
         [Range(0f, 1f)]
         public float EvaporationFactor = 0.5f;
 
+        [Range(0f, 1f)]
+        public float RunoffFactor = 0.25f;
+
+        [Range(0f, 1f)]
+        public float SeepageFactor = 0.125f;
+
         private int cellCount;
         private HexCellPriorityQueue searchFrontier;
         private int searchFrontierPhase;
@@ -371,14 +377,31 @@ namespace DarkDomains
             cellClimate.Clouds -= precipitation;
             cellClimate.Moisture += precipitation;
 
-            var dispersal = cellClimate.Clouds / 6f;
+            var cloudDispersal = cellClimate.Clouds / 6f;
+            var runoff = cellClimate.Moisture * RunoffFactor / 6f;
+            var seepage = cellClimate.Moisture * SeepageFactor / 6f;
+
             for(var d = HexDirection.NE; d <= HexDirection.NW; d++)
             {
                 var neighbour = cell.GetNeighbour(d);
                 if(!neighbour)
                     continue;
+
                 var neighbourClimate = climate[neighbour.Index];
-                neighbourClimate.Clouds += dispersal;
+                neighbourClimate.Clouds += cloudDispersal;
+
+                var elevationDelta = neighbour.ViewElevation - cell.ViewElevation;
+                if(elevationDelta < 0)
+                {
+                    cellClimate.Moisture -= runoff;
+                    neighbourClimate.Moisture += runoff;
+                } 
+                else if(elevationDelta == 0)
+                {
+                    cellClimate.Moisture -= seepage;
+                    neighbourClimate.Moisture += seepage;
+                }
+
                 climate[neighbour.Index] = neighbourClimate;
             }
             cellClimate.Clouds = 0f;
