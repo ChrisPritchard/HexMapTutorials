@@ -374,6 +374,8 @@ namespace DarkDomains
             highlight.enabled = true;
         }
 
+        public void SetMapData(float data) => ShaderData.SetMapData(this, data);
+
         public void Save(BinaryWriter writer)
         {
             writer.Write((byte)(elevation + 127));

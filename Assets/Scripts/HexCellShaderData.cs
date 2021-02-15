@@ -62,6 +62,21 @@ namespace DarkDomains
             enabled = true;
         }
 
+        public void SetMapData(HexCell cell, float data)
+        {
+            // below, using 254 instead of 255 for max value in blue channel
+            // 1 less as 255 in the blue channel is being used to store visibility transitioned state, see RefreshVisibility function
+
+            byte toSet = 0;
+            if (data > 0 && data <= 1f)
+                toSet = (byte)(data * 254f);
+            else if(data > 1f)
+                toSet = 254;
+
+            cellTextureData[cell.Index].b = toSet;
+            enabled = true;
+        }
+
         public void ViewElevationChanged()
         {
             needsVisibilityReset = true;

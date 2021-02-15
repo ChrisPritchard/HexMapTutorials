@@ -237,6 +237,9 @@ namespace DarkDomains
                 var cell = Grid.GetCell(i);
                 if(!cell.IsUnderwater)
                     cell.TerrainTypeIndex = (byte)Mathf.Clamp(cell.Elevation - cell.WaterLevel, 0, 255);
+
+                var normalised = (cell.Elevation - ElevationMinimum) / (float)(ElevationMaximum - ElevationMinimum);
+                cell.SetMapData(normalised);
             }
         }
 
