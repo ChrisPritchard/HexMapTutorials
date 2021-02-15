@@ -70,6 +70,9 @@ namespace DarkDomains
         [Range(0f, 1f)]
         public float Evaporation = 0.5f;
 
+        [Range(0f, 1f)]
+        public float PrecipitationFactor = 0.25f;
+
         private int cellCount;
         private HexCellPriorityQueue searchFrontier;
         private int searchFrontierPhase;
@@ -260,6 +263,9 @@ namespace DarkDomains
 
             if(cell.IsUnderwater)
                 cellClimate.Clouds += Evaporation;
+
+            var precipitation = cellClimate.Clouds * PrecipitationFactor;
+            cellClimate.Clouds -= precipitation;
 
             var dispersal = cellClimate.Clouds / 6f;
             for(var d = HexDirection.NE; d <= HexDirection.NW; d++)
