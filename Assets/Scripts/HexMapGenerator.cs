@@ -82,6 +82,11 @@ namespace DarkDomains
         [Range(0f, 1f)]
         public float SeepageFactor = 0.125f;
 
+        public HexDirection WindDirection = HexDirection.NW;
+
+        [Range(1f, 10f)]
+        public float WindStrength = 4f;
+
         private int cellCount;
         private HexCellPriorityQueue searchFrontier;
         private int searchFrontierPhase;
@@ -377,7 +382,16 @@ namespace DarkDomains
             cellClimate.Clouds -= precipitation;
             cellClimate.Moisture += precipitation;
 
-            var cloudDispersal = cellClimate.Clouds / 6f;
+            var cloudMaximum = 1f - cell.ViewElevation / (ElevationMaximum + 1f);
+            if(cellClimate.Clouds > cloudMaximum)
+            {
+                cellClimate.Moisture += cellClimate.Clouds - cloudMaximum;
+                cellClimate.Clouds = cloudMaximum;
+            }
+
+            var mainDispersalDirection = WindDirection.Opposite();
+            var cloudDispersal = cellClimate.Clouds / (5f + WindStrength);
+
             var runoff = cellClimate.Moisture * RunoffFactor / 6f;
             var seepage = cellClimate.Moisture * SeepageFactor / 6f;
 
@@ -388,7 +402,10 @@ namespace DarkDomains
                     continue;
 
                 var neighbourClimate = climate[neighbour.Index];
-                neighbourClimate.Clouds += cloudDispersal;
+                if(d == mainDispersalDirection)
+                    neighbourClimate.Clouds += cloudDispersal * WindStrength;
+                else
+                    neighbourClimate.Clouds += cloudDispersal;
 
                 var elevationDelta = neighbour.ViewElevation - cell.ViewElevation;
                 if(elevationDelta < 0)

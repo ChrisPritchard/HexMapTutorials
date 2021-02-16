@@ -7542,7 +7542,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   HexGrid: {fileID: 1756129105}
-  StickMinZoom: -300
+  StickMinZoom: -600
   StickMaxZoom: -30
   MoveSpeedMinZoom: 400
   MoveSpeedMaxZoom: 100
@@ -8999,6 +8999,18 @@ MonoBehaviour:
   WaterLevel: 3
   ElevationMinimum: -2
   ElevationMaximum: 8
+  MapBorderX: 5
+  MapBorderZ: 5
+  RegionBorder: 5
+  RegionCount: 1
+  ErosionPercentage: 50
+  Evaporation: 0.5
+  PrecipitationFactor: 0.25
+  EvaporationFactor: 0.5
+  RunoffFactor: 0.25
+  SeepageFactor: 0.125
+  WindDirection: 5
+  WindStrength: 4
 --- !u!4 &1200516152
 Transform:
   m_ObjectHideFlags: 0
