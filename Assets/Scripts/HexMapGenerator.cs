@@ -450,10 +450,24 @@ namespace DarkDomains
             for(var i = 0; i < cellCount; i++)
             {
                 var cell = Grid.GetCell(i);
+                var moisture = climate[i].Moisture;
                 if(!cell.IsUnderwater)
-                    cell.TerrainTypeIndex = (byte)Mathf.Clamp(cell.Elevation - cell.WaterLevel, 0, 255);
+                {
+                    if(moisture < 0.05f)
+                        cell.TerrainTypeIndex = 4; // snow
+                    else if(moisture < 0.12f)
+                        cell.TerrainTypeIndex = 0; // desert
+                    else if(moisture < 0.28f)
+                        cell.TerrainTypeIndex = 3; // rock
+                    else if(moisture < 0.85f)
+                        cell.TerrainTypeIndex = 1; // grass
+                    else
+                        cell.TerrainTypeIndex = 2; // mud
+                }
+                else
+                    cell.TerrainTypeIndex = 2; // mud
 
-                cell.SetMapData(climate[i].Moisture);
+                cell.SetMapData(moisture);
             }
         }
     }
