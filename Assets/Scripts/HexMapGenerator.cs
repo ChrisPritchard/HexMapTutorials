@@ -87,11 +87,15 @@ namespace DarkDomains
         [Range(1f, 10f)]
         public float WindStrength = 4f;
 
+        [Range(0f, 1f)]
+        public float StartingMoisture = 0.1f;
+
         private int cellCount;
         private HexCellPriorityQueue searchFrontier;
         private int searchFrontierPhase;
         private List<MapRegion> regions;
         private List<ClimateData> climate = new List<ClimateData>();
+        private List<ClimateData> nextClimate = new List<ClimateData>();
 
         public void GenerateMap (int x, int z)
         {
@@ -351,14 +355,24 @@ namespace DarkDomains
         private void CreateClimate()
         {
             climate.Clear();
-            var initialData = new ClimateData();
+            nextClimate.Clear();
+            var initialData = new ClimateData { Moisture = StartingMoisture };
+            var clearData = new ClimateData();
 
             for(var i = 0; i < cellCount; i++)
+            {
                 climate.Add(initialData);
+                nextClimate.Add(clearData);
+            }
 
             for(var cycle = 0; cycle < 40; cycle++)
+            {
                 for(var i = 0; i < cellCount; i++)
                     EvolveClimate(i);
+                var swap = climate;
+                climate = nextClimate;
+                nextClimate = swap;
+            }
         }
 
         private void EvolveClimate(int cellIndex)
@@ -401,7 +415,8 @@ namespace DarkDomains
                 if(!neighbour)
                     continue;
 
-                var neighbourClimate = climate[neighbour.Index];
+                var neighbourClimate = nextClimate[neighbour.Index];
+
                 if(d == mainDispersalDirection)
                     neighbourClimate.Clouds += cloudDispersal * WindStrength;
                 else
@@ -419,11 +434,15 @@ namespace DarkDomains
                     neighbourClimate.Moisture += seepage;
                 }
 
-                climate[neighbour.Index] = neighbourClimate;
+                nextClimate[neighbour.Index] = neighbourClimate;
             }
-            cellClimate.Clouds = 0f;
-            
-            climate[cellIndex] = cellClimate;
+
+            var nextCellClimate = nextClimate[cellIndex];
+            nextCellClimate.Moisture += cellClimate.Moisture;
+            if(nextCellClimate.Moisture > 1f)
+                nextCellClimate.Moisture = 1f;
+            nextClimate[cellIndex] = nextCellClimate;
+            climate[cellIndex] = new ClimateData();;
         }
 
         private void SetTerrainType()
