@@ -40,32 +40,6 @@ namespace DarkDomains
         public bool IsExplored { get => Explorable && explored; private set => explored = value; }
         public bool Explorable { get; set; }
 
-        public void IncreaseVisibility()
-        {
-            visibility++;
-            if(visibility == 1)
-            {
-                IsExplored = true;
-                ShaderData.RefreshVisibility(this);
-            }
-        }
-
-        public void DecreaseVisibility()
-        {
-            visibility--;
-            if(visibility == 0)
-                ShaderData.RefreshVisibility(this);
-        }
-
-        public void ResetVisibility()
-        {
-            if(visibility > 0)
-            {
-                visibility = 0;
-                ShaderData.RefreshVisibility(this);
-            }
-        }
-
         private byte terrainTypeIndex;
         public byte TerrainTypeIndex
         {
@@ -261,25 +235,30 @@ namespace DarkDomains
 
         public HexEdgeType GetEdgeType(HexCell other) => HexMetrics.GetEdgeType(elevation, other.elevation);
 
-        public void Refresh()
+        public void IncreaseVisibility()
         {
-            if(!Chunk) 
-                return;
-
-            Chunk.Refresh();
-            foreach(var neighbour in Neighbours)
-                if(neighbour != null && neighbour.Chunk != Chunk)
-                    neighbour.Chunk.Refresh();
-
-            if(Unit)
-                Unit.ValidatePosition();
+            visibility++;
+            if(visibility == 1)
+            {
+                IsExplored = true;
+                ShaderData.RefreshVisibility(this);
+            }
         }
 
-        public void RefreshSelfOnly()
+        public void DecreaseVisibility()
         {
-            Chunk?.Refresh();
-            if(Unit)
-                Unit.ValidatePosition();
+            visibility--;
+            if(visibility == 0)
+                ShaderData.RefreshVisibility(this);
+        }
+
+        public void ResetVisibility()
+        {
+            if(visibility > 0)
+            {
+                visibility = 0;
+                ShaderData.RefreshVisibility(this);
+            }
         }
 
         public bool HasRiverThroughEdge(HexDirection direction) =>
@@ -375,6 +354,27 @@ namespace DarkDomains
         }
 
         public void SetMapData(float data) => ShaderData.SetMapData(this, data);
+
+        public void Refresh()
+        {
+            if(!Chunk) 
+                return;
+
+            Chunk.Refresh();
+            foreach(var neighbour in Neighbours)
+                if(neighbour != null && neighbour.Chunk != Chunk)
+                    neighbour.Chunk.Refresh();
+
+            if(Unit)
+                Unit.ValidatePosition();
+        }
+
+        public void RefreshSelfOnly()
+        {
+            Chunk?.Refresh();
+            if(Unit)
+                Unit.ValidatePosition();
+        }
 
         public void Save(BinaryWriter writer)
         {
