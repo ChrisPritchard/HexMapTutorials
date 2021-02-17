@@ -14,3 +14,5 @@ Ideas on where to go next:
 - expanding lakes - join with any river along side by expanding
     - identify river 'id' for cells, to ensure loop rivers dont exist (river that feeds into itself)
 - using a byte in memory to represent all low int values, but signed. sbyte? or int16? (latter is cls compliant, but larger)
+- refer to terrain always by enum, not index
+- tighter direction loops, better use of lists (switch to arrays?)

@@ -40,15 +40,15 @@ namespace DarkDomains
         public bool IsExplored { get => Explorable && explored; private set => explored = value; }
         public bool Explorable { get; set; }
 
-        private byte terrainTypeIndex;
-        public byte TerrainTypeIndex
+        private int terrainTypeIndex;
+        public int TerrainTypeIndex
         {
             get => terrainTypeIndex;
             set
             {
                 if (terrainTypeIndex == value)
                     return;
-                terrainTypeIndex = (byte)value;
+                terrainTypeIndex = value;
                 ShaderData.RefreshTerrain(this);
             }
         }
@@ -380,7 +380,7 @@ namespace DarkDomains
         {
             writer.Write((byte)(elevation + 127));
             writer.Write((byte)(waterLevel + 127));
-            writer.Write(terrainTypeIndex);
+            writer.Write((byte)terrainTypeIndex);
 
             var roadFlags = 0;
             for(var i = 0; i < roads.Length; i++)
@@ -401,8 +401,8 @@ namespace DarkDomains
         {
             elevation = (int)(reader.ReadByte() - 127);
             waterLevel = (int)(reader.ReadByte() - 127);
-
             terrainTypeIndex = reader.ReadByte();
+
             ShaderData.RefreshTerrain(this);
 
             var roadFlags = reader.ReadByte();

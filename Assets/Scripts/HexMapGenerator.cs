@@ -4,21 +4,30 @@ namespace DarkDomains
     using System.Collections.Generic;
     using UnityEngine;
 
-    public struct MapRegion
-    {
-        public int XMin, XMax, ZMin, ZMax;
-
-        public static MapRegion Create(int xmin, int xmax, int zmin, int zmax) => 
-            new MapRegion { XMin = xmin, XMax = xmax, ZMin = zmin, ZMax = zmax };
-    }
-
-    public struct ClimateData
-    {
-        public float Clouds, Moisture;
-    }
+    public enum HemisphereMode { North, South, Both }
 
     public class HexMapGenerator : MonoBehaviour
     {
+        struct MapRegion
+        {
+            public int XMin, XMax, ZMin, ZMax;
+
+            public static MapRegion Create(int xmin, int xmax, int zmin, int zmax) => 
+                new MapRegion { XMin = xmin, XMax = xmax, ZMin = zmin, ZMax = zmax };
+        }
+
+        struct ClimateData
+        {
+            public float Clouds, Moisture;
+        }
+
+        struct Biome
+        {
+            public int Terrain;
+
+            public Biome(int terrain) => Terrain = terrain;
+        }
+
         public HexGrid Grid;
 
         public int Seed;
@@ -96,6 +105,17 @@ namespace DarkDomains
         [Range(0f, 1f)]
         public float ExtraLakeProbability = 0.25f;
 
+        [Range(0f, 1f)]
+        public float LowTemperature = 0f;
+
+        [Range(0f, 1f)]
+        public float HighTemperature = 1f;
+
+        [Range(0f, 1f)]
+        public float TemperatureJitter = 0.1f;
+
+        public HemisphereMode HemisphereMode = HemisphereMode.Both;
+
         private int cellCount, landCells;
         private HexCellPriorityQueue searchFrontier;
         private int searchFrontierPhase;
@@ -103,6 +123,17 @@ namespace DarkDomains
         private List<ClimateData> climate = new List<ClimateData>();
         private List<ClimateData> nextClimate = new List<ClimateData>();
         private List<HexDirection> flowDirections = new List<HexDirection>();
+        private int temperatureJitterChannel;
+
+        private static float[] temperatureBands = { 0.1f, 0.3f, 0.6f };
+        private static float[] moistureBands = { 0.12f, 0.28f, 0.85f };
+
+        private static Biome[] biomes = {
+            new Biome(0), new Biome(4), new Biome(4), new Biome(4), // desert   snow    snow    snow
+            new Biome(0), new Biome(2), new Biome(2), new Biome(2), // desert   mud     mud     mud
+            new Biome(0), new Biome(1), new Biome(1), new Biome(1), // desert   grass   grass   grass
+            new Biome(0), new Biome(1), new Biome(1), new Biome(1)  // desert   grass   grass   grass
+        };
 
         public void GenerateMap (int x, int z)
         {
@@ -594,28 +625,64 @@ namespace DarkDomains
 
         private void SetTerrainType()
         {
+            temperatureJitterChannel = Random.Range(0, 4);
+            var rockDesertElevation = (ElevationMaximum - WaterLevel) / 2;
+
             for(var i = 0; i < cellCount; i++)
             {
                 var cell = Grid.GetCell(i);
+                var temperature = DetermineTemperature(cell);
                 var moisture = climate[i].Moisture;
+
                 if(!cell.IsUnderwater)
                 {
-                    if(moisture < 0.05f)
-                        cell.TerrainTypeIndex = 4; // snow
-                    else if(moisture < 0.12f)
-                        cell.TerrainTypeIndex = 0; // desert
-                    else if(moisture < 0.28f)
-                        cell.TerrainTypeIndex = 3; // rock
-                    else if(moisture < 0.85f)
-                        cell.TerrainTypeIndex = 1; // grass
-                    else
-                        cell.TerrainTypeIndex = 2; // mud
+                    var t = 0;
+                    for (; t < temperatureBands.Length; t++)
+                        if(temperature < temperatureBands[t])
+                            break;
+                    var m = 0;
+                    for (; m < moistureBands.Length; m++)
+                        if(moisture < moistureBands[m])
+                            break;
+
+                    var biome = biomes[t * 4 + m];
+                    if(biome.Terrain == 0)
+                    {
+                        if(cell.Elevation - WaterLevel > rockDesertElevation)
+                            biome.Terrain = 3;
+                    }
+                    else if(cell.Elevation == ElevationMaximum)
+                        biome.Terrain = 4;
+
+                    cell.TerrainTypeIndex = biome.Terrain;
                 }
                 else
                     cell.TerrainTypeIndex = 2; // mud
-
-                cell.SetMapData(moisture);
             }
+        }
+
+        private float DetermineTemperature(HexCell cell)
+        {
+            var latitude = (float)cell.Coordinates.Z / Grid.CellCountZ;
+
+            if(HemisphereMode == HemisphereMode.Both)
+            {
+                latitude *= 2f;
+                if(latitude > 1f)
+                    latitude = 2f - latitude;
+            } 
+            else if (HemisphereMode == HemisphereMode.North)
+                latitude = 1f - latitude;
+
+            var temperature = Mathf.LerpUnclamped(LowTemperature, HighTemperature, latitude);
+
+            // cool by height
+            temperature *= 1f - (cell.ViewElevation - WaterLevel) / (ElevationMaximum - WaterLevel + 1f);
+
+            var jitter = HexMetrics.SampleNoise(cell.Position * 0.1f)[temperatureJitterChannel];
+            temperature += (jitter * 2f - 1f) * TemperatureJitter;
+
+            return temperature;
         }
     }
 }

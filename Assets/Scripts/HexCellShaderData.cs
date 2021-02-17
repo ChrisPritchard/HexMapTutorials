@@ -43,7 +43,7 @@ namespace DarkDomains
 
         public void RefreshTerrain(HexCell cell)
         {
-            cellTextureData[cell.Index].a = cell.TerrainTypeIndex;
+            cellTextureData[cell.Index].a = (byte)cell.TerrainTypeIndex;
             enabled = true;
         }
 
