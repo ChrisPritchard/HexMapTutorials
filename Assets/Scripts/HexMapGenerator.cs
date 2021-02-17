@@ -23,9 +23,10 @@ namespace DarkDomains
 
         struct Biome
         {
-            public int Terrain;
+            public int Terrain, Forest;
 
-            public Biome(int terrain) => Terrain = terrain;
+            public Biome(int terrain, int forest) => 
+                (Terrain, Forest) = (terrain, forest);
         }
 
         public HexGrid Grid;
@@ -128,11 +129,12 @@ namespace DarkDomains
         private static float[] temperatureBands = { 0.1f, 0.3f, 0.6f };
         private static float[] moistureBands = { 0.12f, 0.28f, 0.85f };
 
+        // down = increasing temperature, right = increasing moisture
         private static Biome[] biomes = {
-            new Biome(0), new Biome(4), new Biome(4), new Biome(4), // desert   snow    snow    snow
-            new Biome(0), new Biome(2), new Biome(2), new Biome(2), // desert   mud     mud     mud
-            new Biome(0), new Biome(1), new Biome(1), new Biome(1), // desert   grass   grass   grass
-            new Biome(0), new Biome(1), new Biome(1), new Biome(1)  // desert   grass   grass   grass
+            new Biome(0, 0), new Biome(4, 0), new Biome(4, 0), new Biome(4, 0), // desert   snow    snow    snow
+            new Biome(0, 0), new Biome(2, 0), new Biome(2, 1), new Biome(2, 2), // desert   mud     mud     mud
+            new Biome(0, 0), new Biome(1, 0), new Biome(1, 1), new Biome(1, 2), // desert   grass   grass   grass
+            new Biome(0, 0), new Biome(1, 1), new Biome(1, 2), new Biome(1, 3)  // desert   grass   grass   grass
         };
 
         public void GenerateMap (int x, int z)
@@ -654,7 +656,13 @@ namespace DarkDomains
                     else if(cell.Elevation == ElevationMaximum)
                         biome.Terrain = 4;
 
+                    if(biome.Terrain == 4)
+                        biome.Forest = 0;
+                    if(biome.Forest < 3 && cell.HasRiver)
+                        biome.Forest ++;
+
                     cell.TerrainTypeIndex = biome.Terrain;
+                    cell.ForestLevel = (byte)biome.Forest;
                 }
                 else
                     cell.TerrainTypeIndex = 2; // mud
