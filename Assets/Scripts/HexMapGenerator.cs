@@ -91,7 +91,10 @@ namespace DarkDomains
         public float StartingMoisture = 0.1f;
         
         [Range(1, 20)]
-        public float RiverPercentage = 10;
+        public int RiverPercentage = 10;
+
+        [Range(0f, 1f)]
+        public float ExtraLakeProbability = 0.25f;
 
         private int cellCount, landCells;
         private HexCellPriorityQueue searchFrontier;
@@ -576,6 +579,13 @@ namespace DarkDomains
                 direction = flowDirections[Random.Range(0, flowDirections.Count)];
                 cell.SetOutgoingRiver(direction);
                 length++;
+
+                if(minNeighbourElevation >= cell.Elevation && Random.value < ExtraLakeProbability) // create a lake
+                {
+                    cell.WaterLevel = (byte)cell.Elevation;
+                    cell.Elevation = cell.Elevation - 1;
+                }
+
                 cell = cell.GetNeighbour(direction);
             }
 
