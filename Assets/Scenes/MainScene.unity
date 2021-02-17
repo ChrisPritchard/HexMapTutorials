@@ -8988,14 +8988,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Grid: {fileID: 1756129105}
-  Seed: 0
-  UseFixedSeed: 0
+  Seed: 686875058
+  UseFixedSeed: 1
   JitterProbability: 0.25
   HighRiseProbability: 0.25
   SinkProbability: 0.2
   ChunkSizeMin: 30
   ChunkSizeMax: 100
-  LandPercentage: 50
+  LandPercentage: 65
   WaterLevel: 3
   ElevationMinimum: -2
   ElevationMaximum: 8
@@ -9011,6 +9011,7 @@ MonoBehaviour:
   SeepageFactor: 0.125
   WindDirection: 5
   WindStrength: 4
+  StartingMoisture: 0.1
 --- !u!4 &1200516152
 Transform:
   m_ObjectHideFlags: 0
