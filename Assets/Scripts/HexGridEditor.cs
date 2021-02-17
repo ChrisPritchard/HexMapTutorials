@@ -18,10 +18,10 @@ namespace DarkDomains
 
         byte activeTerrain, activeSpecialFeature;
 
-        byte activeElevation;
+        int activeElevation;
         public Text ElevationText;
 
-        byte activeWaterLevel;
+        int activeWaterLevel;
         public Text WaterLevelText;
 
         bool addRivers = true;
@@ -184,13 +184,13 @@ namespace DarkDomains
 
         public void SelectElevation(float amount)
         {
-            activeElevation = (byte)amount;
+            activeElevation = (int)amount;
             ElevationText.text = amount.ToString();
         }
 
         public void SelectWaterLevel(float amount)
         {
-            activeWaterLevel = (byte)amount;
+            activeWaterLevel = (int)amount;
             WaterLevelText.text = amount.ToString();
         }
 

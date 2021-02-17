@@ -118,7 +118,7 @@ namespace DarkDomains
                 searchFrontier = new HexCellPriorityQueue();
 
             for(var i = 0; i < cellCount; i++)
-                Grid.GetCell(i).WaterLevel = (byte)WaterLevel;
+                Grid.GetCell(i).WaterLevel = WaterLevel;
 
             CreateRegions();
             CreateLand();
@@ -569,7 +569,7 @@ namespace DarkDomains
                         
                     if(minNeighbourElevation >= cell.Elevation) // create a lake
                     {
-                        cell.WaterLevel = (byte)minNeighbourElevation;
+                        cell.WaterLevel = minNeighbourElevation;
                         if(minNeighbourElevation == cell.Elevation)
                             cell.Elevation = minNeighbourElevation - 1;
                     }
@@ -582,7 +582,7 @@ namespace DarkDomains
 
                 if(minNeighbourElevation >= cell.Elevation && Random.value < ExtraLakeProbability) // create a lake
                 {
-                    cell.WaterLevel = (byte)cell.Elevation;
+                    cell.WaterLevel = cell.Elevation;
                     cell.Elevation = cell.Elevation - 1;
                 }
 

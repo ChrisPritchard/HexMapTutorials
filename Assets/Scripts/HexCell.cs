@@ -100,8 +100,8 @@ namespace DarkDomains
             }
         }
 
-        private byte waterLevel;
-        public byte WaterLevel
+        private int waterLevel;
+        public int WaterLevel
         {
             get => waterLevel;
             set
@@ -379,7 +379,7 @@ namespace DarkDomains
         public void Save(BinaryWriter writer)
         {
             writer.Write((byte)(elevation + 127));
-            writer.Write(waterLevel);
+            writer.Write((byte)(waterLevel + 127));
             writer.Write(terrainTypeIndex);
 
             var roadFlags = 0;
@@ -400,7 +400,7 @@ namespace DarkDomains
         public void Load(BinaryReader reader)
         {
             elevation = (int)(reader.ReadByte() - 127);
-            waterLevel = reader.ReadByte();
+            waterLevel = (int)(reader.ReadByte() - 127);
 
             terrainTypeIndex = reader.ReadByte();
             ShaderData.RefreshTerrain(this);
