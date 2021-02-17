@@ -665,7 +665,40 @@ namespace DarkDomains
                     cell.ForestLevel = (byte)biome.Forest;
                 }
                 else
-                    cell.TerrainTypeIndex = 2; // mud
+                {
+                    var terrain = 2;
+                    if(cell.Elevation == WaterLevel - 1)
+                    {
+                        // possible coast
+                        int cliffs = 0, slopes = 0;
+                        for(var d = HexDirection.NE; d <= HexDirection.NW; d++)
+                        {
+                            var neighbour = cell.GetNeighbour(d);
+                            if(!neighbour)
+                                continue;
+                            var delta = neighbour.Elevation - cell.WaterLevel;
+                            if(delta == 0)
+                                slopes++;
+                            else if(delta > 0)
+                                cliffs++;
+                            if (cliffs + slopes > 3)
+                                terrain = 1; // grass
+                            else if(cliffs > 0)
+                                terrain = 3; // rock
+                            else if(slopes > 0)
+                                terrain = 0; // sand
+                            else
+                                terrain = 1; // grass
+                        }
+                    }
+                    else if(cell.Elevation >= WaterLevel)
+                        terrain = 1; // grass
+                    else if(cell.Elevation < 0)
+                        terrain = 3; // rock
+                    if (terrain == 1 && temperature < temperatureBands[0])
+                        terrain = 2; // mud
+                    cell.TerrainTypeIndex = terrain;
+                }
             }
         }
 
