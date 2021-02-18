@@ -31,6 +31,8 @@ namespace DarkDomains
         HexCellShaderData cellShaderData;
 
         bool wrapping;
+        public bool Wrapping => wrapping;
+        int currentCentreColumnIndex = -1;
 
         private void Awake()
         {
@@ -39,7 +41,7 @@ namespace DarkDomains
             HexUnit.UnitPrefab = UnitPrefab;
             cellShaderData = gameObject.AddComponent<HexCellShaderData>();
             cellShaderData.Grid = this;
-            CreateMap(40, 30, wrapping);
+            CreateMap(40, 30, Wrapping);
         }
 
         private void OnEnable() 
@@ -49,7 +51,7 @@ namespace DarkDomains
 
             HexMetrics.NoiseSource = NoiseSource;
             HexMetrics.InitialiseHashGrid(Seed);            
-            HexMetrics.WrapSize = wrapping ? CellCountX : 0;
+            HexMetrics.WrapSize = Wrapping ? CellCountX : 0;
             HexUnit.UnitPrefab = UnitPrefab;
 
             ResetVisibility();
@@ -66,6 +68,7 @@ namespace DarkDomains
 
             this.wrapping = wrapping;
             HexMetrics.WrapSize = wrapping ? CellCountX : 0;
+            this.currentCentreColumnIndex = -1;
 
             ClearPath();
             ClearUnits();
@@ -161,6 +164,30 @@ namespace DarkDomains
             //cell.WaterLevel = 1; // covered in water
 
             AddCellToChunk(x, z, cell);
+        }
+
+        public void CentreMap(float xPosition)
+        {
+            var centreColumnIndex = (int)(xPosition / (HexMetrics.InnerDiameter * HexMetrics.ChunkSizeX));
+            if(centreColumnIndex == currentCentreColumnIndex)
+                return;
+            currentCentreColumnIndex = centreColumnIndex;
+
+            var minColumnIndex = centreColumnIndex - chunkCountX / 2;
+            var maxColumnIndex = centreColumnIndex + chunkCountX / 2;
+
+            var position = new Vector3();
+            var chunkAdjust = HexMetrics.InnerDiameter * HexMetrics.ChunkSizeX;
+            for(var i = 0; i < columns.Length; i++)
+            {   
+                if(i < minColumnIndex)
+                    position.x = chunkCountX * chunkAdjust;
+                else if(i > maxColumnIndex)
+                    position.x = chunkCountX * -chunkAdjust;
+                else
+                    position.x = 0;
+                columns[i].localPosition = position;
+            }
         }
 
         public void AddUnit(HexUnit unit, HexCell location, float orientation)
@@ -439,7 +466,7 @@ namespace DarkDomains
         {
             writer.Write(CellCountX);
             writer.Write(CellCountZ);
-            writer.Write(wrapping);
+            writer.Write(Wrapping);
 
             foreach(var cell in cells)
                 cell.Save(writer);

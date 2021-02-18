@@ -10,7 +10,7 @@ namespace DarkDomains
         float zoom;
         float rotationAngle;
 
-        public HexGrid HexGrid;
+        public HexGrid Grid;
 
         public float StickMinZoom, StickMaxZoom;
         public float MoveSpeedMinZoom, MoveSpeedMaxZoom;
@@ -60,15 +60,27 @@ namespace DarkDomains
 
             var position = transform.localPosition;
             position += direction * damping * distance;
-            transform.localPosition = ClampPosition(position);
+            transform.localPosition = Grid.Wrapping ? WrapPosition(position) : ClampPosition(position);
+        }
+
+        private Vector3 WrapPosition(Vector3 position)
+        {
+            var xMax = (Grid.CellCountX - 0.5f) * HexMetrics.InnerDiameter;
+            position.x = Mathf.Clamp(position.x, 0, xMax);
+
+            var zMax = (Grid.CellCountZ - 1f) * (1.5f * HexMetrics.OuterRadius);
+            position.z = Mathf.Clamp(position.z, 0, zMax);
+
+            Grid.CentreMap(position.x);
+            return position;
         }
 
         private Vector3 ClampPosition(Vector3 position)
         {
-            var XMax = (HexGrid.CellCountX - 0.5f) * HexMetrics.InnerDiameter;
+            var XMax = (Grid.CellCountX - 0.5f) * HexMetrics.InnerDiameter;
             position.x = Mathf.Clamp(position.x, 0f, XMax);
 
-            var ZMax = (HexGrid.CellCountZ - 1f) * 1.5f * HexMetrics.OuterRadius;
+            var ZMax = (Grid.CellCountZ - 1f) * 1.5f * HexMetrics.OuterRadius;
             position.z = Mathf.Clamp(position.z, 0f, ZMax);
 
             return position;
