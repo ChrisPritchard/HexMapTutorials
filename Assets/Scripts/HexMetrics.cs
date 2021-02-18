@@ -155,8 +155,16 @@ namespace DarkDomains
             return HexEdgeType.Cliff;
         }
 
-        public static Vector4 SampleNoise(Vector3 position) => 
-            NoiseSource.GetPixelBilinear(position.x * NoiseScale, position.z * NoiseScale);
+        public static Vector4 SampleNoise(Vector3 position)
+        {
+            var sample = NoiseSource.GetPixelBilinear(position.x * NoiseScale, position.z * NoiseScale);
+            if(Wrapping && position.x < InnerDiameter)
+            {
+                var sample2 = NoiseSource.GetPixelBilinear((position.x + WrapSize * InnerDiameter) * NoiseScale, position.z * NoiseScale);
+                sample = Vector4.Lerp(sample2, sample, position.x * (1f / InnerDiameter));
+            }
+            return sample;
+        }
 
         // a key insight with perturb is that the same position will always be perturbed the same amount, due to the fixed noise texture
         // as a result, even though vertices for one triangle are isolated, other triangles will line up as their vertices have the same initial position
