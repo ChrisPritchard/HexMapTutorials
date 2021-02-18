@@ -26,6 +26,11 @@ namespace DarkDomains
             AdjustZoom(0.8f);
         }
 
+        private void OnEnable() 
+        {
+            ValidatePosition();
+        }
+
         private void Update() 
         {
             if(Locked)
@@ -65,6 +70,8 @@ namespace DarkDomains
 
         private Vector3 WrapPosition(Vector3 position)
         {
+            // this code will ensure the camera stays within the map width
+            // without clamping - it just teleports the camera when it goes over a min/max
             var width = Grid.CellCountX * HexMetrics.InnerDiameter;
             while(position.x < 0f)
                 position.x += width;

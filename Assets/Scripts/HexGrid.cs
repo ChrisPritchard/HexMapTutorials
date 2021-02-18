@@ -171,19 +171,23 @@ namespace DarkDomains
             var centreColumnIndex = (int)(xPosition / (HexMetrics.InnerDiameter * HexMetrics.ChunkSizeX));
             if(centreColumnIndex == currentCentreColumnIndex)
                 return;
-            currentCentreColumnIndex = centreColumnIndex;
+            currentCentreColumnIndex = centreColumnIndex; // index of column camera is over
 
-            var minColumnIndex = centreColumnIndex - chunkCountX / 2;
+            // each column is at 0,0, and its chunks are relative to that
+            // meaning, if the column is moved to the right edge, its chunks will be adjusted proportionally
+            // and vice versa - if a column is shifted a map width back, its chunks will be in the right position a length back
+
+            var minColumnIndex = centreColumnIndex - chunkCountX / 2; // visible columns
             var maxColumnIndex = centreColumnIndex + chunkCountX / 2;
 
             var position = new Vector3();
-            var chunkAdjust = HexMetrics.InnerDiameter * HexMetrics.ChunkSizeX;
+            var chunkAdjust = HexMetrics.InnerDiameter * HexMetrics.ChunkSizeX * chunkCountX; // one map length
             for(var i = 0; i < columns.Length; i++)
             {   
                 if(i < minColumnIndex)
-                    position.x = chunkCountX * chunkAdjust;
+                    position.x = chunkAdjust; // move it ahead
                 else if(i > maxColumnIndex)
-                    position.x = chunkCountX * -chunkAdjust;
+                    position.x = -chunkAdjust; // move it behind
                 else
                     position.x = 0;
                 columns[i].localPosition = position;
