@@ -47,7 +47,8 @@ namespace DarkDomains
                 return;
 
             HexMetrics.NoiseSource = NoiseSource;
-            HexMetrics.InitialiseHashGrid(Seed);
+            HexMetrics.InitialiseHashGrid(Seed);            
+            HexMetrics.WrapSize = wrapping ? CellCountX : 0;
             HexUnit.UnitPrefab = UnitPrefab;
 
             ResetVisibility();
@@ -63,6 +64,7 @@ namespace DarkDomains
             }
 
             this.wrapping = wrapping;
+            HexMetrics.WrapSize = wrapping ? CellCountX : 0;
 
             ClearPath();
             ClearUnits();
@@ -109,7 +111,7 @@ namespace DarkDomains
 
         private void CreateCell(int x, int z, int i)
         {
-            var px = (x + z/2f - z/2) * (2 * HexMetrics.InnerRadius);
+            var px = (x + z/2f - z/2) * HexMetrics.InnerDiameter;
             var pz = z * (1.5f * HexMetrics.OuterRadius);
             var position = new Vector3(px, 0f, pz);
 

@@ -26,6 +26,8 @@ namespace DarkDomains
 
         public const float InnerRadius = OuterRadius * OuterToInner; // distance from centre to any edge
 
+        public const float InnerDiameter = InnerRadius * 2;
+
         public const float SolidFactor = 0.8f; // unblended core percent of a tile
 
         public const float BlendFactor = 1f - SolidFactor; // blended with neighbours percent of a tile
@@ -69,6 +71,10 @@ namespace DarkDomains
         public const float WallTowerThreashold = 0.5f;
         
         public const float BridgeDesignLength = 7f;
+
+        public static int WrapSize = 0;
+
+        public static bool Wrapping => WrapSize > 0;
 
         static HexHash[] hashGrid;
 

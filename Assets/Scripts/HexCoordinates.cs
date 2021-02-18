@@ -25,7 +25,7 @@ namespace DarkDomains
         public static HexCoordinates FromOffsetCoordinates(int x, int z) => new HexCoordinates(x-z/2, z);
         public static HexCoordinates FromPosition(Vector3 position)
         {
-            var x = position.x / (HexMetrics.InnerRadius * 2f);
+            var x = position.x / HexMetrics.InnerDiameter;
             var y = -x;
             var offset = position.z / (HexMetrics.OuterRadius * 3f);
             x -= offset;

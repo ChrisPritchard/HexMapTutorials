@@ -65,7 +65,7 @@ namespace DarkDomains
 
         private Vector3 ClampPosition(Vector3 position)
         {
-            var XMax = (HexGrid.CellCountX - 0.5f) * 2f * HexMetrics.InnerRadius;
+            var XMax = (HexGrid.CellCountX - 0.5f) * HexMetrics.InnerDiameter;
             position.x = Mathf.Clamp(position.x, 0f, XMax);
 
             var ZMax = (HexGrid.CellCountZ - 1f) * 1.5f * HexMetrics.OuterRadius;
