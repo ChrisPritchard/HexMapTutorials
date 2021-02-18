@@ -29,6 +29,8 @@ namespace DarkDomains
 
         HexCellShaderData cellShaderData;
 
+        bool wrapping;
+
         private void Awake()
         {
             HexMetrics.NoiseSource = NoiseSource;
@@ -36,7 +38,7 @@ namespace DarkDomains
             HexUnit.UnitPrefab = UnitPrefab;
             cellShaderData = gameObject.AddComponent<HexCellShaderData>();
             cellShaderData.Grid = this;
-            CreateMap(40, 30);
+            CreateMap(40, 30, wrapping);
         }
 
         private void OnEnable() 
@@ -51,7 +53,7 @@ namespace DarkDomains
             ResetVisibility();
         }
 
-        public void CreateMap(int x, int z)
+        public void CreateMap(int x, int z, bool wrapping)
         {
             if(x % HexMetrics.ChunkSizeX != 0
             || z % HexMetrics.ChunkSizeZ != 0)
@@ -59,6 +61,8 @@ namespace DarkDomains
                 Debug.Log("invalid size specified - must be multiples of chunksize");
                 return;
             }
+
+            this.wrapping = wrapping;
 
             ClearPath();
             ClearUnits();
@@ -428,6 +432,7 @@ namespace DarkDomains
         {
             writer.Write(CellCountX);
             writer.Write(CellCountZ);
+            writer.Write(wrapping);
 
             foreach(var cell in cells)
                 cell.Save(writer);
@@ -444,7 +449,9 @@ namespace DarkDomains
 
             var cX = reader.ReadInt32();
             var cY = reader.ReadInt32();
-            CreateMap(cX, cY); // ensures the right size max is created
+            var wrapping = reader.ReadBoolean();
+
+            CreateMap(cX, cY, wrapping); // ensures the right size max is created
 
             var mode = cellShaderData.ImmediateMode;
             cellShaderData.ImmediateMode = true; // visibility is shown immediately on initial load

@@ -137,7 +137,7 @@ namespace DarkDomains
             new Biome(0, 0), new Biome(1, 1), new Biome(1, 2), new Biome(1, 3)  // desert   grass   grass   grass
         };
 
-        public void GenerateMap (int x, int z)
+        public void GenerateMap (int x, int z, bool wrapping)
         {
             var originalRandomState = Random.state;
             if(!UseFixedSeed)
@@ -145,7 +145,7 @@ namespace DarkDomains
             Random.InitState(Seed);
 
             cellCount = x * z;
-            Grid.CreateMap(x, z);
+            Grid.CreateMap(x, z, wrapping);
 
             if(searchFrontier == null)
                 searchFrontier = new HexCellPriorityQueue();

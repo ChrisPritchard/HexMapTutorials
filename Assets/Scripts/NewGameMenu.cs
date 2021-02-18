@@ -25,12 +25,16 @@ namespace DarkDomains
 
         public void ToggleMapGeneration (bool toggle) => generateMap = toggle;
 
+        private bool wrappingMap = true;
+
+        public void ToggleWrappingMap (bool toggle) => wrappingMap = toggle;
+
         public void CreateSmallMap()
         {
             if(generateMap)
-                Generator.GenerateMap(20, 15);
+                Generator.GenerateMap(20, 15, wrappingMap);
             else
-                HexGrid.CreateMap(20, 15);
+                HexGrid.CreateMap(20, 15, wrappingMap);
             Hide();
             HexMapCamera.ValidatePosition();
         }
@@ -38,9 +42,9 @@ namespace DarkDomains
         public void CreateMediumMap()
         {
             if(generateMap)
-                Generator.GenerateMap(40, 30);
+                Generator.GenerateMap(40, 30, wrappingMap);
             else
-                HexGrid.CreateMap(40, 30);
+                HexGrid.CreateMap(40, 30, wrappingMap);
             Hide();
             HexMapCamera.ValidatePosition();
         }
@@ -48,9 +52,9 @@ namespace DarkDomains
         public void CreateLargeMap()
         {
             if(generateMap)
-                Generator.GenerateMap(80, 60);
+                Generator.GenerateMap(80, 60, wrappingMap);
             else
-                HexGrid.CreateMap(80, 60);
+                HexGrid.CreateMap(80, 60, wrappingMap);
             Hide();
             HexMapCamera.ValidatePosition();
         }
