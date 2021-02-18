@@ -65,8 +65,11 @@ namespace DarkDomains
 
         private Vector3 WrapPosition(Vector3 position)
         {
-            var xMax = (Grid.CellCountX - 0.5f) * HexMetrics.InnerDiameter;
-            position.x = Mathf.Clamp(position.x, 0, xMax);
+            var width = Grid.CellCountX * HexMetrics.InnerDiameter;
+            while(position.x < 0f)
+                position.x += width;
+            while(position.x > width)
+                position.x -= width;
 
             var zMax = (Grid.CellCountZ - 1f) * (1.5f * HexMetrics.OuterRadius);
             position.z = Mathf.Clamp(position.z, 0, zMax);
