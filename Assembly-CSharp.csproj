@@ -63,6 +63,7 @@
      <None Include="Assets\Shaders\Feature.shader" />
      <None Include="Assets\Shaders\Highlight.shader" />
      <None Include="Assets\Shaders\HexCellData.cginc" />
+     <None Include="Assets\Shaders\HexMetrics.cginc" />
      <None Include="Assets\Shaders\Rivers.shader" />
      <None Include="Assets\Shaders\WaterShared.cginc" />
      <None Include="Assets\Shaders\Terrain.shader" />

@@ -1,4 +1,6 @@
 
+#include "HexMetrics.cginc"
+
 float River(float2 riverUV, sampler2D noiseText) {
     float2 uv = riverUV;
     uv.x = uv.x * 0.0625 + _Time.y * 0.005;
@@ -17,7 +19,7 @@ float Foam(float shore, float2 worldXZ, sampler2D noiseTex) {
     shore = sqrt(shore) * 0.9;
 
     float2 noiseUV = worldXZ + _Time.y * 0.25;
-    float4 noise = tex2D(noiseTex, noiseUV * 0.015);
+    float4 noise = tex2D(noiseTex, noiseUV * (2 * TILING_SCALE));
 
     float distortion1 = noise.x * (1 - shore);
     float foam1 = sin((shore + distortion1) * 10 - _Time.y);
@@ -33,11 +35,11 @@ float Foam(float shore, float2 worldXZ, sampler2D noiseTex) {
 float Waves(float2 worldXZ, sampler2D noiseTex) {
     float2 uv1 = worldXZ;
     uv1.y += _Time.y;
-    float4 noise1 = tex2D(noiseTex, uv1 * 0.025);
+    float4 noise1 = tex2D(noiseTex, uv1 * (3 * TILING_SCALE));
 
     float2 uv2 = worldXZ;
     uv2.x += _Time.y;
-    float4 noise2 = tex2D(noiseTex, uv2 * 0.025);
+    float4 noise2 = tex2D(noiseTex, uv2 * (3 * TILING_SCALE));
 
     float blendwave = sin((worldXZ.x + worldXZ.y) * 0.1 + noise1.y + noise2.z + _Time.y);
     blendwave *= blendwave;
