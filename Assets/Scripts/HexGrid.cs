@@ -138,25 +138,26 @@ namespace DarkDomains
             // the setneighbour function does the reverse, so connecting back will conneck the prior cell to the current one too
             // in this way, all cells are connected to their neighbours
 
-            if (x != 0)
+            if (x > 0)
             {
                 cell.SetNeighbour(HexDirection.W, cells[index - 1]);
                 if(wrapping && x == CellCountX - 1)
                     cell.SetNeighbour(HexDirection.E, cells[i - x]);
             }
-            if (z != 0)
+            if (z > 0)
             {            
-                if (z % 2 == 0) // non 'shunted' row, so always has bottom right, but first doesnt have bottom left
+                if ((z & 1) == 0) // non 'shunted' row, so always has bottom right, but first doesnt have bottom left
                 {
                     cell.SetNeighbour(HexDirection.SE, cells[index - CellCountX]);
-                    if (x != 0)
+                    if (x > 0)
                         cell.SetNeighbour(HexDirection.SW, cells[index - CellCountX - 1]);
                     else if(wrapping)
                         cell.SetNeighbour(HexDirection.SW, cells[i - 1]);
-                } else  // 'shunted' row, always has bottom left, but last does not have bottom right
+                } 
+                else  // 'shunted' row, always has bottom left, but last does not have bottom right
                 {
                     cell.SetNeighbour(HexDirection.SW, cells[index - CellCountX]);
-                    if (x != CellCountX - 1)
+                    if (x < CellCountX - 1)
                         cell.SetNeighbour(HexDirection.SE, cells[index - CellCountX + 1]);
                     else if (wrapping)
                         cell.SetNeighbour(HexDirection.SE, cells[i - CellCountX * 2 + 1]);
