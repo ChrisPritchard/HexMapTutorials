@@ -23,6 +23,7 @@ namespace DarkDomains
 
         public int Seed;
 
+        Transform[] columns;
         HexGridChunk[] chunks;
         HexCell[] cells;
         List<HexUnit> units = new List<HexUnit>();
@@ -69,9 +70,9 @@ namespace DarkDomains
             ClearPath();
             ClearUnits();
 
-            if(chunks != null)
-                foreach(var chunk in chunks)
-                    Destroy(chunk.gameObject);
+            if(columns != null)
+                foreach(var column in columns)
+                    Destroy(column.gameObject);
 
             chunkCountX = x / HexMetrics.ChunkSizeX;
             chunkCountZ = z / HexMetrics.ChunkSizeZ;
@@ -83,20 +84,24 @@ namespace DarkDomains
 
         private void CreateChunks()
         {
+            columns = new Transform[chunkCountX];
+            for(var x = 0; x < chunkCountX; x++)
+            {
+                columns[x] = new GameObject("Column").transform;
+                columns[x].SetParent(transform, false);
+            }
+
             chunks = new HexGridChunk[chunkCountX * chunkCountZ];
 
             for(var z = 0; z < chunkCountZ; z++)
                 for(var x = 0; x < chunkCountX; x++)
-                    CreateChunk(x, z);
-        }
+                {
+                    var chunk = Instantiate<HexGridChunk>(ChunkPrefab);
+                    chunk.transform.SetParent(columns[x]);
 
-        private void CreateChunk(int x, int z)
-        {
-            var chunk = Instantiate<HexGridChunk>(ChunkPrefab);
-            chunk.transform.SetParent(this.transform);
-
-            var index = z * chunkCountX + x;
-            chunks[index] = chunk;
+                    var index = z * chunkCountX + x;
+                    chunks[index] = chunk;
+                }
         }
 
         private void CreateCells()
