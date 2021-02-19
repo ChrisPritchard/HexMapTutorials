@@ -698,6 +698,11 @@ namespace DarkDomains
             Water.AddTriangleCellData(indices, weights1);
 
             var centre2 = neighbour.Position;
+            if(neighbour.ColumnIndex < cell.ColumnIndex - 1)
+                centre2.x += HexMetrics.WrapSize * HexMetrics.InnerDiameter;
+            else if(neighbour.ColumnIndex > cell.ColumnIndex + 1)
+                centre2.x -= HexMetrics.WrapSize * HexMetrics.InnerDiameter;
+
             centre2.y = centre.y;
             var e2 = new EdgeVertices(
                 centre2 + HexMetrics.GetSecondSolidCorner(direction.Opposite()),
@@ -726,7 +731,13 @@ namespace DarkDomains
             if (nextNeighbour == null)
                 return;
 
-            var v3 = nextNeighbour.Position + 
+            var centre3 = nextNeighbour.Position;
+            if(nextNeighbour.ColumnIndex < cell.ColumnIndex - 1)
+                centre3.x += HexMetrics.WrapSize * HexMetrics.InnerDiameter;
+            else if(nextNeighbour.ColumnIndex > cell.ColumnIndex + 1)
+                centre3.x -= HexMetrics.WrapSize * HexMetrics.InnerDiameter;
+
+            var v3 = centre3 + 
                 (nextNeighbour.IsUnderwater ? 
                     HexMetrics.GetFirstWaterCorner(direction.Previous()) :
                     HexMetrics.GetFirstSolidCorner(direction.Previous()));

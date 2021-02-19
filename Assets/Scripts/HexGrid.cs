@@ -125,6 +125,7 @@ namespace DarkDomains
 
             var cell = Instantiate<HexCell>(CellPrefab);
             cell.Index = i;
+            cell.ColumnIndex = x / HexMetrics.ChunkSizeX;
             cell.transform.localPosition = position;
             cell.Coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
             cell.ShaderData = cellShaderData;

@@ -8,6 +8,7 @@ namespace DarkDomains
     public class HexCell : MonoBehaviour
     {
         public int Index { get; set; }
+        public int ColumnIndex { get; set; }
         public HexGridChunk Chunk;
         public HexCoordinates Coordinates;
         public RectTransform UIRect;

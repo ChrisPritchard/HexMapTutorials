@@ -14,6 +14,14 @@ namespace DarkDomains
 
         public HexCoordinates(int x, int z)
         {
+            if(HexMetrics.Wrapping)
+            {
+                var oX = x + z / 2;
+                if(oX < 0)
+                    x += HexMetrics.WrapSize;
+                else if(oX >= HexMetrics.WrapSize)
+                    x -= HexMetrics.WrapSize;
+            }
             X = x;
             Z = z;
         }
