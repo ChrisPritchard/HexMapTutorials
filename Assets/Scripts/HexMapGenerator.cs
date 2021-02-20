@@ -171,18 +171,26 @@ namespace DarkDomains
             else
                 regions.Clear();
 
+            var borderX = Grid.Wrapping ? RegionBorder : MapBorderX;
+
             if (RegionCount == 1)
-                regions.Add(MapRegion.Create(MapBorderX, Grid.CellCountX - MapBorderX, MapBorderZ, Grid.CellCountZ - MapBorderZ));
+            {
+                if(Grid.Wrapping) borderX = 0;
+                regions.Add(MapRegion.Create(borderX, Grid.CellCountX - borderX, MapBorderZ, Grid.CellCountZ - MapBorderZ));
+            }
             else if (RegionCount == 2 && Random.value < 0.5f) // horizonal split
                 regions.AddRange(new [] {
                     MapRegion.Create(MapBorderX, Grid.CellCountX / 2 - RegionBorder, MapBorderZ, Grid.CellCountZ - MapBorderZ),
                     MapRegion.Create(Grid.CellCountX / 2 + RegionBorder, Grid.CellCountX - MapBorderX, MapBorderZ, Grid.CellCountZ - MapBorderZ)
                 });
             else if (RegionCount == 2) // vertical split
+            {
+                if(Grid.Wrapping) borderX = 0;
                 regions.AddRange(new [] {
                     MapRegion.Create(MapBorderX, Grid.CellCountX - MapBorderX, MapBorderZ, Grid.CellCountZ / 2 - RegionBorder),
                     MapRegion.Create(MapBorderX, Grid.CellCountX - MapBorderX, Grid.CellCountZ / 2 + RegionBorder, Grid.CellCountZ - MapBorderZ)
                 });
+            }
             else if (RegionCount == 3)
                 regions.AddRange(new [] {
                     MapRegion.Create(MapBorderX, Grid.CellCountX / 3 - RegionBorder, MapBorderZ, Grid.CellCountZ - MapBorderZ),
