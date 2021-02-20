@@ -1,7 +1,7 @@
 
 using UnityEngine;
 using UnityEditor;
-using DarkDomains;
+using HexMapTutorials;
 
 [CustomPropertyDrawer(typeof(HexCoordinates))]
 public class HexCoordinatesDrawer: PropertyDrawer

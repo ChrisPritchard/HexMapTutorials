@@ -1,18 +1,9 @@
-# Dark Domains
+# Hex Map Tutorials
 
-An experimental 4X.
+Built following the hex series of tutorials written by Catlike Coding: https://catlikecoding.com/unity/tutorials/hex-map
 
-Built following the tutorials written by Catlike Coding, specifically the Hex series: https://catlikecoding.com/unity/tutorials/hex-map
+The final work looks like this:
 
-## Beyond the tutorials
+<div align="center"><img src="1613678156626-inner-lake.jpg" /></div>
 
-Ideas on where to go next:
-
-- a 'bevel' on cliffs and rivers: an extra pair of vertices to create a slight slope before the steep one
-- pixel art textures for terrain, and sprites for trees, towns etc (up the density on trees)
-- when a cell is underwater, it can have a river on any side, in or out
-- expanding lakes - join with any river along side by expanding
-    - identify river 'id' for cells, to ensure loop rivers dont exist (river that feeds into itself)
-- using a byte in memory to represent all low int values, but signed. sbyte? or int16? (latter is cls compliant, but larger)
-- refer to terrain always by enum, not index
-- tighter direction loops, better use of lists (switch to arrays?)
+This is in edit mode - fog of war is also implemented, as are everything in the 27 tutorials. No doubt some bugs somewhere, but primarily the only deviation is minor aspects of coding style.

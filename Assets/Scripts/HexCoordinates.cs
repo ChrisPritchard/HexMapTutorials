@@ -1,5 +1,5 @@
 
-namespace DarkDomains
+namespace HexMapTutorials
 {
     using System;
     using System.IO;

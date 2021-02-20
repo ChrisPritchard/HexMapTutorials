@@ -1,7 +1,6 @@
 
-namespace DarkDomains
+namespace HexMapTutorials
 {
-    using System;
     using UnityEngine;
     using UnityEngine.EventSystems;
 

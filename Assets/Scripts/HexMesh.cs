@@ -1,5 +1,5 @@
 
-namespace DarkDomains
+namespace HexMapTutorials
 {
     using UnityEngine;
     using System;

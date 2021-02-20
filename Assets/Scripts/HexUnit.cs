@@ -1,5 +1,5 @@
 
-namespace DarkDomains
+namespace HexMapTutorials
 {
     using System.Collections;
     using System.Collections.Generic;
