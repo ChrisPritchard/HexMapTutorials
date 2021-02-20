@@ -158,14 +158,14 @@ namespace DarkDomains
         public static Vector4 SampleNoise(Vector3 position)
         {
             var sample = NoiseSource.GetPixelBilinear(position.x * NoiseScale, position.z * NoiseScale);
+
             if(Wrapping && position.x < InnerDiameter * 1.5f)
             {
-                var sample2 = NoiseSource.GetPixelBilinear(
-                    (position.x + WrapSize * InnerDiameter) * NoiseScale, 
-                    position.z * NoiseScale);
-                sample = Vector4.Lerp(sample2, sample, 
-                    position.x * (1f / InnerDiameter) - 0.5f);
+                var otherX = position.x + WrapSize * InnerDiameter;
+                var sample2 = NoiseSource.GetPixelBilinear(otherX * NoiseScale, position.z * NoiseScale);
+                sample = Vector4.Lerp(sample2, sample, position.x * (1f / InnerDiameter) - 0.5f);
             }
+
             return sample;
         }
 

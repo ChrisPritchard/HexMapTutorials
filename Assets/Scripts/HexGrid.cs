@@ -66,10 +66,6 @@ namespace DarkDomains
                 return;
             }
 
-            this.wrapping = wrapping;
-            HexMetrics.WrapSize = wrapping ? CellCountX : 0;
-            this.currentCentreColumnIndex = -1;
-
             ClearPath();
             ClearUnits();
 
@@ -80,6 +76,10 @@ namespace DarkDomains
             chunkCountX = x / HexMetrics.ChunkSizeX;
             chunkCountZ = z / HexMetrics.ChunkSizeZ;
             cellShaderData.Initialise(CellCountX, CellCountZ);
+
+            this.wrapping = wrapping;
+            HexMetrics.WrapSize = wrapping ? CellCountX : 0;
+            this.currentCentreColumnIndex = -1;
 
             CreateChunks();
             CreateCells();
@@ -124,16 +124,15 @@ namespace DarkDomains
             var position = new Vector3(px, 0f, pz);
 
             var cell = Instantiate<HexCell>(CellPrefab);
+
             cell.Index = i;
             cell.ColumnIndex = x / HexMetrics.ChunkSizeX;
             cell.transform.localPosition = position;
             cell.Coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
             cell.ShaderData = cellShaderData;
-
             cell.Explorable = x > 0 && z > 0 && x < CellCountX - 1 && z < CellCountZ - 1;
 
-            var index = z * CellCountX + x;
-            cells[index] = cell;
+            cells[i] = cell;
 
             // connect neighbours, working backwards. e.g. connect the prior, and the bottom two corners if available
             // the setneighbour function does the reverse, so connecting back will conneck the prior cell to the current one too
@@ -141,7 +140,7 @@ namespace DarkDomains
 
             if (x > 0)
             {
-                cell.SetNeighbour(HexDirection.W, cells[index - 1]);
+                cell.SetNeighbour(HexDirection.W, cells[i - 1]);
                 if(wrapping && x == CellCountX - 1)
                     cell.SetNeighbour(HexDirection.E, cells[i - x]);
             }
@@ -149,17 +148,17 @@ namespace DarkDomains
             {            
                 if ((z & 1) == 0) // non 'shunted' row, so always has bottom right, but first doesnt have bottom left
                 {
-                    cell.SetNeighbour(HexDirection.SE, cells[index - CellCountX]);
+                    cell.SetNeighbour(HexDirection.SE, cells[i - CellCountX]);
                     if (x > 0)
-                        cell.SetNeighbour(HexDirection.SW, cells[index - CellCountX - 1]);
+                        cell.SetNeighbour(HexDirection.SW, cells[i - CellCountX - 1]);
                     else if(wrapping)
                         cell.SetNeighbour(HexDirection.SW, cells[i - 1]);
                 } 
                 else  // 'shunted' row, always has bottom left, but last does not have bottom right
                 {
-                    cell.SetNeighbour(HexDirection.SW, cells[index - CellCountX]);
+                    cell.SetNeighbour(HexDirection.SW, cells[i - CellCountX]);
                     if (x < CellCountX - 1)
-                        cell.SetNeighbour(HexDirection.SE, cells[index - CellCountX + 1]);
+                        cell.SetNeighbour(HexDirection.SE, cells[i - CellCountX + 1]);
                     else if (wrapping)
                         cell.SetNeighbour(HexDirection.SE, cells[i - CellCountX * 2 + 1]);
                 }
