@@ -39,6 +39,7 @@ namespace DarkDomains
                 value.Unit = this;
                 Grid.IncreaseVisibility(value, VisionRange);
                 transform.localPosition = value.Position;
+                Grid.MakeChildOfColumn(transform, value.ColumnIndex);
             }
         }
 
@@ -103,6 +104,15 @@ namespace DarkDomains
 
         IEnumerator LookAt(Vector3 point)
         {
+            if(HexMetrics.Wrapping)
+            {
+                var xDistance = point.x - transform.localPosition.x;
+                if(xDistance < -HexMetrics.InnerRadius * HexMetrics.WrapSize)
+                    point.x += HexMetrics.InnerDiameter * HexMetrics.WrapSize;
+                else if(xDistance > HexMetrics.InnerRadius * HexMetrics.WrapSize)
+                    point.x -= HexMetrics.InnerDiameter * HexMetrics.WrapSize;
+            }
+
             point.y = transform.localPosition.y;
             var fromRotation = transform.localRotation;
             var toRotation = Quaternion.LookRotation(point - transform.localPosition);
@@ -139,17 +149,39 @@ namespace DarkDomains
             transform.localPosition = c;
             yield return LookAt(pathToTravel[1].Position);
             
-            Grid.DecreaseVisibility( // catches mid move switch, requiring current location to lose visibility
-                currentTravelLocation ? currentTravelLocation : pathToTravel[0], VisionRange);
+            if(!currentTravelLocation)
+                currentTravelLocation = pathToTravel[0];
+                
+            Grid.DecreaseVisibility(currentTravelLocation, VisionRange);
+            var currentColumn = currentTravelLocation.ColumnIndex;
 
             var t = Time.deltaTime * travelSpeed;
+            var wrapJump = HexMetrics.InnerDiameter * HexMetrics.WrapSize;
 
             for(var i = 1; i < pathToTravel.Count; i++)
             {
+                currentTravelLocation = pathToTravel[i];
                 a = c;
                 b = pathToTravel[i - 1].Position;
-                c = (b + pathToTravel[i].Position) * 0.5f; // moves toward edges
 
+                var nextColumn = currentTravelLocation.ColumnIndex;
+                if(currentColumn != nextColumn)
+                {
+                    if(nextColumn < currentColumn - 1)
+                    {
+                        a.x -= wrapJump;
+                        b.x -= wrapJump;
+                    }
+                    else if(nextColumn > currentColumn + 1)
+                    {
+                        a.x += wrapJump;
+                        b.x += wrapJump;
+                    }
+                    Grid.MakeChildOfColumn(transform, nextColumn);
+                    currentColumn = nextColumn;
+                }
+
+                c = (b + currentTravelLocation.Position) * 0.5f;
                 Grid.IncreaseVisibility(pathToTravel[i], VisionRange);
 
                 for(; t < 1f; t += Time.deltaTime * travelSpeed)

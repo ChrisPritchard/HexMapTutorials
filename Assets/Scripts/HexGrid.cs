@@ -130,7 +130,11 @@ namespace DarkDomains
             cell.transform.localPosition = position;
             cell.Coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
             cell.ShaderData = cellShaderData;
-            cell.Explorable = x > 0 && z > 0 && x < CellCountX - 1 && z < CellCountZ - 1;
+
+            if(wrapping)
+                cell.Explorable = z > 0 && z < CellCountZ - 1;
+            else
+                cell.Explorable = x > 0 && z > 0 && x < CellCountX - 1 && z < CellCountZ - 1;
 
             cells[i] = cell;
 
@@ -206,11 +210,13 @@ namespace DarkDomains
         public void AddUnit(HexUnit unit, HexCell location, float orientation)
         {
             units.Add(unit);
-            unit.transform.SetParent(transform, false);
             unit.Grid = this;
             unit.Location = location;
             unit.Orientation = orientation;
         }
+
+        public void MakeChildOfColumn(Transform child, int columnIndex) =>
+            child.SetParent(columns[columnIndex], false);
 
         public void RemoveUnit(HexUnit unit)
         {
